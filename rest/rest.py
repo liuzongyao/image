@@ -9,7 +9,7 @@ import json
 
 class Alauda:
 
-    def __init__(self, configfile='../config/env.yaml'):
+    def __init__(self, configfile='./config/env.yaml'):
         self.configfile = configfile
         f = open(self.configfile)
         env = yaml.load(f)
