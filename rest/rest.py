@@ -6,6 +6,7 @@
 import yaml
 import requests
 import json
+import logging
 
 class Alauda:
 
@@ -15,6 +16,7 @@ class Alauda:
         env = yaml.load(f)
         self.header = {'Content-Type':'application/json','Authorization': 'Token ' + env['token']}
         self.apiv1 = env['apiv1']
+        self.region = env['region']
 
     def complete_path(self,resource_url):
         return self.apiv1 + resource_url
@@ -50,58 +52,34 @@ class Alauda:
 
         print self.complete_path(resource_url)
         jsondata = json.load(open(data_template))  # dic
-        data = json.dumps(jsondata)  # dic to strstr
+        print type(jsondata)
+        if kwargs:
+            for i in range(len(kwargs.keys())):
+                print "------"
+                print jsondata[kwargs.keys()[i]]
+                print kwargs.values()[i]
+                jsondata[kwargs.keys()[i]] = kwargs.values()[i]
+        data = json.dumps(jsondata)  # dic to str
         print data
         try:
-            r = requests.post(self.complete_path(resource_url), data=data, headers=self.header,**kwargs)
+            r = requests.post(self.complete_path(resource_url), data=data, headers=self.header)
             r.encoding = 'UTF-8'
             json_response = json.loads(r.text)
             return json_response
         except Exception as e:
             print('post请求出错,原因:%s' % e)
 
+    def get_value(self,response,key):
 
+        r"""
+        经常有这样的需要，我希望从前一个post/get请求中拿出一个值，作为下一个请求中的一个参数
+        比如希望查看build状态 就需要拿到build id
+        :param response:
+        :param key:
+        :return:
+        """
 
-
-
-
-
-
-
-
-# def post(self, resource_url, data, **kwargs):
-#     headers = self._headers.copy()
-#     headers.update(kwargs)
-#     if type(data) is dict:
-#         data = json.dumps(data)
-#     return rest.post(self.complete_path(resource_url), data, **headers)
-#
-#
-# def get(self, resource_url, **kwargs):
-#     headers = self._headers.copy()
-#     headers.update(kwargs)
-#     return rest.get(self.complete_path(resource_url), **headers)
-#
-#
-#
-# def post(url, data, **kwargs):
-#     __logger.debug("Post %s" % url)
-#     if data:
-#         __logger.debug(str(data))
-#     req = urllib2.Request(url, data, kwargs)
-#     req.get_method = lambda: "POST"
-#     try:
-#         resp = openurl(req)
-#         return resp
-#     except urllib2.HTTPError, e:
-#         return e
-#
-# def get(url, **kwargs):
-#     __logger.debug("Get %s" % url)
-#     req = urllib2.Request(url, None, kwargs)
-#     req.get_method = lambda: "GET"
-#     try:
-#         resp = openurl(req)
-#         return resp
-#     except urllib2.HTTPError, e:
-#         return e
+        keys = response.keys()
+        if key in keys:
+            logging.warning("this key is not in the list")
+        return response[key]

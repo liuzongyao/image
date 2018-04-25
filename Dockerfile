@@ -9,17 +9,6 @@ RUN apt-get update \
         expect \
     && curl https://bootstrap.pypa.io/get-pip.py | python
 
-#RUN echo "deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ trusty main restricted" >> /etc/apt/sources.list \
-#    && echo "deb-src http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ trusty main restricted" >> /etc/apt/sources.list \
-#    && apt-get update \
-#    && apt-get install -y \
-#        python-dev \
-#        libpq-dev \
-#        git \
-#        curl \
-#        expect \
-#    && curl https://bootstrap.pypa.io/get-pip.py | python
-
 COPY requirements.txt .
 RUN pip install -r /requirements.txt
 
