@@ -29,6 +29,9 @@ COPY run-local.sh .
 RUN chmod +x /run-local.sh
 
 WORKDIR /app
-CMD ["python", "/app/main.py"]
 
 COPY . /app
+
+CMD ["python", "/app/main.py"]
+
+
