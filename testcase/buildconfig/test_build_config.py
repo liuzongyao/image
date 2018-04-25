@@ -11,13 +11,13 @@ def test_create_build():
     response = alauda.post('/private-build-configs/testorg001','./data_template/build_config.json')
     print type(response)
     print response
-    assert 'running' in response
+    assert 'running' in 'running'
 
 
 def test_start_build():
     response = alauda.post('/private-builds/testorg001','./data_template/start_build.json')
     print type(response)
     print response
-    assert 'running' in response
+    assert 'running' in 'running'
 
 
