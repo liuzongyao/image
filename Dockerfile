@@ -14,8 +14,9 @@ RUN pip install -r /requirements.txt
 
 RUN mkdir /var/log/mathilde
 
-COPY run-local.sh .
-RUN chmod +x /run-local.sh
+#COPY run-local.sh .
+
+#RUN chmod +x /run-local.sh
 
 WORKDIR /app
 

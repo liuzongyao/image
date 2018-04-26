@@ -1,17 +1,13 @@
-from rest.rest import Alauda
-import pytest
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+from rest.rest import alauda
 
-alauda = Alauda()
-print alauda.header
 
 def test_get_a_region_detail():
-    resource_url = '/regions/testorg001/' + alauda.region
+    resource_url = '/regions/' + alauda.namespace + '/' + alauda.region
+    print resource_url
     response = alauda.get(resource_url)
-    #print type(response)
-    #print response
-    state = alauda.get_value(response,'state')
+    print type(response)
+    # print response
+    state = alauda.get_value(response, 'state')
     assert 'RUNNING' in state
-
-def test_bugs():
-    with pytest.raises(ValueError, unknown='foo'):
-        raise ValueError

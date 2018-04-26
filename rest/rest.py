@@ -8,20 +8,22 @@ import requests
 import json
 import logging
 
+
 class Alauda:
 
-    def __init__(self, configfile='./config/env.yaml'):
+    def __init__(self, configfile='./config/env_staging.yaml'):
         self.configfile = configfile
         f = open(self.configfile)
         env = yaml.load(f)
-        self.header = {'Content-Type':'application/json','Authorization': 'Token ' + env['token']}
+        self.header = {'Content-Type': 'application/json', 'Authorization': 'Token ' + env['token']}
         self.apiv1 = env['apiv1']
         self.region = env['region']
+        self.namespace = env['namespace']
 
-    def complete_path(self,resource_url):
+    def complete_path(self, resource_url):
         return self.apiv1 + resource_url
 
-    def get(self,resource_url, params=None, **kwargs):
+    def get(self, resource_url, params=None, **kwargs):
         r"""Sends a GET request.
 
             :param url: URL for the new :class:`Request` object.
@@ -40,7 +42,7 @@ class Alauda:
             print('get请求出错,出错原因:%s' % e)
             return {}
 
-    def post(self,resource_url, data_template,**kwargs):
+    def post(self, resource_url, data_template, **kwargs):
 
         r"""Sends a POST request.
            :param resource_url : 资源的url不必带前面的host信息.
@@ -69,7 +71,7 @@ class Alauda:
         except Exception as e:
             print('post请求出错,原因:%s' % e)
 
-    def get_value(self,response,key):
+    def get_value(self, response, key):
 
         r"""
         经常有这样的需要，我希望从前一个post/get请求中拿出一个值，作为下一个请求中的一个参数
@@ -83,3 +85,13 @@ class Alauda:
         if key in keys:
             logging.warning("this key is not in the list")
         return response[key]
+
+
+alauda = Alauda('./config/env_new_int.yaml')
+
+r"""
+alauda = Alauda('./config/env_new_int.yaml')
+每个test case开始都需要更新alauda 但更改环境env文件时，需要更改的地方回很多，
+转为在rest文件中申请一个instance
+
+"""

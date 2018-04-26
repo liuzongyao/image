@@ -1,0 +1,6 @@
+apiv1 : http://40.83.120.254:20081/v1
+apiv2 : https://api-staging.alauda.cn/v2
+namespace : alauda
+namespace-pw : alauda
+token : 5f25d985456dbaa21f345959ab8f32c190f9ef40
+region : k8s_new
