@@ -1,0 +1,36 @@
+{
+  "target_num_instances": 1, 
+  "region_name": "laok8sazure", 
+  "service_name": "demo", 
+  "instance_size": "XXS", 
+  "scaling_mode": "MANUAL", 
+  "namespace": "testorg001", 
+  "image_name": "index-staging.alauda.cn/testorg001/hello-world", 
+  "space_name": "staging", 
+  "network_mode": "FLANNEL", 
+  "target_state": "STARTED", 
+  "version": "v2", 
+  "node_selector": {
+    "ip": "10.23.0.9"
+  }, 
+  "pod_controller": "Deployment", 
+  "load_balancers": [
+    {
+      "listeners": [
+        {
+          "listener_port": 61234, 
+          "protocol": "http", 
+          "container_port": 80
+        }
+      ], 
+      "version": "2", 
+      "type": "haproxy", 
+      "name": "haproxy-23-99-114-240", 
+      "load_balancer_id": "7ed6833f-f948-4444-4246-e643a1528cb6"
+    }
+  ], 
+  "image_tag": "latest", 
+  "ports": [
+    80
+  ]
+}

@@ -1,6 +1,12 @@
+json_dir : ./data_template
+env_file : ./config/env_staging.yaml
 apiv1 : https://api-staging.alauda.cn/v1
-apiv2 : https://api-staging.alauda.cn/v2
 namespace : testorg001
-namespace-pw : alauda_staging
 token : ad2ba8a3c2fa7637179c9854107dd55e67e24f7c
-region : laok8sazure
+region_name : laok8sazure
+space_name : staging
+image_name : index-staging.alauda.cn/testorg001/hello-world
+image_tag : latest
+node_selector :
+  ip : 10.23.0.9
+

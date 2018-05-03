@@ -1,0 +1,20 @@
+{
+  "region_name": "laok8sazure", 
+  "service_name": "demo2", 
+  "pod_controller": "StatefulSet", 
+  "scaling_mode": "MANUAL", 
+  "namespace": "testorg001", 
+  "image_name": "index-staging.alauda.cn/testorg001/hello-world", 
+  "ports": [
+    80
+  ], 
+  "network_mode": "FLANNEL", 
+  "target_state": "STARTED", 
+  "version": "v2", 
+  "node_selector": {
+    "ip": "10.23.0.9"
+  }, 
+  "space_name": "staging", 
+  "image_tag": "latest", 
+  "instance_size": "XXS"
+}

@@ -1,0 +1,21 @@
+{
+    "version": "v2",
+    "target_num_instances": 1,
+    "pod_controller": "Deployment",
+    "region_name": "laok8sazure",
+    "service_name": "demo",
+    "instance_size": "XXS",
+    "scaling_mode": "MANUAL",
+    "namespace": "testorg001",
+    "image_name": "index-staging.alauda.cn/testorg001/hello-world",
+    "network_mode": "FLANNEL",
+    "target_state": "STARTED",
+    "space_name": "e2equota",
+    "node_selector": {
+        "ip": "10.23.0.7"
+    },
+    "image_tag": "latest",
+    "ports": [
+        80
+    ]
+}
