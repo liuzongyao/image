@@ -1,36 +1,40 @@
 {
-  "target_num_instances": 1, 
+  "instance_envvars": {
+    "__ALAUDA_FILE_LOG_PATH__": "/var/log/bootstrap.log,/var/log/demo2.log", 
+    "__ALAUDA_EXCLUDE_LOG_PATH__": "/var/log/demo.log"
+  }, 
+  "space_uuid": "2b68ab46-921b-4990-a68a-493d1c7a9077", 
+  "image_tag": "latest", 
   "region_name": "laok8sazure", 
-  "service_name": "demo", 
+  "labels": [
+    {
+      "editable": true, 
+      "propagate": true, 
+      "key": "test1", 
+      "value": "test1"
+    }, 
+    {
+      "editable": true, 
+      "propagate": true, 
+      "key": "test2", 
+      "value": "test2"
+    }
+  ], 
+  "service_name": "demo2", 
   "instance_size": "XXS", 
   "scaling_mode": "MANUAL", 
   "namespace": "testorg001", 
   "image_name": "index-staging.alauda.cn/testorg001/hello-world", 
-  "space_name": "staging", 
+  "ports": [
+    80
+  ], 
   "network_mode": "FLANNEL", 
   "target_state": "STARTED", 
   "version": "v2", 
   "node_selector": {
-    "ip": "10.23.0.9"
+    "ip": "10.23.0.5"
   }, 
-  "pod_controller": "Deployment", 
-  "load_balancers": [
-    {
-      "listeners": [
-        {
-          "listener_port": 61234, 
-          "protocol": "http", 
-          "container_port": 80
-        }
-      ], 
-      "version": "2", 
-      "type": "haproxy", 
-      "name": "haproxy-23-99-114-240", 
-      "load_balancer_id": "7ed6833f-f948-4444-4246-e643a1528cb6"
-    }
-  ], 
-  "image_tag": "latest", 
-  "ports": [
-    80
-  ]
+  "space_name": "staging", 
+  "target_num_instances": 1, 
+  "pod_controller": "Deployment"
 }

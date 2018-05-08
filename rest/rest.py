@@ -21,6 +21,7 @@ class Alauda:
         self.namespace = env['namespace']
         self.env_file = env['env_file']
         self.json_dir = env['json_dir']
+        self.resource_url = []
         jsonfile = []
         for root, dirs, files in os.walk(self.json_dir):
             for fn1 in files:
@@ -32,7 +33,8 @@ class Alauda:
             f1 = open(fn2)
             jsondata = json.load(f1)
             for key, value in env.items():
-                if jsondata.has_key(key):
+                # if jsondata.has_key(key):
+                if key in jsondata.keys():
                     jsondata.update({key: value})
             f1.close()
             f2 = open(fn2, 'w')
@@ -104,6 +106,7 @@ class Alauda:
         try:
             r = requests.post(self.complete_path(resource_url), data=data, headers=self.header)
             r.encoding = 'UTF-8'
+            print r.status_code
             if r.status_code < 200 or r.status_code >= 300:
                 json_response = json.loads(r.text)
                 print json_response
@@ -141,23 +144,41 @@ class Alauda:
             print('delete,出错原因:%s' % e)
             exit()
 
-    def generate_data_template(self, data_template, **kwargs):
+    def generate_data_template(self, data_template, append_json=[], **kwargs):
         # 根据后超的提示，dict update存在key就是更新，不存在就是追加，因此没必要写method
-        filename = './data_template/data_template_generated.json'
+
+        # filename = './generated_json/data_template_generated.json'
+        # jsondata = json.load(open(data_template))
+        # if append_json:
+        #     for i in range(len(append_json)):
+        #         jsondata_append = json.load(open(append_json[i]))
+        #         jsondata.update(jsondata_append)
+        #         jsonfile = open(filename, 'w')
+        #         json.dump(jsondata, jsonfile,indent=2)
+        #         jsonfile.close()
+        # return filename
+
+        #filename = './generated_json/data_template_generated.json'
+
         jsondata = json.load(open(data_template))
-        jsonfile = open(filename, 'w')
+        if append_json:
+            for i in range(len(append_json)):
+                jsondata_append = json.load(open(append_json[i]))
+                jsondata.update(jsondata_append)
+                with open('./data_template/data_template_generated.json', 'w') as f:
+                    json.dump(jsondata, f, indent=2)
+                    f.close()
         if kwargs:
             for i in range(len(kwargs.keys())):
-                if kwargs[kwargs.keys()[i]].endswith('json'):  # 此处说明传入的是一个json文件，需要追加
-                    jsondata_append = json.load(open(kwargs[kwargs.keys()[i]]))  # 此处不好，如果不以name为key就不好处理
-                    jsondata.update(jsondata_append)
-                    print jsondata
-                    json.dump(jsondata, jsonfile)
-                else:
-                    jsondata[kwargs.keys()[i]] = kwargs.values()[i]
-                    json.dump(jsondata, jsonfile)
-        jsonfile.close()
-        return filename
+                jsondata[kwargs.keys()[i]] = kwargs.values()[i]
+                with open('./data_template/data_template_generated.json', 'w') as f:
+                    json.dump(jsondata, f, indent=2)
+                    f.close()
+
+        return './data_template/data_template_generated.json'
+
+
+
 
     def get_value(self, response, key, resource_type=None):
 
@@ -220,12 +241,13 @@ class Alauda:
         return key_values
 
 
-# try:
-#     envfile = os.getenv(env_file, './config/env_staging.yaml')
-# except NameError:
-#     envfile = './config/env_staging.yaml'
-envfile = './config/env_staging.yaml'
-alauda = Alauda(envfile)
+env_dist = os.environ
+if env_dist.has_key("env_key"):
+    env_value = os.getenv("env_key")
+else:
+    env_value = './config/env_staging.yaml'
+
+alauda = Alauda(env_value)
 
 r"""
 alauda = Alauda('./config/env_new_int.yaml')

@@ -1,0 +1,18 @@
+{
+  "mount_points": [
+    {
+      "path": "/var/demo", 
+      "type": "config", 
+      "value": {
+        "name": "test002", 
+        "key": "q", 
+        "uuid": "d5816107-2bb8-4129-a161-6de95661d6c8"
+      }
+    }, 
+    {
+      "path": "/var/demo1", 
+      "type": "raw", 
+      "value": "test"
+    }
+  ]
+}
