@@ -1,0 +1,10 @@
+{
+  "scaling_mode": "AUTO", 
+  "autoscaling_config": {
+    "decrease_delta": 1, 
+    "wait_period": 30, 
+    "maximum_num_instances": 6, 
+    "increase_delta": 1, 
+    "minimum_num_instances": 1
+  }
+}

@@ -1,10 +1,9 @@
 {
-  "space_uuid": "2b68ab46-921b-4990-a68a-493d1c7a9077", 
   "region_name": "laok8sazure", 
   "service_name": "demo1", 
   "pod_controller": "DaemonSet", 
   "namespace": "testorg001", 
-  "image_name": "index-staging.alauda.cn/testorg001/hello-world", 
+  "image_name": "index-staging.alauda.cn/library/nginx", 
   "network_mode": "FLANNEL", 
   "target_state": "STARTED", 
   "instance_size": "XS", 

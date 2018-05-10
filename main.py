@@ -6,7 +6,10 @@
 import pytest
 
 if __name__ == '__main__':
-    run_command = ["--capture=no", './testcase/oldk8s_service/test_oldk8s_service.py', "--result-log=./report/log.txt", "--html=./report/pytest.html"]
+
+    #run_command = ["--capture=no", "-m demo",'./testcase/oldk8s_service/test_oldk8s_service.py', "--result-log=./report/log.txt", "--html=./report/pytest.html"]
+
+    run_command = ["--capture=no",'./testcase/oldk8s_service/test_oldk8s_service.py', "--html=./report/pytest.html"]
 
     pytest.main(run_command)
 

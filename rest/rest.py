@@ -62,7 +62,7 @@ class Alauda:
             json.dump(jsondata, f2, indent=2)  # indent 值代表格式化json文件
             f2.close()
 
-    def complete_path(self, resource_url):
+    def _complete_path(self, resource_url):
         return self.apiv1 + resource_url
 
     def get(self, resource_url, params=None, **kwargs):
@@ -74,23 +74,21 @@ class Alauda:
             :return: :class:`Response <Response>` object
             :rtype: requests.Response
             """
-        print self.complete_path(resource_url)
+        print self._complete_path(resource_url)
         try:
-            r = requests.get(self.complete_path(resource_url), headers=self.header, **kwargs)
+            r = requests.get(self._complete_path(resource_url), headers=self.header, **kwargs)
             r.encoding = 'UTF-8'
             if r.status_code < 200 or r.status_code >= 300:
                 json_response = json.loads(r.text)
                 print json_response
-                exit()
             else:
                 json_response = json.loads(r.text)
                 return json_response
                 print r.status_code
         except Exception as e:
             print('get请求出错,出错原因:%s' % e)
-            exit()
 
-    def post(self, resource_url, data_template, **kwargs):
+    def post(self, resource_url, data_template, append_template=None, params=None, **kwargs):
 
         r"""Sends a POST request.
            :param resource_url : 资源的url不必带前面的host信息.
@@ -99,18 +97,18 @@ class Alauda:
            :return: :class:`Response <Response>` object
            :rtype: requests.Response
         """
-        jsondata = json.load(open(data_template))
+        temp_template = self._generate_data_template(data_template, append_template, **kwargs)
+        jsondata = json.load(open(temp_template))
         data = json.dumps(jsondata)
         print self.complete_path(resource_url)
         print data
         try:
-            r = requests.post(self.complete_path(resource_url), data=data, headers=self.header)
+            r = requests.post(self._complete_path(resource_url), data=data, headers=self.header)
             r.encoding = 'UTF-8'
             print r.status_code
             if r.status_code < 200 or r.status_code >= 300:
                 json_response = json.loads(r.text)
                 print json_response
-                exit()
             else:
                 json_response = json.loads(r.text)
                 return json_response
@@ -118,7 +116,7 @@ class Alauda:
 
         except Exception as e:
             print('post请求出错,原因:%s' % e)
-            exit()
+
 
 
     def delete(self,resource_url):
@@ -130,55 +128,90 @@ class Alauda:
             """
         print self.complete_path(resource_url)
         try:
-            r = requests.delete(self.complete_path(resource_url), headers=self.header)
+            r = requests.delete(self._complete_path(resource_url), headers=self.header)
             r.encoding = 'UTF-8'
             if r.status_code < 200 or r.status_code >= 300:
                 json_response = json.loads(r.text)
-                print json_response
-                exit()
-            else:
-                json_response = json.loads(r.text)
                 return json_response
-                print r.status_code
+            else:
+                #json_response = json.loads(r.text)  # 删除操作成功后没有text，此处操作会失败
+                return r.status_code
         except Exception as e:
             print('delete,出错原因:%s' % e)
-            exit()
 
-    def generate_data_template(self, data_template, append_json=[], **kwargs):
+
+    def _generate_data_template(self, data_template, append_template=[], **kwargs):
         # 根据后超的提示，dict update存在key就是更新，不存在就是追加，因此没必要写method
-
-        # filename = './generated_json/data_template_generated.json'
         # jsondata = json.load(open(data_template))
         # if append_json:
         #     for i in range(len(append_json)):
         #         jsondata_append = json.load(open(append_json[i]))
         #         jsondata.update(jsondata_append)
-        #         jsonfile = open(filename, 'w')
-        #         json.dump(jsondata, jsonfile,indent=2)
-        #         jsonfile.close()
-        # return filename
-
-        #filename = './generated_json/data_template_generated.json'
-
-        jsondata = json.load(open(data_template))
-        if append_json:
-            for i in range(len(append_json)):
-                jsondata_append = json.load(open(append_json[i]))
+        #         with open('./data_template/data_template_generated.json', 'w') as f:
+        #             json.dump(jsondata, f, indent=2)
+        #             f.close()
+        # if kwargs:
+        #     for i in range(len(kwargs.keys())):
+        #         jsondata[kwargs.keys()[i]] = kwargs.values()[i]
+        #         with open('./data_template/data_template_generated.json', 'w') as f:
+        #             json.dump(jsondata, f, indent=2)
+        #             f.close()
+        #
+        # return './data_template/data_template_generated.json'
+        temp_template = './data_template/data_template_generated.json'
+        now = 'alauda' + time.strftime('%Y%m%d%H%M%S', time.localtime(time.time()))
+        if append_template:
+            jsondata = json.load(open(data_template))
+            for i in range(len(append_template)):
+                jsondata_append = json.load(open(append_template[i]))
                 jsondata.update(jsondata_append)
-                with open('./data_template/data_template_generated.json', 'w') as f:
+                with open(temp_template, 'w') as f:
                     json.dump(jsondata, f, indent=2)
                     f.close()
-        if kwargs:
-            for i in range(len(kwargs.keys())):
-                jsondata[kwargs.keys()[i]] = kwargs.values()[i]
-                with open('./data_template/data_template_generated.json', 'w') as f:
+            if kwargs:
+                jsondata = json.load(open(temp_template))
+                if 'service_name' in kwargs.keys():
+                    for i in range(len(kwargs.keys())):
+                        jsondata[kwargs.keys()[i]] = kwargs.values()[i]
+                        with open(temp_template, 'w') as f:
+                            json.dump(jsondata, f, indent=2)
+                            f.close()
+                else:
+                    kwargs.update({'service_name': now})
+                    for i in range(len(kwargs.keys())):
+                        jsondata[kwargs.keys()[i]] = kwargs.values()[i]
+                        with open(temp_template, 'w') as f:
+                            json.dump(jsondata, f, indent=2)
+                            f.close()
+            else:
+                jsondata = json.load(open(data_template))
+                jsondata.update({'service_name': now})
+                with open(temp_template, 'w') as f:
                     json.dump(jsondata, f, indent=2)
                     f.close()
 
-        return './data_template/data_template_generated.json'
-
-
-
+        elif kwargs:
+            jsondata = json.load(open(data_template))
+            if 'service_name' in kwargs.keys():
+                for i in range(len(kwargs.keys())):
+                    jsondata[kwargs.keys()[i]] = kwargs.values()[i]
+                    with open(temp_template, 'w') as f:
+                        json.dump(jsondata, f, indent=2)
+                        f.close()
+            else:
+                kwargs.update({'service_name': now})
+                for i in range(len(kwargs.keys())):
+                    jsondata[kwargs.keys()[i]] = kwargs.values()[i]
+                    with open(temp_template, 'w') as f:
+                        json.dump(jsondata, f, indent=2)
+                        f.close()
+        else:
+            jsondata = json.load(open(data_template))
+            jsondata.update({'service_name': now})
+            with open(temp_template, 'w') as f:
+                json.dump(jsondata, f, indent=2)
+                f.close()
+        return temp_template
 
     def get_value(self, response, key, resource_type=None):
 
@@ -191,28 +224,50 @@ class Alauda:
         :return: the value of the key
 
         """
-        if resource_type is None: # 处理没有type的常规情况
-
-            keys = response.keys()
-            values = response.values() # list
-            if key not in keys:
-                # 处理字典嵌套情况
-                for value in values:
-                    if type(value) == list and value and type(value[0]) == dict:  # 判断是不是list 不需要加引号,value 列表不为空
-                        # print "value0 is :", value[0]
-                        # print "value0 type is :", type(value[0])
-                        for key2, value2 in value[0].items():
-                            if key2 != key:
-                                print "not found this key"
-                            else:
-                                return value2
-            else:
-                return response[key]
-        else:
-            return response[resource_type][key]
+        # if resource_type is None: # 处理没有type的常规情况
+        #         #
+        #         #     keys = response.keys()
+        #         #     values = response.values() # list
+        #         #     if key not in keys:
+        #         #         # 处理字典嵌套情况
+        #         #         for value in values:
+        #         #             if type(value) == list and value and type(value[0]) == dict:  # 判断是不是list 不需要加引号,value 列表不为空
+        #         #                 # print "value0 is :", value[0]
+        #         #                 # print "value0 type is :", type(value[0])
+        #         #                 for key2, value2 in value[0].items():
+        #         #                     if key2 != key:
+        #         #                         print "not found this key"
+        #         #                     else:
+        #         #                         return value2
+        #         #     else:
+        #         #         return response[key]
+        #         # else:
+        #         #     return response[resource_type][key]
 
             # 此处没有再次考虑不同resource之后的嵌套情况
             # 返回这样的case很少。如果需要从这里添加。
+        # print jsondata['kube_config']['pod']['podAffinity']['requiredDuringSchedulingIgnoredDuringExecution'][0]['labelSelector']['matchExpressions'][0]['values']
+        temp = response
+        if '.' in key:  # 此处说明，key是嵌套情况。
+            keys = key.split('.')
+            for i in range(len(keys)):
+                if keys[i].isdigit():  # 说明是key
+                    temp = temp[int(keys[i])]
+                    print temp
+
+                else:
+                    temp = temp[keys[i]]
+                    print temp
+
+        else:
+            return response[key]
+        return temp
+
+
+
+
+
+
 
     def circle_get_value(self, resource_url, key, circle=1, resource_type=None):
         r"""
@@ -242,7 +297,7 @@ class Alauda:
 
 
 env_dist = os.environ
-if env_dist.has_key("env_key"):
+if 'env_key' in env_dist.keys():
     env_value = os.getenv("env_key")
 else:
     env_value = './config/env_staging.yaml'
