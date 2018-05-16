@@ -1,11 +1,16 @@
 {
   "volumes": [
     {
-      "app_volume_dir": "/var/demo", 
+      "app_volume_dir": "/demo1", 
       "driver_name": "glusterfs", 
       "region_id": "e792bca0-3aad-42f3-9c2d-7b8cace0ac09", 
-      "volume_name": "test-ys", 
-      "volume_id": "fe6d9855-4e9d-4a74-94e7-c374adcf1a72"
+      "volume_id": "fdd21ec6-887a-4014-8400-8179f244dcad", 
+      "volume_name": "volume123"
+    }, 
+    {
+      "app_volume_dir": "/demo", 
+      "volume_name": "/demo", 
+      "volume_id": "host_path"
     }
   ]
 }

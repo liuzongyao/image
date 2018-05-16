@@ -1,6 +1,6 @@
 {
   "instance_envvars": {
-    "__ALAUDA_FILE_LOG_PATH__": "/var/log/bootstrap.log,/var/log/demo2.log", 
-    "__ALAUDA_EXCLUDE_LOG_PATH__": "/var/log/demo.log"
+    "__ALAUDA_FILE_LOG_PATH__": "/var/log/demo1.log,/var/log/demo2.log", 
+    "__ALAUDA_EXCLUDE_LOG_PATH__": "/var/log/demo3.log"
   }
 }
