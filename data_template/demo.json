@@ -1,22 +1,34 @@
 {
-  "created_at": "2018-05-14T03:56:13.357783", 
-  "unique_name": "44ac0e99-ddfa-4534-846d-57a48fc772e4", 
-  "last_autoscale_datetime": "None", 
+  "unique_name": "96b5513d-9a69-459e-80e8-288aee04ac36", 
+  "kube_config": {
+    "services": [
+      {
+        "editable": false, 
+        "type": "ClusterIP", 
+        "name": "alauda20180516144004"
+      }
+    ], 
+    "pod": {
+      "podAffinity": {}, 
+      "labels": {}, 
+      "podAntiAffinity": {}
+    }
+  }, 
   "app_name": null, 
   "mount_points": [], 
-  "service_name": "demo", 
+  "service_name": "alauda20180516144004", 
   "labels": [
     {
-      "editable": false, 
       "propagate": false, 
-      "key": "space", 
-      "value": "test-automation"
+      "editable": false, 
+      "value": "test-automation", 
+      "key": "space"
     }
   ], 
-  "updated_at": "2018-05-14T03:56:26.101670", 
+  "updated_at": "2018-05-16T06:40:16.503861", 
   "update_strategy": {
     "max_unavailable": 1, 
-    "max_surge": 1
+    "max_surge": 0
   }, 
   "target_state": "STARTED", 
   "instance_envvars": {}, 
@@ -25,14 +37,14 @@
   "space_uuid": "2b68ab46-921b-4990-a68a-493d1c7a9077", 
   "region_id": "e792bca0-3aad-42f3-9c2d-7b8cace0ac09", 
   "resource_actions": [
-    "service:delete", 
     "service:start", 
     "service:stop", 
     "service:update", 
     "service:view", 
-    "service:create"
+    "service:create", 
+    "service:delete"
   ], 
-  "uuid": "44ac0e99-ddfa-4534-846d-57a48fc772e4", 
+  "uuid": "96b5513d-9a69-459e-80e8-288aee04ac36", 
   "linked_to_apps": {}, 
   "custom_instance_size": {
     "mem": 256, 
@@ -42,8 +54,12 @@
   "pod_controller": "Deployment", 
   "namespace": "testorg001", 
   "entrypoint": "", 
+  "node_selector": {
+    "ip": "10.23.0.7"
+  }, 
   "autoscaling_config": "{}", 
   "run_command": "", 
+  "space_id": "f8f24bd2-6f78-4bca-9daf-06903d146a23", 
   "custom_domain_name": null, 
   "linked_to_services": [], 
   "project_name": "automation", 
@@ -51,10 +67,6 @@
     {
       "protocol": "tcp", 
       "container_port": 80
-    }, 
-    {
-      "protocol": "tcp", 
-      "container_port": 443
     }
   ], 
   "region_name": "laok8sazure", 
@@ -64,89 +76,38 @@
   "network_mode": "FLANNEL", 
   "health_checks": [], 
   "linked_from_apps": {}, 
-  "load_balancers": [], 
-  "target_num_instances": 1, 
-  "current_num_instances": 1, 
-  "envfiles": [], 
-  "region_uuid": "e792bca0-3aad-42f3-9c2d-7b8cace0ac09", 
-  "instances": [
-    {
-      "uuid": "8174915e353e067db1b4fec0e1d5b117bc714a1e240d3147b18abf6efe83075d", 
-      "host_ip": "10.23.0.6", 
-      "instance_name": "demo.0", 
-      "version": "CURRENT", 
-      "pod_name": "44ac0e99-ddfa-4534-846d-57a48fc772e4-deployment-867b5cf6467swqk", 
-      "started_at": "2018-05-14T03:56:23Z", 
-      "container_ip": "10.9.2.90"
-    }
-  ], 
-  "space_id": "f8f24bd2-6f78-4bca-9daf-06903d146a23", 
-  "kube_config": {
-    "services": [
-      {
-        "type": "ClusterIP", 
-        "editable": false, 
-        "name": "demo"
-      }
-    ], 
-    "pod": {
-      "podAffinity": {
-        "requiredDuringSchedulingIgnoredDuringExecution": [
-          {
-            "labelSelector": {
-              "matchExpressions": [
-                {
-                  "operator": "In", 
-                  "values": [
-                    "31c9fde9-2972-45cf-899f-6cdff64364a7", 
-                    "99a9e969-5e85-4f3c-a433-c2af4835aef3"
-                  ], 
-                  "key": "alauda_service_id"
-                }
-              ]
-            }, 
-            "topologyKey": "kubernetes.io/hostname"
-          }
-        ], 
-        "preferredDuringSchedulingIgnoredDuringExecution": []
-      }, 
-      "labels": {}, 
-      "podAntiAffinity": {
-        "requiredDuringSchedulingIgnoredDuringExecution": [
-          {
-            "labelSelector": {
-              "matchExpressions": [
-                {
-                  "operator": "In", 
-                  "values": [
-                    "aa8b0263-9f6e-469a-8f22-f63906302f91"
-                  ], 
-                  "key": "alauda_service_id"
-                }
-              ]
-            }, 
-            "topologyKey": "kubernetes.io/hostname"
-          }
-        ], 
-        "preferredDuringSchedulingIgnoredDuringExecution": []
-      }
-    }
-  }, 
-  "container_manager": "KUBERNETES", 
-  "current_status": "Running", 
-  "ports": [
-    80, 
-    443
-  ], 
-  "exec_endpoint": "23.99.114.240", 
-  "instance_size": "CUSTOMIZED", 
-  "volumes": [], 
-  "project_uuid": "70f8990e-c27f-4e46-be2f-27eb6e4cc4d7", 
-  "is_stateful": false, 
-  "image_tag": "latest", 
   "region": {
     "display_text": "laok8sazure", 
     "name": "laok8sazure"
   }, 
+  "load_balancers": [], 
+  "target_num_instances": 1, 
+  "current_num_instances": 1, 
+  "region_uuid": "e792bca0-3aad-42f3-9c2d-7b8cace0ac09", 
+  "instances": [
+    {
+      "uuid": "32015b826af995839f920c819d5b14cffec4a2f846887e8d2cbb3e8bdbb90d72", 
+      "host_ip": "10.23.0.7", 
+      "instance_name": "alauda20180516144004.0", 
+      "version": "CURRENT", 
+      "pod_name": "96b5513d-9a69-459e-80e8-288aee04ac36-deployment-5fd55875566v7jv", 
+      "started_at": "2018-05-16T06:40:14Z", 
+      "container_ip": "10.9.1.191"
+    }
+  ], 
+  "created_at": "2018-05-16T06:40:05.264061", 
+  "last_autoscale_datetime": "None", 
+  "container_manager": "KUBERNETES", 
+  "current_status": "Running", 
+  "ports": [
+    80
+  ], 
+  "exec_endpoint": "23.99.114.240", 
+  "instance_size": "XXS", 
+  "volumes": [], 
+  "project_uuid": "70f8990e-c27f-4e46-be2f-27eb6e4cc4d7", 
+  "is_stateful": false, 
+  "image_tag": "latest", 
+  "envfiles": [], 
   "mipn_enabled": false
 }

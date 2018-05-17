@@ -1,14 +1,16 @@
 {
   "volumes": [
     {
-      "app_volume_dir": "/demo", 
-      "volume_id": "host_path", 
-      "volume_name": "/demo"
+      "app_volume_dir": "/demo1", 
+      "driver_name": "glusterfs", 
+      "region_id": "e792bca0-3aad-42f3-9c2d-7b8cace0ac09", 
+      "volume_id": "94f453dd-4ad8-43ee-a869-994e14b98571", 
+      "volume_name": "alauda20180516174807"
     }, 
     {
       "app_volume_dir": "/demo", 
-      "volume_id": "host_path", 
-      "volume_name": "/demo"
+      "volume_name": "/demo", 
+      "volume_id": "host_path"
     }
   ]
 }

@@ -73,7 +73,6 @@
       "grace_period_seconds": 100
     }
   ], 
-  "pod_controller": "Deployment", 
   "load_balancers": [
     {
       "listeners": [
@@ -84,23 +83,23 @@
               "domain": "a.b.com"
             }
           ], 
-          "container_port": 80, 
+          "listener_port": 80, 
           "protocol": "http", 
-          "listener_port": 80
+          "container_port": 80
         }, 
         {
-          "container_port": 8080, 
+          "listener_port": 8080, 
           "protocol": "tcp", 
-          "listener_port": 8080
+          "container_port": 8080
         }, 
         {
           "domains": [
             "www.alauda-test.com"
           ], 
           "certificate_name": "mycert", 
-          "container_port": 443, 
+          "listener_port": 443, 
           "protocol": "https", 
-          "listener_port": 443
+          "container_port": 443
         }
       ], 
       "version": "2", 
@@ -114,8 +113,8 @@
   "kube_config": {
     "services": [
       {
-        "editable": true, 
         "type": "Headless", 
+        "editable": true, 
         "name": "hello-hl-hh"
       }
     ], 
@@ -198,13 +197,14 @@
       }
     }
   }, 
-  "volumes": {
-    "app_volume_dir": "/xq/image", 
-    "volume_name": "/xq/host", 
-    "volume_id": "host_path"
-  }, 
-  "image_tag": "latest", 
   "ports": [
     80
-  ]
+  ], 
+  "volumes": {
+    "app_volume_dir": "/xq/image", 
+    "volume_id": "host_path", 
+    "volume_name": "/xq/host"
+  }, 
+  "image_tag": "latest", 
+  "pod_controller": "Deployment"
 }

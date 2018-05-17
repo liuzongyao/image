@@ -3,9 +3,9 @@
     {
       "listeners": [
         {
-          "listener_port": 61234, 
+          "container_port": 80, 
           "protocol": "http", 
-          "container_port": 80
+          "listener_port": 61234
         }
       ], 
       "version": "2", 

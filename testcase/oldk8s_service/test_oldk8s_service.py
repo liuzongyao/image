@@ -5,7 +5,6 @@ import time
 import json
 
 
-
 def teardown_function(function):
     print ("teardown_function--->")
     for i in range(len(alauda.resource_url)):
@@ -21,8 +20,8 @@ def teardown_function(function):
                 break
 
 
-@pytest.mark.demo
-def test_create_basic_service_deployment():
+
+def test_1():
     response1 = alauda.post(alauda.url_path('services', params={'project_name': 'automation'}), 'basic_service_deployment.json',  space_name='test-automation')
 
     service_name = alauda.get_value1(response1, 'unique_name')
@@ -41,7 +40,7 @@ def test_create_basic_service_deployment():
 
 
 
-def test_1():
+def test_2():
     labels = [{'editable': 'true', 'propagate': 'true', 'key': 'test3', 'value': 'test3'}]
     data_template = 'basic_service_deployment.json'
     append_template = ['module_labels.json']
@@ -50,7 +49,7 @@ def test_1():
 
 
 
-def test_4():
+def test_3():
     #get service with params
     response = alauda.get(alauda.url_path('services', params={'space_name': 'staging'}))
     count = alauda.get_value1(response, 'count')
@@ -62,25 +61,27 @@ def test_4():
 
 
 
-
-def test_full():
-    response_env_file = alauda.post(alauda.url_path('env-files'), 'envfiles.json', primary='name')
-    envfile_name = alauda.get_value1(response_env_file, 'name')
-    envfile_uuid = alauda.get_value(response_env_file, 'uuid')
-    alauda.set_value1('module_envfiles.json', 'name', envfile_name)
+@pytest.mark.demo
+def test_4():
+    # response_env_file = alauda.post(alauda.url_path('env-files'), 'envfiles.json', primary='name')
+    # envfile_name = alauda.get_value1(response_env_file, 'name')
+    # envfile_uuid = alauda.get_value(response_env_file, 'uuid')
+    # alauda.set_value1('module_envfiles.json', 'name', envfile_name)
 
     response_volume = alauda.post(alauda.url_path('storage', volumes='volumes'), 'volume.json', primary='name')
     volume_name = alauda.get_value(response_volume, 'name')
     volume_id = alauda.get_value(response_volume, 'id')
-    alauda.set_value('module_volumes.json', ['volumes/0/volume_name', 'volumes/0/volume_id'], [volume_name, volume_id])
+    alauda.set_value1('module_volumes.json', 'volume_name', volume_name)
+    alauda.set_value1('module_volumes.json', 'volume_id', volume_id)
+    alauda.set_value1('module_volumes.json', 'test', 'test123')
 
-    append_json = ['module_labels.json', 'module_instance_envvars.json', 'module_envfiles.json']
-    response1 = alauda.post(alauda.url_path('services'), 'basic_service_deployment.json', append_json)
-    service_name = alauda.get_value(response1, 'unique_name')
-
-    alauda.resource_url.append(alauda.url_path('services', service_name=service_name))
-    alauda.resource_url.append(alauda.url_path('env-files', envfile_uuid=envfile_uuid))
-    alauda.resource_url.append(alauda.url_path('storage', volumes='volumes', volume_id=volume_id))
+    # append_json = ['module_labels.json', 'module_instance_envvars.json', 'module_envfiles.json']
+    # response1 = alauda.post(alauda.url_path('services'), 'basic_service_deployment.json', append_json)
+    # service_name = alauda.get_value(response1, 'unique_name')
+    #
+    # alauda.resource_url.append(alauda.url_path('services', service_name=service_name))
+    # alauda.resource_url.append(alauda.url_path('env-files', envfile_uuid=envfile_uuid))
+    # alauda.resource_url.append(alauda.url_path('storage', volumes='volumes', volume_id=volume_id))
 
 
 
