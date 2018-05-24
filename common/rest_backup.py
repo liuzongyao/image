@@ -13,9 +13,9 @@ import dpath.util
 
 class Alauda:
 
-    def __init__(self, envfile):
-        self.envfile = envfile
-        f = open(self.envfile)
+    def __init__(self, env_file):
+        self._env = env_file
+        f = open(self._env)
         env = yaml.load(f)
         self.header = {'Content-Type': 'application/json', 'Authorization': 'Token ' + env['token']}
         self.apiv1 = env['apiv1']

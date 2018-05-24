@@ -1,28 +1,16 @@
 {
+  "created_at": "2018-05-16T06:40:05.264061", 
   "unique_name": "96b5513d-9a69-459e-80e8-288aee04ac36", 
-  "kube_config": {
-    "services": [
-      {
-        "editable": false, 
-        "type": "ClusterIP", 
-        "name": "alauda20180516144004"
-      }
-    ], 
-    "pod": {
-      "podAffinity": {}, 
-      "labels": {}, 
-      "podAntiAffinity": {}
-    }
-  }, 
+  "last_autoscale_datetime": "None", 
   "app_name": null, 
   "mount_points": [], 
   "service_name": "alauda20180516144004", 
   "labels": [
     {
-      "propagate": false, 
       "editable": false, 
-      "value": "test-automation", 
-      "key": "space"
+      "propagate": false, 
+      "key": "space", 
+      "value": "test-automation"
     }
   ], 
   "updated_at": "2018-05-16T06:40:16.503861", 
@@ -59,7 +47,6 @@
   }, 
   "autoscaling_config": "{}", 
   "run_command": "", 
-  "space_id": "f8f24bd2-6f78-4bca-9daf-06903d146a23", 
   "custom_domain_name": null, 
   "linked_to_services": [], 
   "project_name": "automation", 
@@ -72,17 +59,14 @@
   "region_name": "laok8sazure", 
   "healthy_num_instances": 1, 
   "scaling_mode": "MANUAL", 
-  "image_name": "laok8sazure-testorg001.stagingindex.alauda.cn:5000/testorg001/hello-world", 
+  "image_name": "index-staging.alauda.cn/library/nginx", 
   "network_mode": "FLANNEL", 
   "health_checks": [], 
   "linked_from_apps": {}, 
-  "region": {
-    "display_text": "laok8sazure", 
-    "name": "laok8sazure"
-  }, 
   "load_balancers": [], 
   "target_num_instances": 1, 
   "current_num_instances": 1, 
+  "envfiles": [], 
   "region_uuid": "e792bca0-3aad-42f3-9c2d-7b8cace0ac09", 
   "instances": [
     {
@@ -95,8 +79,21 @@
       "container_ip": "10.9.1.191"
     }
   ], 
-  "created_at": "2018-05-16T06:40:05.264061", 
-  "last_autoscale_datetime": "None", 
+  "space_id": "f8f24bd2-6f78-4bca-9daf-06903d146a23", 
+  "kube_config": {
+    "services": [
+      {
+        "type": "ClusterIP", 
+        "editable": false, 
+        "name": "alauda20180516144004"
+      }
+    ], 
+    "pod": {
+      "podAffinity": {}, 
+      "labels": {}, 
+      "podAntiAffinity": {}
+    }
+  }, 
   "container_manager": "KUBERNETES", 
   "current_status": "Running", 
   "ports": [
@@ -108,6 +105,9 @@
   "project_uuid": "70f8990e-c27f-4e46-be2f-27eb6e4cc4d7", 
   "is_stateful": false, 
   "image_tag": "latest", 
-  "envfiles": [], 
+  "region": {
+    "display_text": "laok8sazure", 
+    "name": "laok8sazure"
+  }, 
   "mipn_enabled": false
 }

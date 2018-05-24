@@ -1,16 +1,16 @@
 {
   "labels": [
     {
-      "editable": true, 
       "propagate": true, 
-      "key": "test1", 
-      "value": "test1"
+      "editable": true, 
+      "value": "test1", 
+      "key": "test1"
     }, 
     {
-      "editable": true, 
       "propagate": true, 
-      "key": "test2", 
-      "value": "test2"
+      "editable": true, 
+      "value": "test2", 
+      "key": "test2"
     }
   ]
 }

@@ -10,12 +10,17 @@ import time
 import os
 import shutil
 import dpath.util
+from bs4 import BeautifulSoup
+from dateutil import tz
+from datetime import datetime
+import iso8601
+
 
 class Alauda:
 
-    def __init__(self, envfile):
-        self.envfile = envfile
-        f = open(self.envfile)
+    def __init__(self, env_file):
+        self.env_file = env_file
+        f = open(self.env_file)
         env = yaml.load(f)
         self.header = {'Content-Type': 'application/json', 'Authorization': 'Token ' + env['token']}
         self.apiv1 = env['apiv1']
@@ -55,7 +60,7 @@ class Alauda:
         if version == 'v1':
             resource_list = ['services', 'env-files', 'storage']
             if resource not in resource_list:
-                print("the resource {} does not exist, should in {}".format(resource, resource_list))
+                print "the resource {} does not exist, should in {}".format(resource, resource_list)
             address = '/' + resource + '/' + self.namespace
             if kwargs:
                 for key, value in kwargs.items():
@@ -75,25 +80,21 @@ class Alauda:
         if version == 'v2':
             pass
 
-
-
     def get(self, url_path):
         """
         request get请求
         :param url_path: url_path方法返回值，作为此处的地址
         :return: reponse对象
         """
-
         try:
             r = requests.get(url_path, headers=self.header)
             r.encoding = 'UTF-8'
             if r.status_code < 200 or r.status_code >= 300:
-                json_response = json.loads(r.text)
-                print json_response
+                html = r.text
+                return html
             else:
                 json_response = json.loads(r.text)
                 return json_response
-                print r.status_code
         except Exception as e:
             print('get请求出错,出错原因:%s' % e)
 
@@ -113,14 +114,13 @@ class Alauda:
         try:
             r = requests.post(url_path, data=data, headers=self.header)
             r.encoding = 'UTF-8'
-            print r.status_code
             if r.status_code < 200 or r.status_code >= 300:
-                json_response = json.loads(r.text)
-                print json_response
+                print('get request url was {}'.format(r.url))
+                print ('error message {}, error code {}, error type {}'.format(r.text['message'], r.text['code'], r.text['type']))
+                return False
             else:
                 json_response = json.loads(r.text)
                 return json_response
-                print r.status_code
 
         except Exception as e:
             print('post请求出错,原因:%s' % e)
@@ -133,16 +133,16 @@ class Alauda:
         """
         try:
             r = requests.delete(url_path, headers=self.header)
-            r.encoding = 'UTF-8'
-            if r.status_code < 200 or r.status_code >= 300:
-                json_response = json.loads(r.text)
-                return json_response
+            if r.status_code < 200 or r.status_code > 300:  # 说明删除出现问题
+                print('delete url was {}'.format(r.url))
+                print ('error reason was {}'.format(r.text['message']))
+                return False
             else:
-                #  json_response = json.loads(r.text)
-                #  删除操作成功后没有text，此处操作会失败
-                return r.status_code
+                print('delete success, url was {}'.format(r.url))
+                return True
+
         except Exception as e:
-            print('delete,出错原因:%s' % e)
+            print('delete,出错原因:%s' %e)
 
     def generate_data_template(self, data_template, append_template=[], primary='service_name', **kwargs):
         """
@@ -196,51 +196,30 @@ class Alauda:
             json.dump(response, f, indent=2)
             f.close()
 
-    def set_value(self, data_template, paths=[], values=[]):
-        """
-        第一版set value方法
-        :param data_template: 原数据
-        :param paths: 需要更改的数据key，需要完整的dpath格式 list
-        :param values: 需要更改的数据value list
-        :return: 追加后完整数据 json
-        """
-        data_template = self.json_dir + data_template
-        response = json.load(open(data_template))
-        for i in range(len(paths)):
-            path = paths[i]
-            value = values[i]
-            dpath.util.set(response, path, value)
-            with open(data_template, 'w') as f:
-                json.dump(response, f, indent=2)
-                f.close()
-
-        return data_template
-
-    def set_value1(self, data_template, key, value, index=1, current={'index': 0}):
+    def set_value(self, data_template, key, value, index=1):
         """
         第二版本set value方法
         :param data_template: 原数据
         :param key: 需要更改的数据key
         :param value: 需要更改的数据value
         :param index:如果数据模版中有多个key通过index来区分，从1开始
-        :param current: 内部参数使用，递归函数的中止条件参数
         :return: 更改后的json文件
         """
         data_template = self.json_dir + data_template
         response = json.load(open(data_template))
-        self.__set_value(response, key, value, index, current={'index': 0})
+        self.__set_value(response, key, value, index, {'index': 0})
         with open(data_template, 'w') as f:
             json.dump(response, f, indent=2)
             f.close()
 
-    def __set_value(self, response, key, value, index, current={'index':0}):
+    def __set_value(self, response, key, value, index, current):
         """
         内部set value方法的中间方法
         :param response: set_value1方法中的data tempalte产生的解释后的字典
         :param key: 需要更改的数据key
         :param value: 需要更改的数据value
-        :param index:如果数据模版中有多个key通过index来区分，从1开始
-        :param current: 内部参数使用，递归函数的中止条件参数
+        :param index:如果数据模版中有多个key通过index来区分，从1开始，代表希望替换的key的序号
+        :param current: 内部参数使用，递归函数的中止条件参数.代表当前key的序号
         :return: 更改后的json文件
         """
         for k, v in response.items():
@@ -249,7 +228,8 @@ class Alauda:
                 if current['index'] == index:
                     response.update({key: value})
                     is_updated = True
-                    return response
+                    if is_updated:
+                        return response
             else:
                 if type(v) == dict:
                     is_updated = self.__set_value(v, key, value, index, current)
@@ -263,17 +243,7 @@ class Alauda:
                 else:
                     continue
 
-    def get_value(self, response, key):
-        """
-        第一版get value方法
-        :param response: request请求产后的response中的text
-        :param key: 满足dpath格式的key
-        :return: key的value
-        """
-
-        return dpath.util.get(response, key)
-
-    def get_value1(self, response, key, **kwargs):
+    def get_value(self, response, key, **kwargs):
         """
         第二版get value方法，get_value1(response, 'node_port', entry='results')
         :param response: request请求产后的response中的text
@@ -312,27 +282,7 @@ class Alauda:
                     continue
         return results
 
-    def circle_get_value(self, resource_url, key):
-        """
-        经过一段时间去或许某个值，比如服务最后的状态是否是running 需要多次get，配合get value
-        :param resource_url:
-        :param key:
-        :return:
-        """
-        i = 0
-        while i < 10:
-            response = self.get(resource_url)
-            time.sleep(5)
-            print response
-            try:
-                return self.get_value(response, key)
-            except KeyError:
-                i = i+1
-                print i
-        print "did not get the value"
-
-
-    def circle_get_value1(self, url_path, key, **kwargs):
+    def circle_get_value(self, url_path, key, **kwargs):
         """
         结合第二版get value
         :param url_path: 多次查找的url
@@ -343,28 +293,35 @@ class Alauda:
         i = 0
         while i < 10:
             response = self.get(url_path)
-            time.sleep(5)
-            print response
-            try:
-                return self.get_value1(response, key, **kwargs)
-            except KeyError:
-                i = i+1
-                print i
-        print "did not get the value"
+            if response:
+                time.sleep(5)
+                print response
+                try:
+                    return self.get_value(response, key, **kwargs)
+                except KeyError:
+                    i = i+1
+                    print i
+            else:
+                assert False
 
-    def get_expected_value(self, resource_url, key, expected_value):
+
+    def get_expected_value(self, url_path, key, expected_value, **kwargs):
         """
         判断获得的值是否是期望的
-        :param resource_url:
+        note1：忽略了当第一次就取得返回值 但是和最终结果不一致的情况，比如说期望service是running状态 但是第一次取得是starting 没有继续等待
+        :param url_path:
         :param key:
         :param expected_value:
         :return:
         """
-
-        if self.circle_get_value(resource_url, key) == expected_value:
-            return True
-        else:
-            return False
+        i = 0
+        while i < 10:
+            if self.circle_get_value(url_path, key, **kwargs) == expected_value:
+                return True
+            else:
+                time.sleep(5)
+                i = i + 1
+        return False
 
     def get_multiple_values(self, response, key_list=[]):
         """
@@ -378,18 +335,41 @@ class Alauda:
             key_values.append(self.get_value(response, key))
         return key_values
 
+    def get_content(self, html, tag):
+        soap = BeautifulSoup(html, 'html.parser')
+        content = unicode(getattr(getattr(soap, tag), 'string'))
+        print type(content)
+        return content
 
+    def covert_to_unix(self, create_at):
+        # UTC Zone
+        #from_zone = tz.gettz('UTC')
+        # China Zone
+        to_zone = tz.gettz(datetime.now(tz.tzlocal()).tzname())
+
+        # utc = datetime.utcnow()
+
+        utc = iso8601.parse_date(create_at).astimezone(to_zone)
+
+        print type(utc)
+
+        # Tell the datetime object that it's in UTC time zone
+        #utc = utc.replace(tzinfo=from_zone)
+
+        # Convert time zone
+        # local = datetime.strftime(utc.astimezone(to_zone), "%Y-%m-%d %H:%M:%S")
+        #
+        t = time.mktime(time.strptime(datetime.strftime(utc, "%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S"))
+        print type(t)
+
+        return t
+
+
+file_path = os.path.dirname(__file__)
 env_dist = os.environ
 if 'env_key' in env_dist.keys():
     env_value = os.getenv("env_key")
 else:
-    env_value = './config/env_staging.yaml'
+    env_value = file_path + '/../config/env_staging.yaml'
 
-alauda = Alauda(env_value)
-
-r"""
-alauda = Alauda('./config/env_new_int.yaml')
-每个test case开始都需要更新alauda 但更改环境env文件时，需要更改的地方回很多，
-转为在rest文件中申请一个instance
-
-"""
+rest = Alauda(env_value)

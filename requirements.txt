@@ -2,6 +2,10 @@ requests==2.18.4
 psycopg2==2.7.4
 boto3==1.7.7
 PyYAML==3.12
+pexpect
+beautifulsoup4==4.3.2
+iso8601
+python-dateutil
 dpath
 pytest
 pytest-html

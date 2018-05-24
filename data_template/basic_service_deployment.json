@@ -1,22 +1,22 @@
 {
   "space_uuid": "2b68ab46-921b-4990-a68a-493d1c7a9077", 
-  "image_tag": "latest", 
+  "target_num_instances": 1, 
   "region_name": "laok8sazure", 
   "service_name": "demo7", 
   "instance_size": "XXS", 
   "scaling_mode": "MANUAL", 
   "namespace": "testorg001", 
-  "image_name": "laok8sazure-testorg001.stagingindex.alauda.cn:5000/testorg001/hello-world", 
-  "ports": [
-    80
-  ], 
+  "image_name": "index-staging.alauda.cn/library/nginx", 
   "network_mode": "FLANNEL", 
   "target_state": "STARTED", 
   "version": "v2", 
   "node_selector": {
     "ip": "10.23.0.7"
   }, 
+  "pod_controller": "Deployment", 
   "space_name": "staging", 
-  "target_num_instances": 1, 
-  "pod_controller": "Deployment"
+  "image_tag": "latest", 
+  "ports": [
+    80
+  ]
 }

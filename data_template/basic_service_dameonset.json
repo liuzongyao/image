@@ -3,14 +3,14 @@
   "service_name": "demo1", 
   "pod_controller": "DaemonSet", 
   "namespace": "testorg001", 
-  "image_name": "laok8sazure-testorg001.stagingindex.alauda.cn:5000/testorg001/hello-world", 
-  "ports": [
-    80
-  ], 
+  "image_name": "index-staging.alauda.cn/library/nginx", 
   "network_mode": "FLANNEL", 
   "target_state": "STARTED", 
+  "instance_size": "XS", 
   "version": "v2", 
   "space_name": "staging", 
   "image_tag": "latest", 
-  "instance_size": "XS"
+  "ports": [
+    80
+  ]
 }
