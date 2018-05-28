@@ -9,6 +9,7 @@ import pexpect
 import yaml
 import os
 import re
+from common import Common
 
 
 class Exec_helper:
@@ -23,7 +24,10 @@ class Exec_helper:
         self._namespace = env['namespace']
         self._prompt = '#'
 
+
     def _connect_container(self, resource_id, index, version='v1'):
+        Common.start_time = Common.get_start_time()
+
         if version == 'v1':
             cmd = 'ssh -p 4022 -t ' + self._namespace + '/' + self._username + '@' + self._master + ' ' + self._namespace + '/' + resource_id + '.' + str(index) + ' ' + '/bin/sh'
             print cmd
@@ -38,9 +42,20 @@ class Exec_helper:
             elif i == 1:
                 pass  # 其中 EOF 通常代表子程序的退出
             # 输入密码.
-            child.sendline(self._password)
-            child.expect(self._prompt)
-            return child
+            else:
+                child.sendline(self._password)
+            i = child.expect([pexpect.TIMEOUT, pexpect.EOF, self._prompt])
+            if i == 0:  # Timeout
+                print 'ERROR! timeout'
+                print 'SSH could not login. Here is what SSH said:'
+                print child.before
+                return None
+            elif i == 1:
+                print "ERROR! EOF"
+                print child.before
+                return None
+            else:
+                return child
         elif version == "v2":
             pass
 

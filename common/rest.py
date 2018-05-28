@@ -11,9 +11,7 @@ import os
 import shutil
 import dpath.util
 from bs4 import BeautifulSoup
-from dateutil import tz
-from datetime import datetime
-import iso8601
+from common import Common
 
 
 class Alauda:
@@ -26,8 +24,13 @@ class Alauda:
         self.apiv1 = env['apiv1']
         self.region = env['region_name']
         self.namespace = env['namespace']
+        self.space = env['space_name']
+        self.lb_id = env['load_balancer_id']
+        self._username = env['username']
         self.env_file = env['env_file']
         self.json_dir = env['json_dir']
+        self.start_time = Common.get_start_time()
+        self.end_time = self.start_time + 5
         self.resource_url = []
         jsonfile = []
         for root, dirs, files in os.walk(self.json_dir):
@@ -58,23 +61,18 @@ class Alauda:
         """
         param = ''
         if version == 'v1':
-            resource_list = ['services', 'env-files', 'storage']
-            if resource not in resource_list:
-                print "the resource {} does not exist, should in {}".format(resource, resource_list)
-            address = '/' + resource + '/' + self.namespace
-            if kwargs:
-                for key, value in kwargs.items():
-                    address = address + '/' + value
+            if isinstance(resource, str):
+                address = '/' + resource + '/' + self.namespace
+            else:
+                address = '/' + resource[0] + '/' + self.namespace
+                for i in range(1, len(resource)):
+                    address = address + '/' + resource[i]
             if params:
                 keys = params.keys()
                 values = params.values()
-                if len(keys) == 1:
-                    param = '?' + keys[0] + '=' + values[0]
-                else:
-                    param = '?' + keys[0] + '=' + values[0]
-                    for i in range(1, len(keys)):
-                        param = param + '&' + keys[i] + '=' + values[i]
-
+                param = '?' + keys[0] + '=' + values[0]
+                for i in range(1, len(keys)):
+                    param = param + '&' + keys[i] + '=' + values[i]
             print self.apiv1 + address + param
             return self.apiv1 + address + param
         if version == 'v2':
@@ -90,11 +88,21 @@ class Alauda:
             r = requests.get(url_path, headers=self.header)
             r.encoding = 'UTF-8'
             if r.status_code < 200 or r.status_code >= 300:
-                html = r.text
-                return html
+                print('get request url was {}'.format(r.url))
+                try:
+                    json_response = json.loads(r.text)
+                    print ('error message {}'.format(json_response['errors'][0]))
+                    return json_response['errors'][0]
+                except ValueError:
+                    response = rest.get_content(r.text, 'p')
+                    return response
             else:
-                json_response = json.loads(r.text)
-                return json_response
+                try:
+                    json_response = json.loads(r.text)
+                    return json_response
+                except ValueError:
+                    response = rest.get_content(r.text, 'p')
+                    return response
         except Exception as e:
             print('get请求出错,出错原因:%s' % e)
 
@@ -112,18 +120,29 @@ class Alauda:
         response = json.load(open(temp_template))
         data = json.dumps(response)
         try:
+            Common.start_time = Common.get_start_time()
             r = requests.post(url_path, data=data, headers=self.header)
             r.encoding = 'UTF-8'
             if r.status_code < 200 or r.status_code >= 300:
-                print('get request url was {}'.format(r.url))
-                print ('error message {}, error code {}, error type {}'.format(r.text['message'], r.text['code'], r.text['type']))
-                return False
+                print('post request url was {}'.format(r.url))
+                try:
+                    json_response = json.loads(r.text)
+                    print ('error message {}'.format(json_response['errors'][0]))
+                    return json_response['errors'][0]
+                except ValueError:
+                    response = rest.get_content(r.text, 'p')
+                    return response
             else:
-                json_response = json.loads(r.text)
-                return json_response
-
+                try:
+                    json_response = json.loads(r.text)
+                    return json_response
+                except ValueError:
+                    response = rest.get_content(r.text, 'p')
+                    return response
         except Exception as e:
             print('post请求出错,原因:%s' % e)
+
+
 
     def delete(self, url_path):
         """
@@ -135,8 +154,12 @@ class Alauda:
             r = requests.delete(url_path, headers=self.header)
             if r.status_code < 200 or r.status_code > 300:  # 说明删除出现问题
                 print('delete url was {}'.format(r.url))
-                print ('error reason was {}'.format(r.text['message']))
-                return False
+                try:
+                    json_response = json.loads(r.text)
+                    print ('error message {}'.format(json_response['errors'][0]))
+                except ValueError:
+                    response = rest.get_content(r.text, 'p')
+                    return response
             else:
                 print('delete success, url was {}'.format(r.url))
                 return True
@@ -207,7 +230,7 @@ class Alauda:
         """
         data_template = self.json_dir + data_template
         response = json.load(open(data_template))
-        self.__set_value(response, key, value, index, {'index': 0})
+        self.__set_value(response, key, value, index, {'index': 1})
         with open(data_template, 'w') as f:
             json.dump(response, f, indent=2)
             f.close()
@@ -224,31 +247,37 @@ class Alauda:
         """
         for k, v in response.items():
             if k == key:
-                current['index'] = current['index'] + 1
+                #current['index'] = current['index'] + 1
                 if current['index'] == index:
                     response.update({key: value})
-                    is_updated = True
-                    if is_updated:
-                        return response
+                    return response
+                    # is_updated = True
+                    # if is_updated:
+                    #     return response
+                else:
+                    current['index'] = current['index'] + 1
+
             else:
                 if type(v) == dict:
-                    is_updated = self.__set_value(v, key, value, index, current)
-                    if is_updated:
-                        return response
+                    self.__set_value(v, key, value, index, current)
+                    # is_updated = self.__set_value(v, key, value, index, current)
+                    # if is_updated:
+                    #     return response
                 elif type(v) == list:
                     for i in range(len(v)):
-                        is_updated = self.__set_value(v[i], key, value, index, current)
-                        if is_updated:
-                            return response
+                        self.__set_value(v[i], key, value, index, current)
+                        # is_updated = self.__set_value(v[i], key, value, index, current)
+                        # if is_updated:
+                        #     return response
                 else:
                     continue
 
     def get_value(self, response, key, **kwargs):
         """
-        第二版get value方法，get_value1(response, 'node_port', entry='results')
+        第二版get value方法，get_value(response, 'node_port', entry='results', index=2)
         :param response: request请求产后的response中的text
         :param key: 需要的key
-        :param kwargs: key: entry 参数key的最开头的入口，从这个往下轮询。 index 代表多个中的某个
+        :param kwargs: key: entry 参数key的最开头的入口，从这个往下轮询。 index 代表多个中的某个,从0开始
         :return: key的value
         """
         if not kwargs:
@@ -293,7 +322,7 @@ class Alauda:
         i = 0
         while i < 10:
             response = self.get(url_path)
-            if response:
+            if isinstance(response, dict):
                 time.sleep(5)
                 print response
                 try:
@@ -341,28 +370,39 @@ class Alauda:
         print type(content)
         return content
 
-    def covert_to_unix(self, create_at):
-        # UTC Zone
-        #from_zone = tz.gettz('UTC')
-        # China Zone
-        to_zone = tz.gettz(datetime.now(tz.tzlocal()).tzname())
+    def get_service_url(self, service_name, domain='haproxy-23-99-114-240-testorg001.myalauda.cn', container_port=80, http='http'):
+        """
+        获得服务地址方法
+        :param service_name:
+        :param domain:
+        :param container_port: 不提供时和容器暴露端口相同，提供时是load balance上的监听端口60000-65555
+        :param http:
+        :return:
+        """
+        service_url = http + '://' + service_name + '.' + self.space + '.' + domain + ':' + container_port.__str__()
+        print service_url
+        return service_url
 
-        # utc = datetime.utcnow()
+    # def get_event_time(self, size='20'):
+    #     params = {'start_time': (rest.current_time - 1).__str__(), 'end_time': (rest.current_time + 1).__str__(), 'size': size}
+    #     return params
+    def get_event_time(self, size='20'):
+        Common.get_start_time()
+        params = {'start_time': '{}'.format(Common.start_time), 'end_time': '{}'.format(Common.start_time + 10), 'size': size}
+        return params
 
-        utc = iso8601.parse_date(create_at).astimezone(to_zone)
+    def get_event(self, url_path, operation, resource_type):
 
-        print type(utc)
+        time.sleep(5)
 
-        # Tell the datetime object that it's in UTC time zone
-        #utc = utc.replace(tzinfo=from_zone)
-
-        # Convert time zone
-        # local = datetime.strftime(utc.astimezone(to_zone), "%Y-%m-%d %H:%M:%S")
-        #
-        t = time.mktime(time.strptime(datetime.strftime(utc, "%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S"))
-        print type(t)
-
-        return t
+        response = self.get(url_path)
+        if isinstance(response, dict):
+            if self.get_value(response, 'operation', entry='results') == operation and self.get_value(response, 'resource_type', entry='results') == resource_type:
+                return True
+            elif self.get_value(response, 'total_items') > 1:
+                for index in range(self.get_value(response, 'total_items')):
+                    if self.get_value(response, 'operation', entry='results', index=index) == operation and self.get_value(response, 'resource_type', entry='results', index=index) == resource_type:
+                        return True
 
 
 file_path = os.path.dirname(__file__)

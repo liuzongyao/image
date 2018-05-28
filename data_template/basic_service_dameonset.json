@@ -4,11 +4,34 @@
   "pod_controller": "DaemonSet", 
   "namespace": "testorg001", 
   "image_name": "index-staging.alauda.cn/library/nginx", 
+  "space_name": "staging", 
   "network_mode": "FLANNEL", 
   "target_state": "STARTED", 
   "instance_size": "XS", 
   "version": "v2", 
-  "space_name": "staging", 
+  "load_balancers": [
+    {
+      "name": "haproxy-23-99-114-240", 
+      "listeners": [
+        {
+          "rules": [], 
+          "listener_port": 0, 
+          "protocol": "tcp", 
+          "container_port": 443
+        }, 
+        {
+          "rules": [], 
+          "listener_port": 0, 
+          "protocol": "http", 
+          "container_port": 80
+        }
+      ], 
+      "version": 2, 
+      "uniqueId": "load_balancer_id4", 
+      "load_balancer_id": "7ed6833f-f948-4444-4246-e643a1528cb6", 
+      "type": "haproxy"
+    }
+  ], 
   "image_tag": "latest", 
   "ports": [
     80

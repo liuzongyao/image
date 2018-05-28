@@ -12,6 +12,7 @@ image_name : index-staging.alauda.cn/library/nginx
 image_tag : latest
 node_selector :
   ip : 10.23.0.7
+load_balancer_id: 7ed6833f-f948-4444-4246-e643a1528cb6
 username : liuzongyao
 password : liuzongyao
 master : 23.99.114.240
