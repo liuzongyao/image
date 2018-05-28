@@ -391,6 +391,13 @@ class Alauda:
         params = {'start_time': '{}'.format(Common.start_time), 'end_time': '{}'.format(Common.start_time + 10), 'size': size}
         return params
 
+    def get_log_time(self):
+        time.sleep(5)
+        end_time = time.time()
+        start_time = end_time - 604800
+        params = {'start_time': '{}'.format(start_time), 'end_time': '{}'.format(end_time)}
+        return params
+
     def get_event(self, url_path, operation, resource_type):
 
         time.sleep(5)
@@ -403,6 +410,17 @@ class Alauda:
                 for index in range(self.get_value(response, 'total_items')):
                     if self.get_value(response, 'operation', entry='results', index=index) == operation and self.get_value(response, 'resource_type', entry='results', index=index) == resource_type:
                         return True
+
+    def get_log(self, url_path, message):
+        response = self.get(url_path)
+        if isinstance(response, list):
+            for i in range(len(response)):
+                if self.get_value(response[i], message):
+                    return self.get_value(response[i], message)
+            pass
+        else:
+            return "no logs for this service "
+
 
 
 file_path = os.path.dirname(__file__)

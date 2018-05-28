@@ -27,7 +27,6 @@ class Exec_helper:
 
     def _connect_container(self, resource_id, index, version='v1'):
         Common.start_time = Common.get_start_time()
-
         if version == 'v1':
             cmd = 'ssh -p 4022 -t ' + self._namespace + '/' + self._username + '@' + self._master + ' ' + self._namespace + '/' + resource_id + '.' + str(index) + ' ' + '/bin/sh'
             print cmd

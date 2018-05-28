@@ -29,8 +29,6 @@ def test_1():
     print response
 
 
-
-
 def test_2():
     #get service with params
     response = rest.get(rest.url_path('services', params={'space_name': 'staging'}))
@@ -46,6 +44,7 @@ def test_3():
     response1 = rest.post(rest.url_path('services'), 'basic_service_deployment.json')
 
     service_id = rest.get_value(response1, 'unique_name')
+    service_name = rest.get_value(response1, 'service_name')
 
     is_event = rest.get_event(rest.url_path(['events', 'service', service_id], params=rest.get_event_time()), 'create', 'service')
 
@@ -62,6 +61,17 @@ def test_3():
     is_event = rest.get_event(rest.url_path(['events', 'service', service_id], params=rest.get_event_time()), 'login', 'service')
 
     print is_event
+
+    content = rest.get(rest.get_service_url(service_name))
+    if 'nginx web server' in content:
+        result.update_check_point('test_4', 'check service could access', False, True, content)
+    else:
+        result.update_check_point('test_4', 'check service could access', False, False, content)
+
+    log = rest.get_log(rest.url_path(['services', service_id, 'logs'], params=rest.get_log_time()), 'message')
+    print log
+
+
 
 @pytest.mark.demo
 def test_4():
@@ -124,35 +134,4 @@ def test_4():
 
 
 
-def test_5():
-    response1 = rest.post(rest.url_path('services'), 'basic_service_deployment.json')
-
-    service_id = rest.get_value(response1, 'unique_name')
-
-    service_name = rest.get_value(response1, 'service_name')
-
-    response2 = rest.get(rest.url_path(['services', service_id]))
-
-    current_status = rest.get_value(response2, 'current_status')
-
-    print current_status
-
-    container_port = rest.circle_get_value(rest.url_path(['services', service_id]), 'container_port', entry='raw_container_ports')
-
-    print container_port
-
-    response3 = rest.get(rest.url_path(['load_balancers', rest.lb_id]))
-
-    domain = rest.get_value(response3, 'domain', entry='domain_info', index=1)
-
-    service_url = rest.get_service_url(service_name, domain, container_port)
-
-    content = rest.get_content(rest.get(service_url), 'title')
-    print content
-
-
-def test_6():
-    service_id = 'abdb817c-a95b-4850-9485-7a7ff1f95faa'
-    is_expected = exec_helper.get_expect_string(service_id, 'export', "A='1'")  # check环境变量
-    print is_expected
 
