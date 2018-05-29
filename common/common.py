@@ -15,7 +15,11 @@ class Common:
         pass
 
     @classmethod
-    def get_start_time(self):
+    def get_start_time(cls):
 
+        return time.time()
+
+    @classmethod
+    def get_end_time(cls):
         return time.time()
 

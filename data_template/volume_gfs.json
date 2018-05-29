@@ -1,6 +1,6 @@
 {
   "driver_name": "glusterfs", 
-  "region_id": "e792bca0-3aad-42f3-9c2d-7b8cace0ac09", 
+  "region_id": "073f6e29-ca7b-4054-b918-64aa3c9f3a77", 
   "space_name": "staging", 
   "size": 10, 
   "name": "demo"

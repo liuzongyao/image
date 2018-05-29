@@ -1,0 +1,15 @@
+{
+  "volumes": [
+    {
+      "app_volume_dir": "/demo1", 
+      "volume_name": "alauda20180529170414", 
+      "region_id": "e792bca0-3aad-42f3-9c2d-7b8cace0ac09", 
+      "volume_id": "6d729493-3b2f-4b51-8ca8-ba859b692fe9"
+    }, 
+    {
+      "app_volume_dir": "/demo", 
+      "volume_id": "host_path", 
+      "volume_name": "/demo"
+    }
+  ]
+}

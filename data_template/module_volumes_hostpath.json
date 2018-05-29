@@ -1,0 +1,9 @@
+{
+  "volumes": [
+    {
+      "app_volume_dir": "/demo", 
+      "volume_id": "host_path", 
+      "volume_name": "/demo"
+    }
+  ]
+}

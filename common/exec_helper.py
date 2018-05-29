@@ -24,14 +24,12 @@ class Exec_helper:
         self._namespace = env['namespace']
         self._prompt = '#'
 
-
     def _connect_container(self, resource_id, index, version='v1'):
-        Common.start_time = Common.get_start_time()
         if version == 'v1':
             cmd = 'ssh -p 4022 -t ' + self._namespace + '/' + self._username + '@' + self._master + ' ' + self._namespace + '/' + resource_id + '.' + str(index) + ' ' + '/bin/sh'
             print cmd
             child = pexpect.spawn(cmd)
-            i = child.expect([pexpect.TIMEOUT, pexpect.EOF, 'password:'])
+            i = child.expect([pexpect.TIMEOUT, pexpect.EOF, 'yes/no', 'password:'])
             # 如果登录超时，打印出错信息，并退出.
             if i == 0:  # Timeout
                 print 'ERROR!'
@@ -40,21 +38,43 @@ class Exec_helper:
                 return None
             elif i == 1:
                 pass  # 其中 EOF 通常代表子程序的退出
-            # 输入密码.
+            elif i == 2:
+                child.sendline('yes')
+                i = child.expect([pexpect.TIMEOUT, pexpect.EOF, 'password:'])
+                if i == 0:  # Timeout
+                    print 'ERROR!'
+                    print 'SSH could not login. Here is what SSH said:'
+                    return None
+                elif i == 1:
+                    pass  # 其中 EOF 通常代表子程序的退出
+                else:
+                    child.sendline(self._password)
+                    i = child.expect([pexpect.TIMEOUT, pexpect.EOF, self._prompt])
+                    if i == 0:  # Timeout
+                        print 'ERROR! timeout'
+                        print 'SSH could not login. Here is what SSH said:'
+                        return None
+                    elif i == 1:
+                        print "ERROR! EOF"
+                        print child.before
+                        return None
+                    else:
+                        return child
             else:
                 child.sendline(self._password)
-            i = child.expect([pexpect.TIMEOUT, pexpect.EOF, self._prompt])
-            if i == 0:  # Timeout
-                print 'ERROR! timeout'
-                print 'SSH could not login. Here is what SSH said:'
-                print child.before
-                return None
-            elif i == 1:
-                print "ERROR! EOF"
-                print child.before
-                return None
-            else:
-                return child
+                i = child.expect([pexpect.TIMEOUT, pexpect.EOF, self._prompt])
+                if i == 0:  # Timeout
+                    print 'ERROR! timeout'
+                    print 'SSH could not login. Here is what SSH said:'
+                    print child.before
+                    return None
+                elif i == 1:
+                    print "ERROR! EOF"
+                    print child.before
+                    return None
+                else:
+                    return child
+
         elif version == "v2":
             pass
 
@@ -68,15 +88,11 @@ class Exec_helper:
                 child.sendline('yes')
                 child.expect('password:')
             child.sendline(password)
-            # print child.before
-            # print child.after
             child.expect('\$')
             if username == 'root':
                 pass
             else:
                 child.sendline('sudo su')
-                # print child.before
-                # print child.after
                 child.expect(self._prompt)
         except pexpect.EOF, pexpect.TIMEOUT:
             print "timeout"
@@ -107,13 +123,17 @@ class Exec_helper:
         return child.before
 
     def get_expect_string(self, resource_id, cmd, expect, index=0, version='v1'):
-        child = self._connect_container(resource_id, index, version)
-        child.sendline(cmd)
-        child.expect(self._prompt)
-        if expect in child.before:
-            return True
-        else:
-            return False
+        Common.start_time = Common.get_start_time()
+        try:
+            child = self._connect_container(resource_id, index, version)
+            child.sendline(cmd)
+            child.expect(self._prompt)
+            if expect in child.before:
+                return True
+            else:
+                return False
+        finally:
+            Common.end_time = Common.get_end_time()
 
     def get_content(self, resource_id, cmd, index=0, version='v1'):
         child = self._connect_container(resource_id, index, version)
@@ -150,36 +170,6 @@ env_dist = os.environ
 if 'env_file' in env_dist.keys():
     env_file = os.getenv("env_key")
 else:
-    env_file = file_path + '/../config/env_staging.yaml'
+    env_file = file_path + '/../config/env_new_int.yaml'
 
 exec_helper = Exec_helper(env_file)
-
-
-if __name__ == '__main__':
-
-    exec_helper.exist_file('4a898eb0-975b-4f89-8298-7a688ea0cd5d', '/demo')
-    exec_helper.get_expect_string('5beeae6b-cd25-4260-b42a-7045df62833d', 'export', "A=1")
-    exec_helper.write_to_host('23.99.107.41', 'alauda', 'v0dkIGW*7u0&U19', '/demo/123.txt', '12312345')
-    content1 = exec_helper.read_from_host('23.99.107.41', 'alauda', 'v0dkIGW*7u0&U19', '/demo/123.txt')
-    content2 = exec_helper.read_from_container('4a898eb0-975b-4f89-8298-7a688ea0cd5d', '/demo/123.txt')
-    print content1
-    print content2
-
-
-
-
-
-
-    # s=pexpect.spawn("ssh -p 4022 -t testorg001/liuzongyao@23.99.114.240 testorg001/2018f7af-6aeb-4b14-ae49-cb26b22affb5.0 /bin/sh")
-    # s.logfile_send = sys.stdout
-    # s.expect("password:")
-    # s.sendline("liuzongyao")
-    # s.expect("#")
-    # s.sendline("export")
-    # s.expect("#")
-    # print type(s.before)
-    # print s.before
-    # if "C='5'" in s.before:
-    #     print "zhaodao"
-    # else:
-    #     print "no"

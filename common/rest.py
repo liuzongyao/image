@@ -19,30 +19,26 @@ class Alauda:
     def __init__(self, env_file):
         self.env_file = env_file
         f = open(self.env_file)
-        env = yaml.load(f)
-        self.header = {'Content-Type': 'application/json', 'Authorization': 'Token ' + env['token']}
-        self.apiv1 = env['apiv1']
-        self.region = env['region_name']
-        self.namespace = env['namespace']
-        self.space = env['space_name']
-        self.lb_id = env['load_balancer_id']
-        self._username = env['username']
-        self.env_file = env['env_file']
-        self.json_dir = env['json_dir']
-        self.start_time = Common.get_start_time()
-        self.end_time = self.start_time + 5
+        self.env = yaml.load(f)
+        self.header = {'Content-Type': 'application/json', 'Authorization': 'Token ' + self.env['token']}
+        self.apiv1 = self.env['apiv1']
+        self.apiv2 = self.env['apiv2']
+        self.region = self.env['region_name']
+        self.namespace = self.env['namespace']
+        self.space = self.env['space_name']
+        self._username = self.env['username']
+        self.env_file = self.env['env_file']
+        self.json_dir = self.env['json_dir']
         self.resource_url = []
         jsonfile = []
         for root, dirs, files in os.walk(self.json_dir):
             for fn1 in files:
                 if os.path.splitext(fn1)[1] == '.json':
                     jsonfile.append(os.path.join(root, fn1))
-        print jsonfile
-
         for fn2 in jsonfile:
             f1 = open(fn2)
             jsondata = json.load(f1)
-            for key, value in env.items():
+            for key, value in self.env.items():
                 if key in jsondata.keys():
                     jsondata.update({key: value})
             f1.close()
@@ -50,33 +46,33 @@ class Alauda:
             json.dump(jsondata, f2, indent=2)  # indent 值代表格式化json文件
             f2.close()
 
-    def url_path(self, resource, version='v1', params=None, **kwargs):
+    def url_path(self, resource, version='v1', params=None):
         """
         该函数用来产生request请求的url
         :param resource: 资源值来自resource_list = ['services', 'env-files', 'storage']会添加更多的资源，通常是请求的第一个
         :param version: 代表api版本，v1适用old v2适用new
         :param params: 代表请求的params参数，格式 params={'project_name': 'automation'}
-        :param kwargs: 额外的url参数，格式service_name=service_name则该参数会以'/'+内容追加到url后面
         :return: 返回一个完整的url地址。
         """
         param = ''
+        if isinstance(resource, str):
+            address = '/' + resource + '/' + self.namespace
+        else:
+            address = '/' + resource[0] + '/' + self.namespace
+            for i in range(1, len(resource)):
+                address = address + '/' + resource[i]
+        if params:
+            keys = params.keys()
+            values = params.values()
+            param = '?' + keys[0] + '=' + values[0]
+            for i in range(1, len(keys)):
+                param = param + '&' + keys[i] + '=' + values[i]
         if version == 'v1':
-            if isinstance(resource, str):
-                address = '/' + resource + '/' + self.namespace
-            else:
-                address = '/' + resource[0] + '/' + self.namespace
-                for i in range(1, len(resource)):
-                    address = address + '/' + resource[i]
-            if params:
-                keys = params.keys()
-                values = params.values()
-                param = '?' + keys[0] + '=' + values[0]
-                for i in range(1, len(keys)):
-                    param = param + '&' + keys[i] + '=' + values[i]
             print self.apiv1 + address + param
             return self.apiv1 + address + param
-        if version == 'v2':
-            pass
+        else:
+            print self.apiv2 + address + param
+            return self.apiv2 + address + param
 
     def get(self, url_path):
         """
@@ -94,14 +90,14 @@ class Alauda:
                     print ('error message {}'.format(json_response['errors'][0]))
                     return json_response['errors'][0]
                 except ValueError:
-                    response = rest.get_content(r.text, 'p')
+                    response = rest.get_content(r.text, 'h1')
                     return response
             else:
                 try:
                     json_response = json.loads(r.text)
                     return json_response
                 except ValueError:
-                    response = rest.get_content(r.text, 'p')
+                    response = rest.get_content(r.text, 'h1')
                     return response
         except Exception as e:
             print('get请求出错,出错原因:%s' % e)
@@ -130,19 +126,19 @@ class Alauda:
                     print ('error message {}'.format(json_response['errors'][0]))
                     return json_response['errors'][0]
                 except ValueError:
-                    response = rest.get_content(r.text, 'p')
+                    response = rest.get_content(r.text, 'h1')
                     return response
             else:
                 try:
                     json_response = json.loads(r.text)
                     return json_response
                 except ValueError:
-                    response = rest.get_content(r.text, 'p')
+                    response = rest.get_content(r.text, 'h1')
                     return response
         except Exception as e:
             print('post请求出错,原因:%s' % e)
-
-
+        finally:
+            Common.end_time = Common.get_end_time()
 
     def delete(self, url_path):
         """
@@ -245,30 +241,22 @@ class Alauda:
         :param current: 内部参数使用，递归函数的中止条件参数.代表当前key的序号
         :return: 更改后的json文件
         """
+        global is_update
+        is_update = False
         for k, v in response.items():
             if k == key:
-                #current['index'] = current['index'] + 1
                 if current['index'] == index:
                     response.update({key: value})
+                    current['index'] = current['index'] + 1
                     return response
-                    # is_updated = True
-                    # if is_updated:
-                    #     return response
                 else:
                     current['index'] = current['index'] + 1
-
             else:
                 if type(v) == dict:
                     self.__set_value(v, key, value, index, current)
-                    # is_updated = self.__set_value(v, key, value, index, current)
-                    # if is_updated:
-                    #     return response
                 elif type(v) == list:
                     for i in range(len(v)):
                         self.__set_value(v[i], key, value, index, current)
-                        # is_updated = self.__set_value(v[i], key, value, index, current)
-                        # if is_updated:
-                        #     return response
                 else:
                     continue
 
@@ -283,12 +271,19 @@ class Alauda:
         if not kwargs:
             return response[key]
         else:
-            glob = kwargs['entry'] + '/**/' + key
-            response1 = dpath.util.search(response, glob=glob)
-            if 'index' in kwargs.keys():
-                return self.__get_value(response1, key)[kwargs['index']]
+            if 'entry' in kwargs.keys():
+                glob = kwargs['entry'] + '/**/' + key
+                response1 = dpath.util.search(response, glob=glob)
+                if 'index' in kwargs.keys():
+                    return self.__get_value(response1, key)[kwargs['index']]
+                else:
+                    return self.__get_value(response1, key)[0]
             else:
-                return self.__get_value(response1, key)[0]
+                if 'index' in kwargs.keys():
+                    return self.__get_value(response, key)[kwargs['index']]
+                else:
+                    return self.__get_value(response, key)[0]
+
 
     def __get_value(self, response, key):
         """
@@ -367,10 +362,9 @@ class Alauda:
     def get_content(self, html, tag):
         soap = BeautifulSoup(html, 'html.parser')
         content = unicode(getattr(getattr(soap, tag), 'string'))
-        print type(content)
         return content
 
-    def get_service_url(self, service_name, domain='haproxy-23-99-114-240-testorg001.myalauda.cn', container_port=80, http='http'):
+    def get_service_url(self, service_name, domain='haproxy-23-99-114-240-testorg001.myalauda.cn', port=80, http='http'):
         """
         获得服务地址方法
         :param service_name:
@@ -379,29 +373,47 @@ class Alauda:
         :param http:
         :return:
         """
-        service_url = http + '://' + service_name + '.' + self.space + '.' + domain + ':' + container_port.__str__()
+
+        response = self.get(self.url_path('load_balancers', params={'region_name': self.region}))
+        for i in range(len(response)):
+            for j in range(len(response[i]['domain_info'])):
+                for k in range(10):
+                    if self.get_value(response[i]['domain_info'][j], 'type', index=k) == 'default-domain':
+                        domain = self.get_value(response[i]['domain_info'][j], 'domain', index=k)
+                        break
+                break
+            break
+
+        http = self.env['load_balancers'][0]["listeners"][0]['protocol']
+        if self.env['load_balancers'][0]["listeners"][0]['listener_port'] == 0:
+
+            port = self.env['load_balancers'][0]["listeners"][0]['container_port']
+        else:
+            port = self.env['load_balancers'][0]["listeners"][0]['listener_port']
+        service_url = http + '://' + service_name + '.' + self.space + '.' + domain + ':' + port.__str__()
         print service_url
         return service_url
 
-    # def get_event_time(self, size='20'):
-    #     params = {'start_time': (rest.current_time - 1).__str__(), 'end_time': (rest.current_time + 1).__str__(), 'size': size}
-    #     return params
-    def get_event_time(self, size='20'):
-        Common.get_start_time()
-        params = {'start_time': '{}'.format(Common.start_time), 'end_time': '{}'.format(Common.start_time + 10), 'size': size}
+    def get_event_params(self, size='20', **kwargs):
+        # Common.get_start_time()
+        # params = {'start_time': '{}'.format(Common.start_time), 'end_time': '{}'.format(Common.start_time + 10), 'size': size}
+        # return params
+        params = {'start_time': '{}'.format(Common.start_time), 'end_time': '{}'.format(Common.end_time), 'size': size}
         return params
 
-    def get_log_time(self):
+    def get_log_parames(self, **kwargs):
         time.sleep(5)
         end_time = time.time()
         start_time = end_time - 604800
         params = {'start_time': '{}'.format(start_time), 'end_time': '{}'.format(end_time)}
         return params
 
+    def get_metric_params(self, agg, metric_name, where, **kwargs):
+        params = {'q': '{}:{}{{service_id={}}}'.format(agg, metric_name, where)}
+        return params
+
     def get_event(self, url_path, operation, resource_type):
-
         time.sleep(5)
-
         response = self.get(url_path)
         if isinstance(response, dict):
             if self.get_value(response, 'operation', entry='results') == operation and self.get_value(response, 'resource_type', entry='results') == resource_type:
@@ -412,15 +424,28 @@ class Alauda:
                         return True
 
     def get_log(self, url_path, message):
+        time.sleep(5)
         response = self.get(url_path)
         if isinstance(response, list):
             for i in range(len(response)):
                 if self.get_value(response[i], message):
                     return self.get_value(response[i], message)
-            pass
         else:
             return "no logs for this service "
 
+    def get_metric(self, url_path, dps):
+        time.sleep(5)
+        response = self.get(url_path)
+        if isinstance(response, list):
+            for i in range(len(response)):
+                if self.get_value(response[i], dps):
+                    data = self.get_value(response[i], dps)
+                    for index in range(len(data.values())):
+                        if len(data.values()) > 20 and not data.values()[index]:
+                            print "metric check success"
+                            return True
+        else:
+            return "no metric for this service "
 
 
 file_path = os.path.dirname(__file__)
@@ -428,6 +453,6 @@ env_dist = os.environ
 if 'env_key' in env_dist.keys():
     env_value = os.getenv("env_key")
 else:
-    env_value = file_path + '/../config/env_staging.yaml'
+    env_value = file_path + '/../config/env_new_int.yaml'
 
 rest = Alauda(env_value)

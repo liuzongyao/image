@@ -1,6 +1,26 @@
-apiv1 : http://40.83.120.254:20081/v1
-apiv2 : https://api-staging.alauda.cn/v2
-namespace : alauda
-namespace-pw : alauda
-token : 5f25d985456dbaa21f345959ab8f32c190f9ef40
-region : k8s_new
+json_dir : ./data_template/
+env_file : ./config/env_new_int.yaml
+apiv1 : http://jakiro-api-staging.nolimited.haproxy-54-223-242-27-alaudacn.myalauda.cn/v1
+apiv2 : http://jakiro-api-staging.nolimited.haproxy-54-223-242-27-alaudacn.myalauda.cn/v2
+namespace : testorg001
+token : 80ba348a7232292885aa1fb9136b22c080dcb9b2
+region_name : awsoldk8s
+region_id : 073f6e29-ca7b-4054-b918-64aa3c9f3a77
+space_name : staging
+space_uuid: 2b68ab46-921b-4990-a68a-493d1c7a9077
+image_name : index-staging.alauda.cn/library/nginx
+image_tag : latest
+node_selector :
+  ip : 172.31.19.230
+load_balancers :
+ - load_balancer_id: 017499f9-9b04-4bc2-7255-40a2919926c3
+   name: haproxy-52-80-56-101
+   type: haproxy
+   version: 2
+   listeners:
+    - "listener_port": 0
+      "container_port": 80
+      "protocol": "http"
+username : liuzongyao
+password : liuzongyao
+master : 52.80.56.101
