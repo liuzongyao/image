@@ -8,8 +8,8 @@ import time
 
 class Common:
 
-    start_time = 0
-    end_time = 0
+    start_time = time.time()
+    end_time = time.time()
 
     def __init__(self):
         pass
