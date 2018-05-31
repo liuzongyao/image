@@ -1,5 +1,23 @@
 {
   "image_tag": "latest", 
+  "region_name": "awsoldk8s   ==", 
+  "service_name": "demo11", 
+  "instance_size": "XXS", 
+  "scaling_mode": "MANUAL", 
+  "namespace": "testorg001   ===", 
+  "image_name": "index-staging.alauda.cn/library/nginx", 
+  "ports": [
+    80
+  ], 
+  "network_mode": "FLANNEL", 
+  "target_state": "STARTED", 
+  "version": "v2", 
+  "node_selector": {
+    "ip": "172.31.19.230"
+  }, 
+  "pod_controller": "Deployment", 
+  "space_name": "staging", 
+  "target_num_instances": 1, 
   "load_balancers": [
     {
       "listeners": [
@@ -14,23 +32,5 @@
       "name": "haproxy-52-80-56-101", 
       "load_balancer_id": "017499f9-9b04-4bc2-7255-40a2919926c3"
     }
-  ], 
-  "region_name": "awsoldk8s", 
-  "service_name": "demo11", 
-  "instance_size": "XXS", 
-  "scaling_mode": "MANUAL", 
-  "namespace": "testorg001", 
-  "image_name": "index-staging.alauda.cn/library/nginx", 
-  "network_mode": "FLANNEL", 
-  "target_state": "STARTED", 
-  "version": "v2", 
-  "node_selector": {
-    "ip": "172.31.19.230"
-  }, 
-  "pod_controller": "Deployment", 
-  "space_name": "staging", 
-  "target_num_instances": 1, 
-  "ports": [
-    80
   ]
 }

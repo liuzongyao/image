@@ -1,0 +1,5 @@
+web:
+  command: python app.py
+  image: index-staging.alauda.cn/alauda/flask-redis:latest
+  ports:
+  - '80/http'

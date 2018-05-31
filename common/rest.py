@@ -10,7 +10,7 @@ import time
 import os
 import shutil
 import dpath.util
-from bs4 import BeautifulSoup
+import re
 from common import Common
 
 
@@ -21,8 +21,7 @@ class Alauda:
         f = open(self.env_file)
         self.env = yaml.load(f)
         self.header = {'Content-Type': 'application/json', 'Authorization': 'Token ' + self.env['token']}
-        self.apiv1 = self.env['apiv1']
-        self.apiv2 = self.env['apiv2']
+        self.api = self.env['api']
         self.region = self.env['region_name']
         self.namespace = self.env['namespace']
         self.space = self.env['space_name']
@@ -46,33 +45,17 @@ class Alauda:
             json.dump(jsondata, f2, indent=2)  # indent 值代表格式化json文件
             f2.close()
 
-    def url_path(self, resource, version='v1', params=None):
-        """
-        该函数用来产生request请求的url
-        :param resource: 资源值来自resource_list = ['services', 'env-files', 'storage']会添加更多的资源，通常是请求的第一个
-        :param version: 代表api版本，v1适用old v2适用new
-        :param params: 代表请求的params参数，格式 params={'project_name': 'automation'}
-        :return: 返回一个完整的url地址。
-        """
-        param = ''
-        if isinstance(resource, str):
-            address = '/' + resource + '/' + self.namespace
-        else:
-            address = '/' + resource[0] + '/' + self.namespace
-            for i in range(1, len(resource)):
-                address = address + '/' + resource[i]
+    def url_path(self, url, args='', version='v1', params=None):
+        url = re.sub(r'{.*?}', '{}', url).format(*args if isinstance(args, tuple) else (args,))
         if params:
             keys = params.keys()
             values = params.values()
             param = '?' + keys[0] + '=' + values[0]
             for i in range(1, len(keys)):
                 param = param + '&' + keys[i] + '=' + values[i]
-        if version == 'v1':
-            print self.apiv1 + address + param
-            return self.apiv1 + address + param
+            return self.api + version + url + param
         else:
-            print self.apiv2 + address + param
-            return self.apiv2 + address + param
+            return self.api + version + url
 
     def get(self, url_path):
         """
@@ -83,22 +66,7 @@ class Alauda:
         try:
             r = requests.get(url_path, headers=self.header)
             r.encoding = 'UTF-8'
-            if r.status_code < 200 or r.status_code >= 300:
-                print('get request url was {}'.format(r.url))
-                try:
-                    json_response = json.loads(r.text)
-                    print ('error message {}'.format(json_response['errors'][0]))
-                    return json_response['errors'][0]
-                except ValueError:
-                    response = rest.get_content(r.text, 'h1')
-                    return response
-            else:
-                try:
-                    json_response = json.loads(r.text)
-                    return json_response
-                except ValueError:
-                    response = rest.get_content(r.text, 'h1')
-                    return response
+            return r.text, r.status_code
         except Exception as e:
             print('get请求出错,出错原因:%s' % e)
 
@@ -139,6 +107,43 @@ class Alauda:
             print('post请求出错,原因:%s' % e)
         finally:
             Common.end_time = Common.get_end_time()
+
+    def post1(self, url_path, data_template, append_template=None, primary='service_name', **kwargs):
+        """
+        request post请求
+        :param url_path:   url_path方法返回值，作为此处的地址
+        :param data_template: 基于的数据模版
+        :param append_template: 以列表追加的数据
+        :param primary: 该资源的主键，如果相同会导致创建失败。
+        :param kwargs: 对前面产生的数据模版作数据替换
+        :return:
+        """
+        temp_template = self.generate_data_template(data_template, append_template, primary, **kwargs)
+        response = json.load(open(temp_template))
+        if "files" in response.keys():
+            files = {'file': open(response["files"], 'rb')}
+            response.pop("files")
+            data = json.dumps(response)
+            try:
+                Common.start_time = Common.get_start_time()
+                r = requests.post(url_path, data=data, files=files, headers=self.header)
+                r.encoding = 'UTF-8'
+                return r.text, r.status_code
+            except Exception as e:
+                print('post请求出错,原因:%s' % e)
+            finally:
+                Common.end_time = Common.get_end_time()
+        else:
+            data = json.dumps(response)
+            try:
+                Common.start_time = Common.get_start_time()
+                r = requests.post(url_path, data=data, headers=self.header)
+                r.encoding = 'UTF-8'
+                return r.text, r.status_code
+            except Exception as e:
+                print('post请求出错,原因:%s' % e)
+            finally:
+                Common.end_time = Common.get_end_time()
 
     def delete(self, url_path):
         """
@@ -359,10 +364,7 @@ class Alauda:
             key_values.append(self.get_value(response, key))
         return key_values
 
-    def get_content(self, html, tag):
-        soap = BeautifulSoup(html, 'html.parser')
-        content = unicode(getattr(getattr(soap, tag), 'string'))
-        return content
+
 
     def get_service_url(self, service_name, domain='haproxy-23-99-114-240-testorg001.myalauda.cn', port=80, http='http'):
         """
@@ -395,9 +397,6 @@ class Alauda:
         return service_url
 
     def get_event_params(self, size='20', **kwargs):
-        # Common.get_start_time()
-        # params = {'start_time': '{}'.format(Common.start_time), 'end_time': '{}'.format(Common.start_time + 10), 'size': size}
-        # return params
         params = {'start_time': '{}'.format(Common.start_time), 'end_time': '{}'.format(Common.end_time), 'size': size}
         return params
 

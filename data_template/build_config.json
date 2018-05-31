@@ -12,7 +12,7 @@
   "name": "demo", 
   "auto_build_enabled": false, 
   "customize_tag": "latest", 
-  "namespace": "testorg001", 
+  "namespace": "testorg001   ===", 
   "endpoint_id": "5a84e7bc-386e-4667-914b-ed1fc7650fce", 
   "space_name": "staging", 
   "image_cache_enabled": false, 

@@ -1,10 +1,10 @@
 json_dir : ./data_template/
 env_file : ./config/env_new_int.yaml
-apiv1 : http://jakiro-api-staging.nolimited.haproxy-54-223-242-27-alaudacn.myalauda.cn/v1
-apiv2 : http://jakiro-api-staging.nolimited.haproxy-54-223-242-27-alaudacn.myalauda.cn/v2
-namespace : testorg001
+api : http://jakiro-api-staging.nolimited.haproxy-54-223-242-27-alaudacn.myalauda.cn/
+
+namespace : testorg001   ===
 token : 80ba348a7232292885aa1fb9136b22c080dcb9b2
-region_name : awsoldk8s
+region_name : awsoldk8s   ==
 region_id : 073f6e29-ca7b-4054-b918-64aa3c9f3a77
 space_name : staging
 space_uuid: 2b68ab46-921b-4990-a68a-493d1c7a9077
@@ -21,6 +21,9 @@ load_balancers :
     - "listener_port": 0
       "container_port": 80
       "protocol": "http"
-username : liuzongyao
-password : liuzongyao
+username : liuzongyao  ==
+password : liuzongyao  ==
 master : 52.80.56.101
+reg id:
+
+

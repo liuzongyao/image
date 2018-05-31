@@ -1,9 +1,9 @@
 {
+  "namespace": "testorg001   ===", 
   "resource": {
     "create_method": "YAML/UI", 
     "name": "service-name"
   }, 
-  "namespace": "testorg001", 
   "kubernetes": [
     {
       "kind": "Service", 
@@ -11,8 +11,8 @@
         "type": "ClusterIP", 
         "ports": [
           {
-            "protocol": "TCP", 
             "targetPort": 80, 
+            "protocol": "TCP", 
             "port": 80
           }
         ], 
