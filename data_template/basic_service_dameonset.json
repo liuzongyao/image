@@ -1,23 +1,8 @@
 {
-  "load_balancers": [
-    {
-      "listeners": [
-        {
-          "listener_port": 0, 
-          "protocol": "http", 
-          "container_port": 80
-        }
-      ], 
-      "version": 2, 
-      "type": "haproxy", 
-      "name": "haproxy-52-80-56-101", 
-      "load_balancer_id": "017499f9-9b04-4bc2-7255-40a2919926c3"
-    }
-  ], 
-  "region_name": "awsoldk8s   ==", 
+  "region_name": "laok8sazure", 
   "service_name": "demo1", 
   "pod_controller": "DaemonSet", 
-  "namespace": "testorg001   ===", 
+  "namespace": "testorg001", 
   "image_name": "index-staging.alauda.cn/library/nginx", 
   "ports": [
     80

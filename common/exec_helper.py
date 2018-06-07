@@ -6,27 +6,22 @@ This runs a command on a remote host using SSH. At the prompts enter hostname,
 user, password and the command.
 """
 import pexpect
-import yaml
-import os
 import re
-from common import Common
+from common import common
 
 
 class Exec_helper:
 
-    def __init__(self, env_file):
-        self.env_file = env_file
-        f = open(self.env_file)
-        env = yaml.load(f)
-        self._username = env['username']
-        self._password = env['password']
-        self._master = env['master']
-        self._namespace = env['namespace']
+    def __init__(self):
+        self._username = common.env['username']
+        self._password = common.env['password']
+        self._region = common.env['region_name']
+        self._namespace = common.env['namespace']
         self._prompt = '#'
 
     def _connect_container(self, resource_id, index, version='v1'):
         if version == 'v1':
-            cmd = 'ssh -p 4022 -t ' + self._namespace + '/' + self._username + '@' + self._master + ' ' + self._namespace + '/' + resource_id + '.' + str(index) + ' ' + '/bin/sh'
+            cmd = 'ssh -p 4022 -t ' + self._namespace + '/' + self._username + '@' + common.master + ' ' + self._namespace + '/' + resource_id + '.' + str(index) + ' ' + '/bin/sh'
             print cmd
             child = pexpect.spawn(cmd)
             i = child.expect([pexpect.TIMEOUT, pexpect.EOF, 'yes/no', 'password:'])
@@ -123,17 +118,17 @@ class Exec_helper:
         return child.before
 
     def get_expect_string(self, resource_id, cmd, expect, index=0, version='v1'):
-        Common.start_time = Common.get_start_time()
+        common.start_time = common.get_start_time()
         try:
             child = self._connect_container(resource_id, index, version)
             child.sendline(cmd)
             child.expect(self._prompt)
             if expect in child.before:
-                return True
+                return "测试通过",True
             else:
-                return False
+                return child.before, False
         finally:
-            Common.end_time = Common.get_end_time()
+            common.end_time = common.get_end_time()
 
     def get_content(self, resource_id, cmd, index=0, version='v1'):
         child = self._connect_container(resource_id, index, version)
@@ -146,11 +141,11 @@ class Exec_helper:
         child.sendline('cd ' + dir_name)
         i = child.expect([pexpect.TIMEOUT, pexpect.EOF, self._prompt, "cd: can't cd to"])
         if i == 2:
-            return True
+            return "测试通过", True
         elif i == 3:
-            return False
+            return '不存在这个目录{}'.format(dir_name),False
         else:
-            return "Error"
+            return "Error", False
 
     def exist_file(self, resource_id, file_name, index=0):
         child = self._connect_container(resource_id, index)
@@ -158,18 +153,11 @@ class Exec_helper:
         i = child.expect([pexpect.TIMEOUT, pexpect.EOF, self._prompt, "No such file or directory"])
         print i
         if i == 2:
-            return True
+            return "测试通过", True
         elif i == 3:
-            return False
+            return '不存在这个文件{}'.format(file_name),False
         else:
-            return "Error"
+            return "Error", False
 
 
-file_path = os.path.dirname(__file__)
-env_dist = os.environ
-if 'env_file' in env_dist.keys():
-    env_file = os.getenv("env_key")
-else:
-    env_file = file_path + '/../config/env_new_int.yaml'
-
-exec_helper = Exec_helper(env_file)
+exec_helper = Exec_helper()

@@ -2,7 +2,10 @@
 from common.rest import rest
 from common.result import result
 from common.exec_helper import exec_helper
+from common.common import common
 import pytest
+import json
+import sys
 
 
 # def teardown_function(function):
@@ -11,109 +14,109 @@ import pytest
 #         rest.delete(rest.resource_url[i])
 
 
-
-
-
-def test_3():
-    response1 = rest.post(rest.url_path('/services/{namespace}', 'testorg001'), 'basic_service_deployment.json')
-    print response1
-
-    service_id = rest.get_value(response1, 'unique_name')
-    service_name = rest.get_value(response1, 'service_name')
-
-    # is_event = rest.get_event(rest.url_path(['events', 'service', service_id], params=rest.get_event_params()), 'create', 'service')
-    #
-    # print is_event
-    #
-    # current_status = rest.get_expected_value(rest.url_path(['services', service_id]), 'current_status', 'Running')
-    #
-    # print current_status
-    #
-    # is_expected = exec_helper.get_expect_string(service_id, 'export', "A='1'")
-    #
-    # print is_expected
-    #
-    # is_event = rest.get_event(rest.url_path(['events', 'service', service_id], params=rest.get_event_params()), 'login', 'service')
-    #
-    # print is_event
-    #
-    # content = rest.get(rest.get_service_url(service_name))
-    # if 'nginx' in content:
-    #     result.update_check_point('test_3', 'check service could access', False, True, content)
-    # else:
-    #     result.update_check_point('test_3', 'check service could access', False, False, content)
-    #
-    # log = rest.get_log(rest.url_path(['services', service_id, 'logs'], params=rest.get_log_parames()), 'message')
-    # print log
-    # address = rest.url_path(['monitor', 'metrics', 'query'], version='v2', params=rest.get_metric_params('avg', 'service.mem.utilization', service_id))
-    # metric = rest.get_metric(address, 'dps')
-    # print metric
-
-
-
-def test_4():
-    response = rest.post(rest.url_path('env-files'), 'envfiles.json', primary='name')
-    if isinstance(response, dict):
-        result.update_check_point('test_4', 'create env file succeed', False, True, 'success')
-    else:
-        result.update_check_point('test_4', 'create env file succeed', True, False, response)
-    envfile_name = rest.get_value(response, 'name')
-    envfile_uuid = rest.get_value(response, 'uuid')
-    rest.set_value('module_envfiles.json', 'name', envfile_name)
-
-    response = rest.post(rest.url_path(['storage', 'volumes']), 'volume_ebs.json', primary='name')
-    if isinstance(response, dict):
-        result.update_check_point('test_4', 'create volume success', False, True, 'success')
-    else:
-        result.update_check_point('test_4', 'create volume success', True, False, response)
-    volume_name = rest.get_value(response, 'name')
-    volume_id = rest.get_value(response, 'id')
-    rest.set_value('module_volumes_ebs.json', 'volume_name', volume_name)
-    rest.set_value('module_volumes_ebs.json', 'volume_id', volume_id)
-    append_json = ['module_envfiles.json', 'module_volumes_ebs.json']
-    response = rest.post(rest.url_path('services'), 'basic_service_deployment.json', append_json)
-    service_id = rest.get_value(response, 'unique_name')
-    service_name = rest.get_value(response, 'service_name')
-    if isinstance(response, dict):
-        result.update_check_point('test_4', 'create service success', False, True, 'success')
-    else:
-        result.update_check_point('test_4', 'create service success', True, False, response)
-
-    current_status = rest.get_expected_value(rest.url_path(['services', service_id]), 'current_status', 'Running')
-
-    if current_status:
-        result.update_check_point('test_4', 'check service is running', False, True, 'success')
-    else:
-        result.update_check_point('test_4', 'check service is running', True, False, 'failure')
-
-    is_expected = exec_helper.get_expect_string(service_id, 'export', "A='1'")  # check环境变量
-    if is_expected:
-        result.update_check_point('test_4', 'check env success in containers', False, True, 'success')
-    else:
-        result.update_check_point('test_4', 'check env success in containers', False, False, 'failure')
-
-    is_exist = exec_helper.exist_file(service_id, '/demo')
-    if is_exist:
-        result.update_check_point('test_4', 'check host path volume exist', False, True, 'success')
-    else:
-        result.update_check_point('test_4', 'check host path volume exist', False, False, 'failure')
-
-    content = rest.get(rest.get_service_url(service_name))
-    if 'nginx' in content:
-        result.update_check_point('test_4', 'check service could access', False, True, content)
-    else:
-        result.update_check_point('test_4', 'check service could access', False, False, content)
-
-    rest.resource_url.append(rest.url_path(['services', service_id]))
-    rest.resource_url.append(rest.url_path(['env-files', envfile_uuid]))
-    rest.resource_url.append(rest.url_path(['storage', 'volumes', volume_id]))
-
 @pytest.mark.demo
 def test_6():
-    q = rest.url_path('/services')
-    print q
-    b = rest.url_path('/services/{namespace}', 'test123')
-    print b
+    case_name = sys._getframe().f_code.co_name
+    rest.update_load_balance()
+    #校验服务创建
+    response, code = rest.post(rest.url_path('/services/{namespace}', common.env['namespace']), 'basic_service_deployment.json', 'module_load_balance.json', service_name="demo7")
+    if result.is_pass(code == 201):
+        result.update_check_point(case_name, True, '测试通过')
+    else:
+        try:
+            message = json.loads(response)
+            result.update_check_point(case_name, False, message)
+        except ValueError:
+            result.update_check_point(case_name, False, response)
+
+    service_uuid, code = rest.get_value(response, 'unique_name')
+    service_name, code = rest.get_value(response, 'service_name')
+
+    #校验创建服务事件
+    response, code = rest.get_event(rest.url_path('/events/{namespace}/{resource_type}/{resource_uuid}', (common.env['namespace'], 'service', service_uuid), params=rest.get_event_params()), 'create', 'service')
+    if result.is_pass(code):
+        result.update_check_point(case_name, True, '测试通过')
+    else:
+        try:
+            message = json.loads(response)
+            result.update_check_point(case_name, False, message)
+        except ValueError:
+            result.update_check_point(case_name, False, response)
+
+    # 校验服务处于运行中
+    response, code = rest.get_expected_value(rest.url_path('/services/{namespace}/{service_uuid}', (common.env['namespace'], service_uuid)), 'current_status', 'Running')
+
+    if result.is_pass(code):
+        result.update_check_point(case_name, True, '测试通过')
+    else:
+        try:
+            message = json.loads(response)
+            result.update_check_point(case_name, False, message)
+        except ValueError:
+            result.update_check_point(case_name, False, response)
+
+    #校验服务可以访问
+    response, code = rest.get(rest.get_service_url(service_name))
+    position = response.find("Welcome to nginx")
+    print position
+    if result.is_pass(position != -1):
+        result.update_check_point(case_name, True, '测试通过')
+    else:
+        result.update_check_point(case_name, False, response)
+
+    #校验登陆容器
+    response, code = exec_helper.get_expect_string(service_uuid, 'export', "export")
+
+    if result.is_pass(code):
+        result.update_check_point(case_name, True, '测试通过')
+    else:
+        try:
+            message = json.loads(response)
+            result.update_check_point(case_name, False, message)
+        except ValueError:
+            result.update_check_point(case_name, False, response)
+    #校验登陆容器事件
+    response, code = rest.get_event(rest.url_path('/events/{namespace}/{resource_type}/{resource_uuid}', (common.env['namespace'], 'service', service_uuid), params=rest.get_event_params()), 'login', 'service')
+
+    if result.is_pass(code):
+        result.update_check_point(case_name, True, '测试通过')
+    else:
+        try:
+            message = json.loads(response)
+            result.update_check_point(case_name, False, message)
+        except ValueError:
+            result.update_check_point(case_name, False, response)
+
+    #校验服务log
+    response, code = rest.get_log(rest.url_path('/services/{namespace}/{service_uuid}/logs', (common.env['namespace'], service_uuid), params=rest.get_log_parames()))
+    if result.is_pass(code):
+        result.update_check_point(case_name, True, '测试通过')
+    else:
+        result.update_check_point(case_name, False, response)
+
+    #校验metric
+
+    params = rest.get_metric_params('avg', 'service.mem.utilization', service_uuid)
+    response, code = rest.get_metric(rest.url_path('/monitor/{namespace}/metrics/query', common.env['namespace'], params=params, version='v2'), 'dps')
+    if result.is_pass(code):
+        result.update_check_point(case_name, True, '测试通过')
+    else:
+        result.update_check_point(case_name, False, response)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

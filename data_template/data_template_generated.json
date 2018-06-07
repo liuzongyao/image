@@ -1,7 +1,33 @@
 {
-  "driver_name": "glusterfs", 
-  "region_id": "e792bca0-3aad-42f3-9c2d-7b8cace0ac09", 
+  "image_tag": "latest", 
+  "region_name": "laok8sazure", 
+  "service_name": "demo7", 
+  "instance_size": "XXS", 
+  "scaling_mode": "MANUAL", 
+  "namespace": "testorg001", 
+  "image_name": "index-staging.alauda.cn/library/nginx", 
   "space_name": "staging", 
-  "size": 10, 
-  "name": "alauda20180524181841"
+  "network_mode": "FLANNEL", 
+  "target_state": "STARTED", 
+  "version": "v2", 
+  "pod_controller": "Deployment", 
+  "load_balancers": [
+    {
+      "listeners": [
+        {
+          "container_port": 80, 
+          "protocol": "http", 
+          "listener_port": 0
+        }
+      ], 
+      "version": 2, 
+      "type": "haproxy", 
+      "name": "haproxy-65-52-166-26", 
+      "load_balancer_id": "1a1774c4-5f63-4ca1-63b0-d2624c5fb556"
+    }
+  ], 
+  "target_num_instances": 1, 
+  "ports": [
+    80
+  ]
 }

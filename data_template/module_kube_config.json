@@ -2,8 +2,8 @@
   "kube_config": {
     "services": [
       {
-        "editable": false, 
         "type": "ClusterIP", 
+        "editable": false, 
         "name": "demo3"
       }
     ], 

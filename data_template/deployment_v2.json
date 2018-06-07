@@ -1,5 +1,5 @@
 {
-  "namespace": "testorg001   ===", 
+  "namespace": "testorg001", 
   "resource": {
     "create_method": "YAML/UI", 
     "name": "service-name"

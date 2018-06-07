@@ -1,0 +1,17 @@
+{
+  "load_balancers": [
+    {
+      "listeners": [
+        {
+          "container_port": 80, 
+          "protocol": "http", 
+          "listener_port": 0
+        }
+      ], 
+      "version": 2, 
+      "name": "haproxy-65-52-166-26", 
+      "load_balancer_id": "1a1774c4-5f63-4ca1-63b0-d2624c5fb556", 
+      "type": "haproxy"
+    }
+  ]
+}

@@ -2,8 +2,6 @@
 # -*- coding:utf-8 -*-
 # Author:zongyao liu
 # Date 2018.4.24
-
-import yaml
 import requests
 import json
 import time
@@ -11,39 +9,61 @@ import os
 import shutil
 import dpath.util
 import re
-from common import Common
+from common import common
 
 
-class Alauda:
+class Rest:
 
-    def __init__(self, env_file):
-        self.env_file = env_file
-        f = open(self.env_file)
-        self.env = yaml.load(f)
-        self.header = {'Content-Type': 'application/json', 'Authorization': 'Token ' + self.env['token']}
-        self.api = self.env['api']
-        self.region = self.env['region_name']
-        self.namespace = self.env['namespace']
-        self.space = self.env['space_name']
-        self._username = self.env['username']
-        self.env_file = self.env['env_file']
-        self.json_dir = self.env['json_dir']
+    def __init__(self):
+
+        self.api = common.env['api']
+        self.header = {'Authorization': 'Token ' + self._get_token()}
+        self.region = common.env['region_name']
+        self.namespace = common.env['namespace']
+        self.space = common.env['space_name']
+        self.json_dir = common.env['json_dir']
         self.resource_url = []
-        jsonfile = []
+        self._update_all_template(common.env)
+        common.master = self._get_master()
+
+    def _update_all_template(self, environment):
+        json_file = []
         for root, dirs, files in os.walk(self.json_dir):
             for fn1 in files:
                 if os.path.splitext(fn1)[1] == '.json':
-                    jsonfile.append(os.path.join(root, fn1))
-        for fn2 in jsonfile:
+                    json_file.append(os.path.join(root, fn1))
+        for fn2 in json_file:
             f1 = open(fn2)
-            jsondata = json.load(f1)
-            for key, value in self.env.items():
-                if key in jsondata.keys():
-                    jsondata.update({key: value})
+            json_data = json.load(f1)
+            for key, value in environment.items():
+                if key in json_data.keys():
+                    json_data.update({key: value})
             f1.close()
             f2 = open(fn2, 'w')
-            json.dump(jsondata, f2, indent=2)  # indent 值代表格式化json文件
+            json.dump(json_data, f2, indent=2)  # indent 值代表格式化json文件
             f2.close()
+
+    def _get_token(self):
+        print self.api
+
+        url = self.api + 'v1' + '/generate-api-token'
+        payload = {"organization": common.env['namespace'], "username": common.env['username'], "password": common.env['password']}
+        data = json.dumps(payload)
+        header = {'Content-Type': 'application/json'}
+        try:
+            r = requests.post(url, data=data, headers=header)
+            token = json.loads(r.text)['token']
+            return token
+        except Exception as e:
+            print('post请求出错,原因:%s' % e)
+
+    def _get_master(self):
+
+        response, code = self.get(self.url_path('/load_balancers/{namespace}', self.namespace, params={'region_name': self.region}))
+
+        response = json.loads(response)
+
+        return response[0]['address']
 
     def url_path(self, url, args='', version='v1', params=None):
         url = re.sub(r'{.*?}', '{}', url).format(*args if isinstance(args, tuple) else (args,))
@@ -53,8 +73,10 @@ class Alauda:
             param = '?' + keys[0] + '=' + values[0]
             for i in range(1, len(keys)):
                 param = param + '&' + keys[i] + '=' + values[i]
+            print self.api + version + url + param
             return self.api + version + url + param
         else:
+            print self.api + version + url
             return self.api + version + url
 
     def get(self, url_path):
@@ -70,7 +92,7 @@ class Alauda:
         except Exception as e:
             print('get请求出错,出错原因:%s' % e)
 
-    def post(self, url_path, data_template, append_template=None, primary='service_name', **kwargs):
+    def post(self, url_path, data_template, append_template=None, **kwargs):
         """
         request post请求
         :param url_path:   url_path方法返回值，作为此处的地址
@@ -80,70 +102,34 @@ class Alauda:
         :param kwargs: 对前面产生的数据模版作数据替换
         :return:
         """
-        temp_template = self.generate_data_template(data_template, append_template, primary, **kwargs)
-        response = json.load(open(temp_template))
-        data = json.dumps(response)
-        try:
-            Common.start_time = Common.get_start_time()
-            r = requests.post(url_path, data=data, headers=self.header)
-            r.encoding = 'UTF-8'
-            if r.status_code < 200 or r.status_code >= 300:
-                print('post request url was {}'.format(r.url))
-                try:
-                    json_response = json.loads(r.text)
-                    print ('error message {}'.format(json_response['errors'][0]))
-                    return json_response['errors'][0]
-                except ValueError:
-                    response = rest.get_content(r.text, 'h1')
-                    return response
-            else:
-                try:
-                    json_response = json.loads(r.text)
-                    return json_response
-                except ValueError:
-                    response = rest.get_content(r.text, 'h1')
-                    return response
-        except Exception as e:
-            print('post请求出错,原因:%s' % e)
-        finally:
-            Common.end_time = Common.get_end_time()
-
-    def post1(self, url_path, data_template, append_template=None, primary='service_name', **kwargs):
-        """
-        request post请求
-        :param url_path:   url_path方法返回值，作为此处的地址
-        :param data_template: 基于的数据模版
-        :param append_template: 以列表追加的数据
-        :param primary: 该资源的主键，如果相同会导致创建失败。
-        :param kwargs: 对前面产生的数据模版作数据替换
-        :return:
-        """
-        temp_template = self.generate_data_template(data_template, append_template, primary, **kwargs)
+        temp_template = self.generate_data_template(data_template, append_template, **kwargs)
         response = json.load(open(temp_template))
         if "files" in response.keys():
             files = {'file': open(response["files"], 'rb')}
             response.pop("files")
             data = json.dumps(response)
             try:
-                Common.start_time = Common.get_start_time()
+                common.start_time = common.get_start_time()
+                self.header.update({'Content-Type': 'multipart/form-data'})
                 r = requests.post(url_path, data=data, files=files, headers=self.header)
                 r.encoding = 'UTF-8'
                 return r.text, r.status_code
             except Exception as e:
                 print('post请求出错,原因:%s' % e)
             finally:
-                Common.end_time = Common.get_end_time()
+                common.end_time = common.get_end_time()
         else:
             data = json.dumps(response)
             try:
-                Common.start_time = Common.get_start_time()
+                common.start_time = common.get_start_time()
+                self.header.update({'Content-Type': 'application/json'})
                 r = requests.post(url_path, data=data, headers=self.header)
                 r.encoding = 'UTF-8'
                 return r.text, r.status_code
             except Exception as e:
                 print('post请求出错,原因:%s' % e)
             finally:
-                Common.end_time = Common.get_end_time()
+                common.end_time = common.get_end_time()
 
     def delete(self, url_path):
         """
@@ -153,61 +139,43 @@ class Alauda:
         """
         try:
             r = requests.delete(url_path, headers=self.header)
-            if r.status_code < 200 or r.status_code > 300:  # 说明删除出现问题
-                print('delete url was {}'.format(r.url))
-                try:
-                    json_response = json.loads(r.text)
-                    print ('error message {}'.format(json_response['errors'][0]))
-                except ValueError:
-                    response = rest.get_content(r.text, 'p')
-                    return response
-            else:
-                print('delete success, url was {}'.format(r.url))
-                return True
+            r.encoding = 'UTF-8'
+            return r.text, r.status_code
 
         except Exception as e:
             print('delete,出错原因:%s' %e)
 
-    def generate_data_template(self, data_template, append_template=[], primary='service_name', **kwargs):
+    def generate_data_template(self, data_template, append_template=[], **kwargs):
         """
         数据模版产生方法
         :param data_template: 基础数据模版
         :param append_template: 追加的数据模版，list
-        :param primary: 数据模版主键
-        :param kwargs: 需要替换的数据 dict
+        :param kwargs: 需要替换的数据 dict, 必须是完整的数据，比如"node_selector": {"ip": "172.31.19.230"}
         :return: 数据模版完整的文件 json
         """
         temp_template = self.json_dir + 'data_template_generated.json'
         data_template = self.json_dir + data_template
-        if append_template:
-            for i in range(len(append_template)):
-                append_template[i] = self.json_dir + append_template[i]
-
         shutil.copyfile(data_template, temp_template)
-        now = 'alauda' + time.strftime('%Y%m%d%H%M%S', time.localtime(time.time()))
         if append_template:
-            for i in range(len(append_template)):
-                json_append = json.load(open(append_template[i]))
+            if isinstance(append_template, list):  # 处理多个json文件，list情形
+                for i in range(len(append_template)):
+                    append_template[i] = self.json_dir + append_template[i]
+                    json_append = json.load(open(append_template[i]))
+                    self.__update_data(temp_template, json_append)
+                if kwargs:
+                    self.__update_data(temp_template, kwargs)
+            else:  # 一个json文件，直接给出文件名字
+                append_template = self.json_dir + append_template
+                json_append = json.load(open(append_template))
                 self.__update_data(temp_template, json_append)
-            if kwargs:
-                if primary in kwargs.keys():
+                if kwargs:
                     self.__update_data(temp_template, kwargs)
-                else:
-                    kwargs.update({primary: now})
-                    self.__update_data(temp_template, kwargs)
-            else:
-                self.__update_data(temp_template, {primary: now})
         elif kwargs:
-            if primary in kwargs.keys():
-                self.__update_data(temp_template, kwargs)
-            else:
-                kwargs.update({primary: now})
-                self.__update_data(temp_template, kwargs)
-        else:
-            self.__update_data(temp_template, {primary: now})
+            self.__update_data(temp_template, kwargs)
         return temp_template
 
-    def __update_data(self, temp_template, content):
+    @staticmethod
+    def __update_data(temp_template, content):
         """
         内部数据更新方法
         :param temp_template: 原数据
@@ -270,69 +238,78 @@ class Alauda:
         第二版get value方法，get_value(response, 'node_port', entry='results', index=2)
         :param response: request请求产后的response中的text
         :param key: 需要的key
-        :param kwargs: key: entry 参数key的最开头的入口，从这个往下轮询。 index 代表多个中的某个,从0开始
+        :param kwargs: key: entry 参数key的最开头的入口，从这个往下轮询。 index 代表多个中的某个,从1开始
         :return: key的value
         """
-        if not kwargs:
-            return response[key]
-        else:
-            if 'entry' in kwargs.keys():
-                glob = kwargs['entry'] + '/**/' + key
-                response1 = dpath.util.search(response, glob=glob)
-                if 'index' in kwargs.keys():
-                    return self.__get_value(response1, key)[kwargs['index']]
+        try:
+            response = json.loads(response)
+            #当取load balance的时候 此处的结果是list
+            if isinstance(response, dict):
+                if not kwargs:
+                    return response[key], True
                 else:
-                    return self.__get_value(response1, key)[0]
-            else:
-                if 'index' in kwargs.keys():
-                    return self.__get_value(response, key)[kwargs['index']]
+                    if 'entry' in kwargs.keys():
+                        glob = kwargs['entry'] + '/**/' + key
+                        response1 = dpath.util.search(response, glob=glob)
+                        if 'index' in kwargs.keys():
+                            return self.__get_value(response1, key, {'index': 1}, kwargs['index']), True
+                        else:
+                            return self.__get_value(response1, key, {'index': 1}, 1), True
+                    else:
+                        if 'index' in kwargs.keys():
+                            return self.__get_value(response, key, {'index': 1}, kwargs['index']), True
+                        else:
+                            return self.__get_value(response, key, {'index': 1}, 1), True
+            elif isinstance(response, list):
+                for i in range(len(response)):
+                    response = response[i]
+                    if not kwargs:
+                        return response[key], True
+                    else:
+                        if 'entry' in kwargs.keys():
+                            glob = kwargs['entry'] + '/**/' + key
+                            response1 = dpath.util.search(response, glob=glob)
+                            if 'index' in kwargs.keys():
+                                return self.__get_value(response1, key, {'index': 1}, kwargs['index']), True
+                            else:
+                                return self.__get_value(response1, key, {'index': 1}, 1), True
+                        else:
+                            if 'index' in kwargs.keys():
+                                return self.__get_value(response, key, {'index': 1}, kwargs['index']), True
+                            else:
+                                return self.__get_value(response, key, {'index': 1}, 1), True
                 else:
-                    return self.__get_value(response, key)[0]
+                    return "返回信息错误，既不是字典格式，也不是列表格式", False
 
+        except ValueError:
+            return response, False
 
-    def __get_value(self, response, key):
+    def __get_value(self, response, key, current, index):
         """
         第二版get value的中间函数
         :param response: 经过dpath寻找后的内容，缩小搜索范围
         :param key: 需要的key
         :return: 将具有相同的key的value组成列表返回
         """
-        results = []
+
         for k, v in response.items():
             if k == key:
-                results.append(v)
+                if current['index'] == index:
+                    return v
+                else:
+                    current['index'] = current['index'] + 1
             else:
                 if type(v) == dict:
-                    results = results + self.__get_value(v, key)
+                    a = self.__get_value(v, key, current, index)
+                    if a:
+                        return a
                 elif type(v) == list:
                     for i in range(len(v)):
-                        results = results + self.__get_value(v[i], key)
+                        b = self.__get_value(v[i], key, current, index)
+                        if b:
+                            return b
                 else:
                     continue
-        return results
-
-    def circle_get_value(self, url_path, key, **kwargs):
-        """
-        结合第二版get value
-        :param url_path: 多次查找的url
-        :param key: 查找的key
-        :param kwargs: 参考get value
-        :return:
-        """
-        i = 0
-        while i < 10:
-            response = self.get(url_path)
-            if isinstance(response, dict):
-                time.sleep(5)
-                print response
-                try:
-                    return self.get_value(response, key, **kwargs)
-                except KeyError:
-                    i = i+1
-                    print i
-            else:
-                assert False
-
 
     def get_expected_value(self, url_path, key, expected_value, **kwargs):
         """
@@ -345,12 +322,14 @@ class Alauda:
         """
         i = 0
         while i < 10:
-            if self.circle_get_value(url_path, key, **kwargs) == expected_value:
-                return True
+            response, code = self.get(url_path)
+            founder = self.get_value(response, key, **kwargs)[0]
+            if founder == expected_value:
+                return "find the expected value {}".format(expected_value), True
             else:
                 time.sleep(5)
                 i = i + 1
-        return False
+        return "get value {}, but the expected value {}".format(founder, expected_value), False
 
     def get_multiple_values(self, response, key_list=[]):
         """
@@ -364,9 +343,7 @@ class Alauda:
             key_values.append(self.get_value(response, key))
         return key_values
 
-
-
-    def get_service_url(self, service_name, domain='haproxy-23-99-114-240-testorg001.myalauda.cn', port=80, http='http'):
+    def get_service_url(self, service_name, port=80, http='http'):
         """
         获得服务地址方法
         :param service_name:
@@ -376,82 +353,85 @@ class Alauda:
         :return:
         """
 
-        response = self.get(self.url_path('load_balancers', params={'region_name': self.region}))
+        response, code = rest.get(rest.url_path('/load_balancers/{namespace}', common.env['namespace'], params={'region_name': common.env['region_name'], 'frontend': 'true'}))
+        response = json.loads(response)
         for i in range(len(response)):
             for j in range(len(response[i]['domain_info'])):
-                for k in range(10):
-                    if self.get_value(response[i]['domain_info'][j], 'type', index=k) == 'default-domain':
-                        domain = self.get_value(response[i]['domain_info'][j], 'domain', index=k)
-                        break
-                break
+
+                if response[i]['domain_info'][j]['type'] == 'default-domain':
+                    domain = response[i]['domain_info'][j]['domain']
+                    break
             break
-
-        http = self.env['load_balancers'][0]["listeners"][0]['protocol']
-        if self.env['load_balancers'][0]["listeners"][0]['listener_port'] == 0:
-
-            port = self.env['load_balancers'][0]["listeners"][0]['container_port']
-        else:
-            port = self.env['load_balancers'][0]["listeners"][0]['listener_port']
         service_url = http + '://' + service_name + '.' + self.space + '.' + domain + ':' + port.__str__()
         print service_url
         return service_url
 
-    def get_event_params(self, size='20', **kwargs):
-        params = {'start_time': '{}'.format(Common.start_time), 'end_time': '{}'.format(Common.end_time), 'size': size}
+    @staticmethod
+    def get_event_params(size='20', **kwargs):
+        if kwargs:
+            pass
+        params = {'start_time': '{}'.format(common.start_time), 'end_time': '{}'.format(common.end_time), 'size': size}
         return params
 
-    def get_log_parames(self, **kwargs):
-        time.sleep(5)
+    @staticmethod
+    def get_log_parames(**kwargs):
+        if kwargs:
+            pass
         end_time = time.time()
         start_time = end_time - 604800
         params = {'start_time': '{}'.format(start_time), 'end_time': '{}'.format(end_time)}
         return params
 
-    def get_metric_params(self, agg, metric_name, where, **kwargs):
+    @staticmethod
+    def get_metric_params(agg, metric_name, where, **kwargs):
+        if kwargs:
+            pass
         params = {'q': '{}:{}{{service_id={}}}'.format(agg, metric_name, where)}
         return params
 
     def get_event(self, url_path, operation, resource_type):
         time.sleep(5)
-        response = self.get(url_path)
-        if isinstance(response, dict):
-            if self.get_value(response, 'operation', entry='results') == operation and self.get_value(response, 'resource_type', entry='results') == resource_type:
-                return True
-            elif self.get_value(response, 'total_items') > 1:
-                for index in range(self.get_value(response, 'total_items')):
-                    if self.get_value(response, 'operation', entry='results', index=index) == operation and self.get_value(response, 'resource_type', entry='results', index=index) == resource_type:
-                        return True
-
-    def get_log(self, url_path, message):
-        time.sleep(5)
-        response = self.get(url_path)
-        if isinstance(response, list):
-            for i in range(len(response)):
-                if self.get_value(response[i], message):
-                    return self.get_value(response[i], message)
+        response, code = self.get(url_path)
+        if self.get_value(response, 'operation', entry='results')[0] == operation and self.get_value(response, 'resource_type', entry='results')[0] == resource_type:
+            return "测试通过", True
+        elif self.get_value(response, 'total_items')[0] > 1:
+            for index in range(1, self.get_value(response, 'total_items')[0] + 1):
+                if self.get_value(response, 'operation', entry='results', index=index)[0] == operation and self.get_value(response, 'resource_type', entry='results', index=index)[0] == resource_type:
+                    return "测试通过", True
         else:
-            return "no logs for this service "
+            return response, False
+
+    def get_log(self, url_path):
+        time.sleep(5)
+        response, code = self.get(url_path)
+        response = json.loads(response)
+        if len(response) > 0 and code == 200:
+            return "测试通过", True
+        else:
+            return "no logs for this service", False
 
     def get_metric(self, url_path, dps):
         time.sleep(5)
-        response = self.get(url_path)
+        response, code = self.get(url_path)
+        response = json.loads(response)
         if isinstance(response, list):
             for i in range(len(response)):
-                if self.get_value(response[i], dps):
-                    data = self.get_value(response[i], dps)
+                data = response[i][dps]
+                if data:
                     for index in range(len(data.values())):
-                        if len(data.values()) > 20 and not data.values()[index]:
-                            print "metric check success"
-                            return True
+                        if len(data.values()) > 20 and data.values()[index]:
+                            return "测试通过", True
         else:
-            return "no metric for this service "
+            return "no metric for this service", False
+
+    def update_load_balance(self):
+        response, code = self.get(self.url_path('/load_balancers/{namespace}', common.env['namespace'], params={'region_name': common.env['region_name'], 'frontend': 'true'}))
+        load_balance_name, code = self.get_value(response, 'name')
+        load_balance_id, code = self.get_value(response, 'load_balancer_id')
+        load_balance_type, code = self.get_value(response, 'type')
+        self.set_value('module_load_balance.json', 'load_balancer_id', load_balance_id)
+        self.set_value('module_load_balance.json', 'name', load_balance_name)
+        self.set_value('module_load_balance.json', 'type', load_balance_type)
 
 
-file_path = os.path.dirname(__file__)
-env_dist = os.environ
-if 'env_key' in env_dist.keys():
-    env_value = os.getenv("env_key")
-else:
-    env_value = file_path + '/../config/env_new_int.yaml'
-
-rest = Alauda(env_value)
+rest = Rest()
