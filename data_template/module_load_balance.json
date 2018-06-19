@@ -3,15 +3,15 @@
     {
       "listeners": [
         {
-          "container_port": 80, 
+          "listener_port": 0, 
           "protocol": "http", 
-          "listener_port": 0
+          "container_port": 80
         }
       ], 
       "version": 2, 
-      "name": "haproxy-65-52-166-26", 
-      "load_balancer_id": "1a1774c4-5f63-4ca1-63b0-d2624c5fb556", 
-      "type": "haproxy"
+      "type": "nginx", 
+      "name": "nginx-52-80-56-101", 
+      "load_balancer_id": "09eff7cf-8d1a-4709-7ff1-787f8a2e14f9"
     }
   ]
 }

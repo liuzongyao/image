@@ -1,22 +1,18 @@
 {
-  "space_uuid": "2b68ab46-921b-4990-a68a-493d1c7a9077", 
   "target_num_instances": 1, 
   "region_name": "awsoldk8s", 
-  "service_name": "demo3", 
-  "pod_controller": "StatefulSet", 
+  "service_name": "demo11", 
+  "instance_size": "XXS", 
   "scaling_mode": "MANUAL", 
   "namespace": "testorg001", 
   "image_name": "awsoldk8s-testorg001.stagingindex.alauda.cn:5000/test/test01", 
-  "network_mode": "FLANNEL", 
-  "target_state": "STARTED", 
-  "instance_size": "XXS", 
-  "version": "v2", 
-  "node_selector": {
-    "ip": "172.31.19.230"
-  }, 
-  "space_name": "staging", 
-  "image_tag": "latest", 
   "ports": [
     80
-  ]
+  ], 
+  "network_mode": "FLANNEL", 
+  "target_state": "STARTED", 
+  "version": "v2", 
+  "space_name": "staging", 
+  "image_tag": "latest", 
+  "pod_controller": "Deployment"
 }

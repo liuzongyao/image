@@ -7,21 +7,27 @@ user, password and the command.
 """
 import pexpect
 import re
-from common import common
+import sys
+from common import Common
 
 
-class Exec_helper:
+class ExecContainer(Common):
 
     def __init__(self):
-        self._username = common.env['username']
-        self._password = common.env['password']
-        self._region = common.env['region_name']
-        self._namespace = common.env['namespace']
-        self._prompt = '#'
+        Common.__init__(self)
+        self.prompt = '#'
 
     def _connect_container(self, resource_id, index, version='v1'):
         if version == 'v1':
-            cmd = 'ssh -p 4022 -t ' + self._namespace + '/' + self._username + '@' + common.master + ' ' + self._namespace + '/' + resource_id + '.' + str(index) + ' ' + '/bin/sh'
+            if 'username' in self.env.keys() and 'password' in self.env.keys():
+                cmd = 'ssh -p 4022 -t ' + self.env['namespace'] + '/' + self.env['username'] + '@' + self.get_master() + ' ' + self.env['namespace'] + '/' + resource_id + '.' + str(index) + ' ' + '/bin/sh'
+                password = self.env['password']
+
+            elif 'namespace' in self.env.keys() and 'namespace_password' in self.env.keys():
+                cmd = 'ssh -p 4022 -t ' + self.env['namespace'] + '@' + self.get_master() + ' ' + self.env['namespace'] + '/' + resource_id + '.' + str(index) + ' ' + '/bin/sh'
+                password = self.env['namespace_password']
+            else:
+                sys.exit("sorry, goodbye! could not access the container, please check the username/passord or namespace/namespace_password right")
             print cmd
             child = pexpect.spawn(cmd)
             i = child.expect([pexpect.TIMEOUT, pexpect.EOF, 'yes/no', 'password:'])
@@ -43,8 +49,8 @@ class Exec_helper:
                 elif i == 1:
                     pass  # 其中 EOF 通常代表子程序的退出
                 else:
-                    child.sendline(self._password)
-                    i = child.expect([pexpect.TIMEOUT, pexpect.EOF, self._prompt])
+                    child.sendline(password)
+                    i = child.expect([pexpect.TIMEOUT, pexpect.EOF, self.prompt])
                     if i == 0:  # Timeout
                         print 'ERROR! timeout'
                         print 'SSH could not login. Here is what SSH said:'
@@ -56,8 +62,8 @@ class Exec_helper:
                     else:
                         return child
             else:
-                child.sendline(self._password)
-                i = child.expect([pexpect.TIMEOUT, pexpect.EOF, self._prompt])
+                child.sendline(password)
+                i = child.expect([pexpect.TIMEOUT, pexpect.EOF, self.prompt])
                 if i == 0:  # Timeout
                     print 'ERROR! timeout'
                     print 'SSH could not login. Here is what SSH said:'
@@ -88,7 +94,7 @@ class Exec_helper:
                 pass
             else:
                 child.sendline('sudo su')
-                child.expect(self._prompt)
+                child.expect(self.prompt)
         except pexpect.EOF, pexpect.TIMEOUT:
             print "timeout"
         return child
@@ -96,50 +102,50 @@ class Exec_helper:
     def write_to_host(self, host, username, password, file_name, text):
         child = self._connect_host(host, username, password)
         child.sendline('touch ' + file_name)
-        child.expect(self._prompt)
+        child.expect(self.prompt)
         child.sendline('echo ' + text + ' > ' + file_name)
-        child.expect(self._prompt)
+        child.expect(self.prompt)
 
     def read_from_host(self, host, username, password, file_name):
         child = self._connect_host(host, username, password)
         child.sendline('cat ' + file_name)
-        child.expect(self._prompt)
+        child.expect(self.prompt)
         return child.before
 
     def write_to_container(self, resource_id, file_name, text, index=0, version='v1'):
         child = self._connect_container(resource_id, index, version)
         child.sendline('echo ' + text + ' > ' + file_name)
-        child.expect(self._prompt)
+        child.expect(self.prompt)
 
     def read_from_container(self, resource_id, file_name, index=0, version='v1'):
         child = self._connect_container(resource_id, index, version)
         child.sendline('cat ' + file_name)
-        child.expect(self._prompt)
+        child.expect(self.prompt)
         return child.before
 
     def get_expect_string(self, resource_id, cmd, expect, index=0, version='v1'):
-        common.start_time = common.get_start_time()
+        Common.start_time = self.get_start_time()
         try:
             child = self._connect_container(resource_id, index, version)
             child.sendline(cmd)
-            child.expect(self._prompt)
+            child.expect(self.prompt)
             if expect in child.before:
                 return "测试通过",True
             else:
                 return child.before, False
         finally:
-            common.end_time = common.get_end_time()
+            Common.end_time = self.get_end_time()
 
     def get_content(self, resource_id, cmd, index=0, version='v1'):
         child = self._connect_container(resource_id, index, version)
         child.sendline(cmd)
-        child.expect([self._prompt])
+        child.expect([self.prompt])
         return re.split(r'\r\n', child.before, maxsplit=1)[1]
 
     def exist_dir(self, resource_id, dir_name, index=0, version='v1'):
         child = self._connect_container(resource_id, index, version)
         child.sendline('cd ' + dir_name)
-        i = child.expect([pexpect.TIMEOUT, pexpect.EOF, self._prompt, "cd: can't cd to"])
+        i = child.expect([pexpect.TIMEOUT, pexpect.EOF, self.prompt, "cd: can't cd to"])
         if i == 2:
             return "测试通过", True
         elif i == 3:
@@ -150,7 +156,7 @@ class Exec_helper:
     def exist_file(self, resource_id, file_name, index=0):
         child = self._connect_container(resource_id, index)
         child.sendline('cat ' + file_name)
-        i = child.expect([pexpect.TIMEOUT, pexpect.EOF, self._prompt, "No such file or directory"])
+        i = child.expect([pexpect.TIMEOUT, pexpect.EOF, self.prompt, "No such file or directory"])
         print i
         if i == 2:
             return "测试通过", True
@@ -160,4 +166,7 @@ class Exec_helper:
             return "Error", False
 
 
-exec_helper = Exec_helper()
+exec_container = ExecContainer()
+
+
+

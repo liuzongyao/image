@@ -1,0 +1,34 @@
+{
+  "auto_tag_type": "TIME", 
+  "image_repo": {
+    "project": {
+      "name": "testorg001"
+    }, 
+    "name": "hello-world", 
+    "registry": {
+      "name": "awsoldk8s"
+    }
+  }, 
+  "name": "gitdemo", 
+  "auto_build_enabled": false, 
+  "customize_tag": "latest", 
+  "namespace": "testorg001", 
+  "dockerfile_info": {
+    "uuid": "", 
+    "name": ""
+  }, 
+  "endpoint_id": "4837ac2e-794b-4afb-8655-2c6904c85e25", 
+  "build_image_enabled": true, 
+  "space_name": "staging", 
+  "image_cache_enabled": true, 
+  "code_repo": {
+    "dockerfile_location": "/", 
+    "code_repo_client": "SIMPLE_GIT", 
+    "code_repo_type": "BRANCH", 
+    "code_repo_type_value": "master", 
+    "code_repo_password": "123456", 
+    "code_repo_username": "123456", 
+    "build_context_path": "/", 
+    "code_repo_path": "123456"
+  }
+}

@@ -1,107 +1,58 @@
 # -*- coding:utf-8 -*-
-from common.rest import rest
-from common.result import result
-from common.exec_helper import exec_helper
-from common.common import common
 import pytest
-import json
-import sys
+from common.result import result
+from common.service import service
+from common.build import build
 
 
-# def teardown_function(function):
-#     print ("teardown_function--->")
-#     for i in range(len(rest.resource_url)):
-#         rest.delete(rest.resource_url[i])
 
+def setup_function():
+    result.test_flag = True
+
+
+def teardown_function():
+    result.results = {}
+
+
+def setup_module():
+    if 'image_name' in service.env.keys() and 'image_tag' in service.env.keys():
+        print "镜像信息，配置文件已提供，不需要手工构建镜像"
+    else:
+        print "镜像信息，配置文件没有提供，需要手工构建镜像"
+        build.update_build_parameter('build/svn.json')
+        build.create('build/svn.json', name='demo1')
+        build.start(build.config_id)
+        image, code = build.get_image()
+        print image
+        assert code
+        service.update_all_template(image)
 
 @pytest.mark.demo
-def test_6():
-    case_name = sys._getframe().f_code.co_name
-    rest.update_load_balance()
-    #校验服务创建
-    response, code = rest.post(rest.url_path('/services/{namespace}', common.env['namespace']), 'basic_service_deployment.json', 'module_load_balance.json', service_name="demo7")
-    if result.is_pass(code == 201):
-        result.update_check_point(case_name, True, '测试通过')
-    else:
-        try:
-            message = json.loads(response)
-            result.update_check_point(case_name, False, message)
-        except ValueError:
-            result.update_check_point(case_name, False, response)
-
-    service_uuid, code = rest.get_value(response, 'unique_name')
-    service_name, code = rest.get_value(response, 'service_name')
-
-    #校验创建服务事件
-    response, code = rest.get_event(rest.url_path('/events/{namespace}/{resource_type}/{resource_uuid}', (common.env['namespace'], 'service', service_uuid), params=rest.get_event_params()), 'create', 'service')
-    if result.is_pass(code):
-        result.update_check_point(case_name, True, '测试通过')
-    else:
-        try:
-            message = json.loads(response)
-            result.update_check_point(case_name, False, message)
-        except ValueError:
-            result.update_check_point(case_name, False, response)
-
-    # 校验服务处于运行中
-    response, code = rest.get_expected_value(rest.url_path('/services/{namespace}/{service_uuid}', (common.env['namespace'], service_uuid)), 'current_status', 'Running')
-
-    if result.is_pass(code):
-        result.update_check_point(case_name, True, '测试通过')
-    else:
-        try:
-            message = json.loads(response)
-            result.update_check_point(case_name, False, message)
-        except ValueError:
-            result.update_check_point(case_name, False, response)
-
+def test_build2():
+    # 校验服务创建
+    response, code = service.create('basic_service_deployment.json', 'module_load_balance.json', service_name="demo28")
+    assert code == 201, response
+    # 校验服务创建事件
+    response, code = service.get_event('create', 'service')
+    result.assert_check_point(code, {"获取服务事件": response})
+    # 校验服务运行中
+    response, code = service.get_expected_value('current_status', 'Running')
+    assert code, response
     #校验服务可以访问
-    response, code = rest.get(rest.get_service_url(service_name))
-    position = response.find("Welcome to nginx")
-    print position
-    if result.is_pass(position != -1):
-        result.update_check_point(case_name, True, '测试通过')
-    else:
-        result.update_check_point(case_name, False, response)
+    response, code = service.is_available(service.service_name)
+    result.assert_check_point(code == 200, {"校验服务访问": response})
+    # 校验服务容器exec
+    response, code = service.get_expect_string('export', "export")
+    result.assert_check_point(code, {"登陆容器": response})
+    # 校验服务容器登陆事件
+    response, code = service.get_event('login', 'service')
+    assert code, response
 
-    #校验登陆容器
-    response, code = exec_helper.get_expect_string(service_uuid, 'export', "export")
 
-    if result.is_pass(code):
-        result.update_check_point(case_name, True, '测试通过')
-    else:
-        try:
-            message = json.loads(response)
-            result.update_check_point(case_name, False, message)
-        except ValueError:
-            result.update_check_point(case_name, False, response)
-    #校验登陆容器事件
-    response, code = rest.get_event(rest.url_path('/events/{namespace}/{resource_type}/{resource_uuid}', (common.env['namespace'], 'service', service_uuid), params=rest.get_event_params()), 'login', 'service')
 
-    if result.is_pass(code):
-        result.update_check_point(case_name, True, '测试通过')
-    else:
-        try:
-            message = json.loads(response)
-            result.update_check_point(case_name, False, message)
-        except ValueError:
-            result.update_check_point(case_name, False, response)
 
-    #校验服务log
-    response, code = rest.get_log(rest.url_path('/services/{namespace}/{service_uuid}/logs', (common.env['namespace'], service_uuid), params=rest.get_log_parames()))
-    if result.is_pass(code):
-        result.update_check_point(case_name, True, '测试通过')
-    else:
-        result.update_check_point(case_name, False, response)
 
-    #校验metric
 
-    params = rest.get_metric_params('avg', 'service.mem.utilization', service_uuid)
-    response, code = rest.get_metric(rest.url_path('/monitor/{namespace}/metrics/query', common.env['namespace'], params=params, version='v2'), 'dps')
-    if result.is_pass(code):
-        result.update_check_point(case_name, True, '测试通过')
-    else:
-        result.update_check_point(case_name, False, response)
 
 
 

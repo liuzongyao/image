@@ -1,19 +1,24 @@
 json_dir : ./data_template/
-api : http://jakiro-api-staging.nolimited.haproxy-54-223-242-27-alaudacn.myalauda.cn/
+api : https://api-staging.alauda.cn/
 namespace : testorg001
-region_name : laok8sazure
+namespace_password: alauda_staging
+region_name : awsoldk8s
+private_registry: awsoldk8s
 space_name : staging
-image_name : index-staging.alauda.cn/library/nginx
-image_tag : latest
-username : liuzongyao
-password : liuzongyao
+#image_name : index-staging.alauda.cn/library/nginx
+#image_tag : latest
+#username : liuzongyao
+#password : liuzongyao
+code_repo_path: http://svn-password.k8s-st.haproxy-54-223-242-27-alaudacn.myalauda.cn/alauda_test/
+code_repo_username: User_Name-01
+code_repo_password: alauda_Test-!@#
 smtp:
- host: smtp.126.com
+ host: smtp.163.com
  port: 25
- username: 13851618795
- password : 1qaz2wsx
- sender: 13851618795@126.com
- debug_level: 0
+ username: 15830736131@163.com
+ password : Mathilde1861
+ sender: 15830736131@163.com
+ debug_level: 1
  receiver:
     - zyliu@alauda.io
 

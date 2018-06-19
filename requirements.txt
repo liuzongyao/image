@@ -3,8 +3,6 @@ psycopg2==2.7.4
 boto3==1.7.7
 PyYAML==3.12
 pexpect
-python-dateutil
-dpath
 pytest
 pytest-html
 pytest-rerunfailures

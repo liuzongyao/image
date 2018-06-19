@@ -2,26 +2,31 @@
   "auto_tag_type": "TIME", 
   "image_repo": {
     "project": {
-      "name": "testorg001"
+      "name": "test"
     }, 
-    "name": "hello-world", 
+    "name": "test01", 
     "registry": {
-      "name": "laok8sazure"
+      "name": "awsoldk8s"
     }
   }, 
-  "name": "demo", 
+  "name": "demo1254", 
   "auto_build_enabled": false, 
   "customize_tag": "latest", 
   "namespace": "testorg001", 
-  "endpoint_id": "5a84e7bc-386e-4667-914b-ed1fc7650fce", 
+  "dockerfile_info": {
+    "uuid": "", 
+    "name": ""
+  }, 
+  "endpoint_id": "4837ac2e-794b-4afb-8655-2c6904c85e25", 
+  "build_image_enabled": true, 
   "space_name": "staging", 
-  "image_cache_enabled": false, 
+  "image_cache_enabled": true, 
   "code_repo": {
     "dockerfile_location": "/", 
-    "code_repo_password": "alauda_Test-!@#", 
+    "code_repo_client": "SIMPLE_SVN", 
     "code_repo_type": "DIR", 
     "code_repo_type_value": "/", 
-    "code_repo_client": "SIMPLE_SVN", 
+    "code_repo_password": "alauda_Test-!@#", 
     "code_repo_username": "User_Name-01", 
     "build_context_path": "/", 
     "code_repo_path": "http://svn-password.k8s-st.haproxy-54-223-242-27-alaudacn.myalauda.cn/alauda_test/"

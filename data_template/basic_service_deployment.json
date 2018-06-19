@@ -1,14 +1,17 @@
 {
   "image_tag": "latest", 
-  "region_name": "laok8sazure", 
+  "region_name": "awsoldk8s", 
   "service_name": "demo11", 
   "instance_size": "XXS", 
   "scaling_mode": "MANUAL", 
   "namespace": "testorg001", 
-  "image_name": "index-staging.alauda.cn/library/nginx", 
+  "image_name": "awsoldk8s-testorg001.stagingindex.alauda.cn:5000/test/test01", 
   "network_mode": "FLANNEL", 
   "target_state": "STARTED", 
   "version": "v2", 
+  "node_selector": {
+    "ip": "172.31.19.230"
+  }, 
   "pod_controller": "Deployment", 
   "space_name": "staging", 
   "target_num_instances": 1, 
