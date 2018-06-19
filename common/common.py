@@ -226,7 +226,6 @@ class Common:
 
     def set_value(self, data_template, key, value, index=1):
         """
-        第二版本set value方法
         :param data_template: 原数据
         :param key: 需要更改的数据key
         :param value: 需要更改的数据value
