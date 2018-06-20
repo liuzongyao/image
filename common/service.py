@@ -10,14 +10,21 @@ class Service(Common):
         Common.__init__(self)
         self.service_uuid = ''
         self.service_name = ''
+        self.apps_uuid = ''
+        self.apps_name = ''
         self.metric_params = ''
         self.service_url = ''
-        self.post_url = self.url_path('/services/{namespace}', self.env['namespace'])
+        self.post_url_v1 = self.url_path('/services/{namespace}', self.env['namespace'])
+        self.post_url_v2 = self.url_path('/apps', version='v2')
 
 
     @property
-    def get_event_url(self):
+    def service_event_url(self):
         return self.url_path('/events/{namespace}/{resource_type}/{resource_uuid}', (self.env['namespace'], 'service', self.service_uuid), params=self.get_event_params())
+
+    @property
+    def apps_event_url(self):
+        return self.url_path('/events/{namespace}/{resource_type}/{resource_uuid}', (self.env['namespace'], 'application', self.apps_uuid), params=self.get_event_params())
 
     @property
     def get_log_url(self):
@@ -28,28 +35,44 @@ class Service(Common):
         return self.url_path('/monitor/{namespace}/metrics/query', self.env['namespace'], params=self.metric_params, version='v2')
 
     @property
-    def get_url(self):
+    def service_get_url(self):
         return self.url_path('/services/{namespace}/{service_uuid}', (self.env['namespace'], self.service_uuid))
 
-    def create(self, json_file, append_template=None, **kwargs):
-        response, code, url = self.post(self.post_url, json_file, append_template, **kwargs)
-        if code == 201:
-            self.service_uuid = self.get_value(response, 'unique_name')[0]
-            self.service_name = self.get_value(response, 'service_name')[0]
-            return '创建服务成功。 请求url {}'.format(url), code
-        else:
-            return '创建服务失败。 请求url {}, 返回code {}, 错误原因 {}'.format(url, code, response), code
+    @property
+    def apps_get_url(self):
+        return self.url_path('/apps/{uuid}', self.apps_uuid, version='v2')
 
-    def get_service_url(self, service_name, port=80, http='http'):
+    def create(self, json_file, append_template=None, version='v1', **kwargs):
+        if version == 'v1':
+            response, code, url = self.post(self.post_url_v1, json_file, append_template, **kwargs)
+            if code == 201:
+                self.service_uuid = self.get_value(response, 'unique_name')[0]
+                self.service_name = self.get_value(response, 'service_name')[0]
+                return '创建服务成功。 请求url {}'.format(url), code
+            else:
+                return '创建服务失败。 请求url {}, 返回code {}, 错误原因 {}'.format(url, code, response), code
+        else:
+            response, code, url = self.post(self.post_url_v2, json_file, append_template, **kwargs)
+            if code == 201:
+                self.apps_uuid = self.get_value(response, 'app.alauda.io/uuid')[0]
+                self.apps_name = self.get_value(response, 'app.alauda.io/name')[0]
+                return '创建服务成功。 请求url {}'.format(url), code
+            else:
+                return '创建服务失败。 请求url {}, 返回code {}, 错误原因 {}'.format(url, code, response), code
+
+    def get_resource_url(self, resource_name, port=80, http='http'):
         response, code, url = self.get(self.url_path('/load_balancers/{namespace}', self.env['namespace'], params={'region_name': self.env['region_name'], 'frontend': 'true'}))
-        domain, code = self.get_value(response, 'domain', service_name)
+        domain, code = self.get_value(response, 'domain', resource_name)
         service_url = http + '://' + domain + ':' + port.__str__()
         print '服务地址{}'.format(service_url)
         self.service_url = service_url
         return service_url
 
-    def get_expected_value(self, key, expected_value, substring=''):
-        return Common.get_expected_value(self, self.get_url, key, expected_value, substring)
+    def get_expected_value(self, key, expected_value, substring='', resource_type='service'):
+        if resource_type == 'service':
+            return Common.get_expected_value(self, self.service_get_url, key, expected_value, substring)
+        elif resource_type == 'apps':
+            return Common.get_expected_value(self, self.apps_get_url, key, expected_value, substring)
 
     def get_expect_string(self, cmd, expect, index=0, version='v1'):
         return exec_container.get_expect_string(self.service_uuid, cmd, expect, index, version)
@@ -71,7 +94,10 @@ class Service(Common):
 
     def get_event(self, operation, resource_type):
         time.sleep(5)
-        response, code, url = self.get(self.get_event_url)
+        if resource_type == 'service':
+            response, code, url = self.get(self.service_event_url)
+        elif resource_type == 'application':
+            response, code, url = self.get(self.apps_event_url)
         if self.get_value(response, 'operation', operation)[0] == operation and self.get_value(response, 'resource_type', resource_type)[0] == resource_type:
             return "测试通过", True
         else:
@@ -117,8 +143,8 @@ class Service(Common):
         else:
             return "no metric for this service", False
 
-    def is_available(self, service_name):
-        response, code, url = self.get(self.get_service_url(service_name))
+    def is_available(self, resource_name):
+        response, code, url = self.get(self.get_resource_url(resource_name))
         if code == 200:
             return '服务可以访问， 请求url {}'.format(url), code
         else:

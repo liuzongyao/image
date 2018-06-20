@@ -5,7 +5,6 @@ from common.service import service
 from common.build import build
 
 
-
 def setup_function():
     result.test_flag = True
 
@@ -28,52 +27,16 @@ def setup_module():
         service.update_all_template(image)
 
 
-def test_build2():
+def test_service():
     # 校验服务创建
-    response, code = service.create('basic_service_deployment.json', 'module_load_balance.json', service_name="demo28")
+    response, code = service.create('new_k8s/deploy.json', version='v2')
     assert code == 201, response
     # 校验服务创建事件
-    response, code = service.get_event('create', 'service')
+    response, code = service.get_event('create', 'application')
     result.assert_check_point(code, {"获取服务事件": response})
     # 校验服务运行中
-    response, code = service.get_expected_value('current_status', 'Running')
+    response, code = service.get_expected_value('status', 'Running', resource_type='apps')
     assert code, response
     #校验服务可以访问
     response, code = service.is_available(service.service_name)
     result.assert_check_point(code == 200, {"校验服务访问": response})
-    # 校验服务容器exec
-    response, code = service.get_expect_string('export', "export")
-    result.assert_check_point(code, {"登陆容器": response})
-    # 校验服务容器登陆事件
-    response, code = service.get_event('login', 'service')
-    assert code, response
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

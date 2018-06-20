@@ -1,3 +1,4 @@
+#for old k8s
 json_dir : ./data_template/
 api : https://api-staging.alauda.cn/
 namespace : testorg001

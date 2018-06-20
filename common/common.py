@@ -46,7 +46,7 @@ class Common:
         json_file = []
         for root, dirs, files in os.walk(self.json_dir):
             for fn1 in files:
-                if os.path.splitext(fn1)[1] == '.json':
+                if os.path.splitext(fn1)[1] == 'deploy.json':
                     json_file.append(os.path.join(root, fn1))
         for fn2 in json_file:
             f1 = open(fn2)
@@ -273,7 +273,11 @@ class Common:
         except ValueError as msg:
             return msg, False
         if not substring:
-            return response[key], True
+            if key in response.keys():
+                return response[key], True
+            else:
+                results = self.__get_value(response, key)
+                return results[0], True    # new k8s app uuid
         else:
             results = self.__get_value(response, key)
             if results:
@@ -302,7 +306,6 @@ class Common:
             for i in range(len(response)):
                 self.__get_value(response[i], key, result)
         return result
-
 
     def get_expected_value(self, url_path, key, expected_value, substring=''):
         i = 0
