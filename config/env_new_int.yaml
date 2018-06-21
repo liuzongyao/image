@@ -2,7 +2,7 @@
 json_dir : ./data_template/
 api : https://api-staging.alauda.cn/
 namespace : testorg001
-namespace_password: alauda_staging
+password: alauda_staging
 region_name : awsoldk8s
 private_registry: awsoldk8s
 space_name : staging

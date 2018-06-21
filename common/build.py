@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-from common import Common
+from .common import Common
 import json
 
 
@@ -25,7 +25,6 @@ class Build(Common):
         response, code, url = self.get(self.url_path('/regions/{namespace}/{region}', (self.env['namespace'], self.env['region_name'])))
         region_id, code = self.get_value(response, 'id')
         response, code, url = self.get(self.url_path('/private-build-endpoints/{namespace}', self.env['namespace']))
-        print type(json.loads(response))
         for i in range(len(json.loads(response))):
             if json.loads(response)[i]['region_id'] == region_id:
                 return json.loads(response)[i]['endpoint_id']
@@ -33,17 +32,20 @@ class Build(Common):
     @property
     def get_image_repo(self):
         if 'private_registry' in self.env.keys():
-            response, code, url = self.get(self.url_path('/registries/{namespace}/{regisitry_name}/projects', (self.env['namespace'], self.env['private_registry'])))
+            response, code, url = self.get(
+                self.url_path('/registries/{namespace}/{regisitry_name}/projects', (self.env['namespace'], self.env['private_registry'])))
             if code == 200:
                 if not response == '[]':
                     project_name = json.loads(response)[0]['project_name']
-                    response, code, url = self.get(self.url_path('/registries/{namespace}/{regisitry_name}/projects/{project_name}/repositories', (self.env['namespace'], self.env['private_registry'], project_name)))
+                    response, code, url = self.get(self.url_path('/registries/{namespace}/{regisitry_name}/projects/{project_name}/repositories',
+                                                                 (self.env['namespace'], self.env['private_registry'], project_name)))
                     if code == 200:
                         if not response == '[]':
                             name = json.loads(response)[0]['name']
                             return {'project_name': project_name, 'name': name}
                 else:
-                    response, code, url = self.get(self.url_path('/registries/{namespace}/{regisitry_name}/repositories', (self.env['namespace'], self.env['private_registry'])))
+                    response, code, url = self.get(
+                        self.url_path('/registries/{namespace}/{regisitry_name}/repositories', (self.env['namespace'], self.env['private_registry'])))
                     if code == 200:
                         if not response == '[]':
                             name = json.loads(response)[0]['name']
@@ -102,5 +104,3 @@ class Build(Common):
 
 
 build = Build()
-
-

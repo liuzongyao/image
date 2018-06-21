@@ -3,6 +3,9 @@ import pytest
 from common.result import result
 from common.service import service
 from common.build import build
+import logging
+
+logger = logging.getLogger()
 
 
 def setup_function():
@@ -15,14 +18,13 @@ def teardown_function():
 
 def setup_module():
     if 'image_name' in service.env.keys() and 'image_tag' in service.env.keys():
-        print "镜像信息，配置文件已提供，不需要手工构建镜像"
+        logger.debug("镜像信息，配置文件已提供，不需要手工构建镜像")
     else:
-        print "镜像信息，配置文件没有提供，需要手工构建镜像"
+        logger.debug("镜像信息，配置文件没有提供，需要手工构建镜像")
         build.update_build_parameter('build/svn.json')
         build.create('build/svn.json', name='demo1')
         build.start(build.config_id)
         image, code = build.get_image()
-        print image
         assert code
         service.update_all_template(image)
 

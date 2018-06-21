@@ -1,27 +1,15 @@
-FROM ubuntu:14.04
+FROM bitnami/python:3-prod
 
-RUN apt-get update \
-    && apt-get install -y \
-        python-dev \
-        libpq-dev \
-        git \
-        curl \
-        expect \
-    && curl https://bootstrap.pypa.io/get-pip.py | python
+RUN install_packages vim curl ssh
 
 COPY requirements.txt .
-RUN pip install -r /requirements.txt
+RUN pip install --upgrade pip && pip install -r /requirements.txt
 
-RUN mkdir /var/log/mathilde
-
-#COPY run-local.sh .
-
-#RUN chmod +x /run-local.sh
+COPY run-local.sh .
+RUN chmod +x /run-local.sh
 
 WORKDIR /app
-
 COPY . /app
 
 CMD ["python", "/app/main.py"]
-
 
