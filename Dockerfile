@@ -1,4 +1,4 @@
-FROM bitnami/python:3-prod
+FROM bitnami/python:3.6.5-prod
 
 RUN install_packages vim curl ssh
 
