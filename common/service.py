@@ -95,7 +95,7 @@ class Service(Common):
     def get_event_params(self, size='20', **kwargs):
         if kwargs:
             pass
-        params = {'start_time': '{}'.format(Common.start_time), 'end_time': '{}'.format(Common.end_time), 'size': size}
+        params = {'start_time': '{}'.format(Common.get_start_time()), 'end_time': '{}'.format(Common.get_end_time()), 'size': size}
         return params
 
     def get_event(self, operation, resource_type):
@@ -114,7 +114,7 @@ class Service(Common):
         if kwargs:
             pass
         end_time = time.time()
-        start_time = end_time - 604800
+        start_time = end_time - 1800
         params = {'start_time': '{}'.format(start_time), 'end_time': '{}'.format(end_time)}
         return params
 
@@ -143,8 +143,9 @@ class Service(Common):
             for i in range(len(response)):
                 data = response[i][dps]
                 if data:
-                    for index in range(len(data.values())):
-                        if len(data.values()) > 20 and data.values()[index]:
+                    metrics_values = list(data.values())
+                    for index in range(len(metrics_values)):
+                        if len(metrics_values) > 20 and metrics_values[index]:
                             return "测试通过", True
         else:
             return "no metric for this service", False

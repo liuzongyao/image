@@ -31,7 +31,7 @@ class Build(Common):
 
     @property
     def get_image_repo(self):
-        if 'private_registry' in self.env.keys():
+        if 'private_registry' in list(self.env.keys()):
             response, code, url = self.get(
                 self.url_path('/registries/{namespace}/{regisitry_name}/projects', (self.env['namespace'], self.env['private_registry'])))
             if code == 200:
@@ -57,7 +57,7 @@ class Build(Common):
         self.set_value(json_file, 'code_repo_password', self.env['code_repo_password'])
         self.set_value(json_file, 'endpoint_id', self.get_endpoint_id)
         image = self.get_image_repo
-        if 'project_name' in image.keys():
+        if 'project_name' in list(image.keys()):
             image_repo = {'project': {'name': image['project_name']}, 'name': image['name'], 'registry': {'name': self.env['private_registry']}}
         else:
             image_repo = {'name': image['name'], 'registry': {'name': self.env['private_registry']}}

@@ -17,7 +17,7 @@ def teardown_function():
 
 
 def setup_module():
-    if 'image_name' in service.env.keys() and 'image_tag' in service.env.keys():
+    if 'image_name' in list(service.env.keys()) and 'image_tag' in list(service.env.keys()):
         logger.debug("镜像信息，配置文件已提供，不需要手工构建镜像")
     else:
         logger.debug("镜像信息，配置文件没有提供，需要手工构建镜像")

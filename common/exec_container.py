@@ -21,13 +21,14 @@ class ExecContainer(Common):
 
     def _connect_container(self, resource_id, index, version='v1'):
         if version == 'v1':
-            if 'username' in self.env.keys():
+            if 'username' in list(self.env.keys()):
                 cmd = 'ssh -p 4022 -t ' + self.env['namespace'] + '/' + self.env['username'] + '@' + self.get_master() + ' ' + self.env[
                     'namespace'] + '/' + resource_id + '.' + str(index) + ' ' + '/bin/sh'
             else:
                 cmd = 'ssh -p 4022 -t ' + self.env['namespace'] + '@' + self.get_master() + ' ' + self.env['namespace'] + '/' + resource_id + '.' + str(
                     index) + ' ' + '/bin/sh'
             password = self.env['password']
+            logger.debug("exec cmd is {}".format(cmd))
             child = pexpect.spawn(cmd)
             i = child.expect([pexpect.TIMEOUT, pexpect.EOF, 'yes/no', 'password:'])
             # 如果登录超时，打印出错信息，并退出.

@@ -31,19 +31,19 @@ class Results(Common):
             pass
         else:
             if is_block:
-                message = {message.keys()[0] + '失败': message.values()[0]}
+                message = {list(message.keys())[0] + '失败': list(message.values())[0]}
                 self.results.update(message)
                 assert False, self.results
             else:
                 self.test_flag = False
-                message = {message.keys()[0] + '失败': message.values()[0]}
+                message = {list(message.keys())[0] + '失败': list(message.values())[0]}
                 self.results.update(message)
         assert self.test_flag, self.results
 
     def assert_check_point(self, is_pass, message):
         if not is_pass:
             self.test_flag = False
-            message = {message.keys()[0] + '失败': message.values()[0]}
+            message = {list(message.keys())[0] + '失败': list(message.values())[0]}
             self.results.update(message)
         assert self.test_flag, self.results
 
