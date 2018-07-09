@@ -8,34 +8,32 @@ user, password and the command.
 import pexpect
 import re
 import sys
-from common import Common
+from .common import Common
+import logging
+
+logger = logging.getLogger()
 
 
 class ExecContainer(Common):
-
     def __init__(self):
         Common.__init__(self)
         self.prompt = '#'
 
     def _connect_container(self, resource_id, index, version='v1'):
         if version == 'v1':
-            if 'username' in self.env.keys() and 'password' in self.env.keys():
-                cmd = 'ssh -p 4022 -t ' + self.env['namespace'] + '/' + self.env['username'] + '@' + self.get_master() + ' ' + self.env['namespace'] + '/' + resource_id + '.' + str(index) + ' ' + '/bin/sh'
-                password = self.env['password']
-
-            elif 'namespace' in self.env.keys() and 'namespace_password' in self.env.keys():
-                cmd = 'ssh -p 4022 -t ' + self.env['namespace'] + '@' + self.get_master() + ' ' + self.env['namespace'] + '/' + resource_id + '.' + str(index) + ' ' + '/bin/sh'
-                password = self.env['namespace_password']
+            if 'username' in list(self.env.keys()):
+                cmd = 'ssh -p 4022 -t ' + self.env['namespace'] + '/' + self.env['username'] + '@' + self.get_master() + ' ' + self.env[
+                    'namespace'] + '/' + resource_id + '.' + str(index) + ' ' + '/bin/sh'
             else:
-                sys.exit("sorry, goodbye! could not access the container, please check the username/passord or namespace/namespace_password right")
-            print cmd
+                cmd = 'ssh -p 4022 -t ' + self.env['namespace'] + '@' + self.get_master() + ' ' + self.env['namespace'] + '/' + resource_id + '.' + str(
+                    index) + ' ' + '/bin/sh'
+            password = self.env['password']
+            logger.debug("exec cmd is {}".format(cmd))
             child = pexpect.spawn(cmd)
             i = child.expect([pexpect.TIMEOUT, pexpect.EOF, 'yes/no', 'password:'])
             # 如果登录超时，打印出错信息，并退出.
             if i == 0:  # Timeout
-                print 'ERROR!'
-                print 'SSH could not login. Here is what SSH said:'
-                print child.before, child.after
+                logger.debug("SSH could not login. SSH Erorr is {},{}".format(child.before, child.after))
                 return None
             elif i == 1:
                 pass  # 其中 EOF 通常代表子程序的退出
@@ -43,8 +41,7 @@ class ExecContainer(Common):
                 child.sendline('yes')
                 i = child.expect([pexpect.TIMEOUT, pexpect.EOF, 'password:'])
                 if i == 0:  # Timeout
-                    print 'ERROR!'
-                    print 'SSH could not login. Here is what SSH said:'
+                    logger.debug("SSH could not login. SSH Erorr is {},{}".format(child.before, child.after))
                     return None
                 elif i == 1:
                     pass  # 其中 EOF 通常代表子程序的退出
@@ -52,12 +49,10 @@ class ExecContainer(Common):
                     child.sendline(password)
                     i = child.expect([pexpect.TIMEOUT, pexpect.EOF, self.prompt])
                     if i == 0:  # Timeout
-                        print 'ERROR! timeout'
-                        print 'SSH could not login. Here is what SSH said:'
+                        logger.debug("SSH could not login. SSH Erorr is {},{}".format(child.before, child.after))
                         return None
                     elif i == 1:
-                        print "ERROR! EOF"
-                        print child.before
+                        logger.debug("SSH could not login. SSH Erorr is {},{}".format(child.before, child.after))
                         return None
                     else:
                         return child
@@ -65,13 +60,10 @@ class ExecContainer(Common):
                 child.sendline(password)
                 i = child.expect([pexpect.TIMEOUT, pexpect.EOF, self.prompt])
                 if i == 0:  # Timeout
-                    print 'ERROR! timeout'
-                    print 'SSH could not login. Here is what SSH said:'
-                    print child.before
+                    logger.debug("SSH could not login. SSH Erorr is {},{}".format(child.before, child.after))
                     return None
                 elif i == 1:
-                    print "ERROR! EOF"
-                    print child.before
+                    logger.debug("SSH could not login. SSH Erorr is {},{}".format(child.before, child.after))
                     return None
                 else:
                     return child
@@ -81,7 +73,6 @@ class ExecContainer(Common):
 
     def _connect_host(self, host, username, password):
         cmd = 'ssh -i alaudastaging.pem ' + username + '@' + host
-        print cmd
         try:
             child = pexpect.spawn(cmd)
             res = child.expect(['Are you sure you want to continue connecting (yes/no)?', 'password:'])
@@ -95,8 +86,10 @@ class ExecContainer(Common):
             else:
                 child.sendline('sudo su')
                 child.expect(self.prompt)
-        except pexpect.EOF, pexpect.TIMEOUT:
-            print "timeout"
+        except pexpect.EOF as e:
+            logger.debug("exec connect EOFERROR:{}".format(e))
+        except pexpect.TIMEOUT as e:
+            logger.debug("exec connect timeout：{}".format(e))
         return child
 
     def write_to_host(self, host, username, password, file_name, text):
@@ -130,7 +123,7 @@ class ExecContainer(Common):
             child.sendline(cmd)
             child.expect(self.prompt)
             if expect in child.before:
-                return "测试通过",True
+                return "测试通过", True
             else:
                 return child.before, False
         finally:
@@ -149,7 +142,7 @@ class ExecContainer(Common):
         if i == 2:
             return "测试通过", True
         elif i == 3:
-            return '不存在这个目录{}'.format(dir_name),False
+            return '不存在这个目录{}'.format(dir_name), False
         else:
             return "Error", False
 
@@ -157,16 +150,12 @@ class ExecContainer(Common):
         child = self._connect_container(resource_id, index)
         child.sendline('cat ' + file_name)
         i = child.expect([pexpect.TIMEOUT, pexpect.EOF, self.prompt, "No such file or directory"])
-        print i
         if i == 2:
             return "测试通过", True
         elif i == 3:
-            return '不存在这个文件{}'.format(file_name),False
+            return '不存在这个文件{}'.format(file_name), False
         else:
             return "Error", False
 
 
 exec_container = ExecContainer()
-
-
-

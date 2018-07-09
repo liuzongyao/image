@@ -10,6 +10,16 @@ import time
 import os
 import shutil
 import re
+import logging
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format=('%(asctime)s [%(process)d] %(levelname)s %(pathname)s' +
+            ' %(funcName)s Line:%(lineno)d %(message)s'),
+)
+logging.getLogger("requests").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+logger = logging.getLogger()
 
 
 class Common:
@@ -19,7 +29,7 @@ class Common:
     def __init__(self):
         file_path = os.path.dirname(__file__)
         env_dist = os.environ
-        if 'env_key' in env_dist.keys():
+        if 'env_key' in list(env_dist.keys()):
             env_file = os.getenv("env_key")
         else:
             env_file = file_path + '/../config/env_new_int.yaml'
@@ -36,11 +46,11 @@ class Common:
 
     @classmethod
     def get_start_time(cls):
-        return time.time()
+        return cls.get_end_time() - 1800
 
     @classmethod
     def get_end_time(cls):
-        return time.time()
+        return int(time.time())
 
     def update_all_template(self, environment):
         json_file = []
@@ -51,8 +61,8 @@ class Common:
         for fn2 in json_file:
             f1 = open(fn2)
             json_data = json.load(f1)
-            for key, value in environment.items():
-                if key in json_data.keys():
+            for key, value in list(environment.items()):
+                if key in list(json_data.keys()):
                     json_data.update({key: value})
             f1.close()
             f2 = open(fn2, 'w')
@@ -61,12 +71,12 @@ class Common:
 
     def _get_token(self):
         url = self.api + 'v1' + '/generate-api-token'
-        if 'username' in self.env.keys() and 'password' in self.env.keys():
+        if 'username' in list(self.env.keys()):
             payload = {"organization": self.env['namespace'], "username": self.env['username'], "password": self.env['password']}
-        elif 'namespace' in self.env.keys() and 'namespace_password' in self.env.keys():
-            payload = {"username": self.env['namespace'], "password": self.env['namespace_password']}
+        elif 'namespace' in list(self.env.keys()):
+            payload = {"username": self.env['namespace'], "password": self.env['password']}
         else:
-            sys.exit("sorry, goodbye! could not get token, please check the username/passord or namespace/namespace_password right")
+            sys.exit("sorry, goodbye! could not get token, please check the username/passord right")
 
         data = json.dumps(payload)
         header = {'Content-Type': 'application/json'}
@@ -78,7 +88,7 @@ class Common:
             else:
                 sys.exit(r.text + r.url)
         except Exception as e:
-            print('post请求出错,原因:%s' % e)
+            logger.debug('post请求出错,原因:%s' % e)
 
     def get_master(self):
         response, code, url = self.get(self.url_path('/load_balancers/{namespace}', self.namespace, params={'region_name': self.region}))
@@ -86,20 +96,18 @@ class Common:
             response = json.loads(response)
             return response[0]['address']
         except ValueError as e:
-            print('post请求出错,原因:%s' % e)
+            logger.debug('post请求出错,原因:%s' % e)
 
     def url_path(self, url, args='', version='v1', params=None):
         url = re.sub(r'{.*?}', '{}', url).format(*args if isinstance(args, tuple) else (args,))
         if params:
-            keys = params.keys()
-            values = params.values()
+            keys = list(params.keys())
+            values = list(params.values())
             param = '?' + keys[0] + '=' + values[0]
             for i in range(1, len(keys)):
                 param = param + '&' + keys[i] + '=' + values[i]
-            print self.api + version + url + param
             return self.api + version + url + param
         else:
-            print self.api + version + url
             return self.api + version + url
 
     def get(self, url_path):
@@ -113,7 +121,7 @@ class Common:
             r.encoding = 'UTF-8'
             return r.text, r.status_code, r.url
         except Exception as e:
-            print('get请求出错,出错原因:%s' % e)
+            logger.debug('get请求出错,出错原因:%s' % e)
 
     def post(self, url_path, data_template, append_template=None, **kwargs):
         """
@@ -133,13 +141,13 @@ class Common:
                 r.encoding = 'UTF-8'
                 return r.text, r.status_code, r.url
             except Exception as e:
-                print('post请求出错,原因:%s' % e)
+                logger.debug('post请求出错,原因:%s' % e)
             finally:
                 Common.end_time = self.get_end_time()
         else:
             temp_template = self.generate_data_template(data_template, append_template, **kwargs)
             response = json.load(open(temp_template))
-            if "files" in response.keys():
+            if "files" in list(response.keys()):
                 files = {'file': open(response["files"], 'rb')}
                 response.pop("files")
                 data = json.dumps(response)
@@ -150,7 +158,7 @@ class Common:
                     r.encoding = 'UTF-8'
                     return r.text, r.status_code, r.url
                 except Exception as e:
-                    print('post请求出错,原因:%s' % e)
+                    logger.debug('post请求出错,原因:%s' % e)
                 finally:
                     Common.end_time = self.get_end_time()
             else:
@@ -158,11 +166,13 @@ class Common:
                 try:
                     Common.start_time = self.get_start_time()
                     self.header.update({'Content-Type': 'application/json'})
+                    logger.debug("POST url is {}, data is {}, header is {}".format(url_path, data, self.header))
+                    print("POST url is {}, data is {}, header is {}".format(url_path, data, self.header))
                     r = requests.post(url_path, data=data, headers=self.header)
                     r.encoding = 'UTF-8'
                     return r.text, r.status_code, r.url
                 except Exception as e:
-                    print('post请求出错,原因:%s' % e)
+                    logger.debug('post请求出错,原因:%s' % e)
                 finally:
                     Common.end_time = self.get_end_time()
 
@@ -178,7 +188,7 @@ class Common:
             return r.text, r.status_code, r.url
 
         except Exception as e:
-            print('delete,出错原因:%s' % e)
+            logger.debug('delete,出错原因:%s' % e)
 
     def generate_data_template(self, data_template, append_template=[], **kwargs):
         """
@@ -250,14 +260,14 @@ class Common:
         """
         global is_update
         is_update = False
-        for k, v in response.items():
+        for k, v in list(response.items()):
             if k == key:
                 if current['index'] == index:
                     response.update({key: value})
-                    current['index'] = current['index'] + 1
+                    current['index'] += 1
                     return response
                 else:
-                    current['index'] = current['index'] + 1
+                    current['index'] += 1
             else:
                 if type(v) == dict:
                     self.__set_value(v, key, value, index, current)
@@ -273,11 +283,11 @@ class Common:
         except ValueError as msg:
             return msg, False
         if not substring:
-            if key in response.keys():
+            if key in list(response.keys()):
                 return response[key], True
             else:
                 results = self.__get_value(response, key)
-                return results[0], True    # new k8s app uuid
+                return results[0], True  # new k8s app uuid
         else:
             results = self.__get_value(response, key)
             if results:
@@ -291,7 +301,7 @@ class Common:
         if result is None:
             result = []
         if isinstance(response, dict):
-            for k, v in response.items():
+            for k, v in list(response.items()):
                 if k == key:
                     result.append(v)
                 else:
@@ -318,4 +328,3 @@ class Common:
                 time.sleep(10)
                 i = i + 1
         return "get value {}, but the expected value {}".format(founder, expected_value), False
-

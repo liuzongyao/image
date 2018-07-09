@@ -5,13 +5,15 @@
 from email.mime.text import MIMEText
 from email.header import Header
 import smtplib
-from common import Common
+from .common import Common
 import os
 import re
+import logging
+
+logger = logging.getLogger()
 
 
 class Results(Common):
-
     def __init__(self):
         Common.__init__(self)
         self.sender = self.env['smtp']['sender']
@@ -29,19 +31,19 @@ class Results(Common):
             pass
         else:
             if is_block:
-                message = {message.keys()[0] + '失败': message.values()[0]}
+                message = {list(message.keys())[0] + '失败': list(message.values())[0]}
                 self.results.update(message)
                 assert False, self.results
             else:
                 self.test_flag = False
-                message = {message.keys()[0] + '失败': message.values()[0]}
+                message = {list(message.keys())[0] + '失败': list(message.values())[0]}
                 self.results.update(message)
         assert self.test_flag, self.results
 
     def assert_check_point(self, is_pass, message):
         if not is_pass:
             self.test_flag = False
-            message = {message.keys()[0] + '失败': message.values()[0]}
+            message = {list(message.keys())[0] + '失败': list(message.values())[0]}
             self.results.update(message)
         assert self.test_flag, self.results
 
@@ -56,18 +58,12 @@ class Results(Common):
         case_duration = re.findall(r'<td class="col-duration">(.*)?</td>', html)
         case_details = re.findall(r'<div class=".*?log">(.*)?</div>', html)
         for i in range(len(case_details)):
-            print case_details[i]
             if case_details[i] == 'No log output captured.':
                 pass
             else:
                 error_message = re.search(r'<span class="error">(.*)?</span>', case_details[i], re.M | re.I).group(1)
                 case_details[i] = error_message
-        print total
-        print case_name
-        print case_flag
-        print case_duration
-        print case_details
-        return total, case_name, case_flag,case_duration, case_details
+        return total, case_name, case_flag, case_duration, case_details
 
     def update_results(self):
         total_time, case_name, case_flag, case_duration, case_detail = self.get_each_case_duration()
@@ -80,7 +76,7 @@ class Results(Common):
                 ignore = ignore + 1
             else:
                 if case_flag[i] == 'Passed':
-                    succeed = succeed + 1
+                    succeed += 1
                 else:
                     fail = fail + 1
         summary = "Run {} cases, Pass {}, Fail {}, Ignore {}, {} ".format(total, succeed, fail, ignore, total_time)
@@ -129,9 +125,9 @@ class Results(Common):
             s.sendmail(self.sender, self.receiver, msg.as_string())
             s.close()
             return True
-        except Exception, e:
-            print str(e)
-            print("发送邮件失败，错误原因：{}".format(e))
+        except Exception as e:
+            logger.debug(str(e))
+            logger.debug("发送邮件失败，错误原因：{}".format(e))
 
 
 result = Results()

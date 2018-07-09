@@ -1,8 +1,11 @@
 # -*- coding:utf-8 -*-
-from common import Common
+from .common import Common
 import json
 import time
-from exec_container import exec_container
+from .exec_container import exec_container
+import logging
+
+logger = logging.getLogger()
 
 
 class Service(Common):
@@ -17,14 +20,15 @@ class Service(Common):
         self.post_url_v1 = self.url_path('/services/{namespace}', self.env['namespace'])
         self.post_url_v2 = self.url_path('/apps', version='v2')
 
-
     @property
     def service_event_url(self):
-        return self.url_path('/events/{namespace}/{resource_type}/{resource_uuid}', (self.env['namespace'], 'service', self.service_uuid), params=self.get_event_params())
+        return self.url_path('/events/{namespace}/{resource_type}/{resource_uuid}', (self.env['namespace'], 'service', self.service_uuid),
+                             params=self.get_event_params())
 
     @property
     def apps_event_url(self):
-        return self.url_path('/events/{namespace}/{resource_type}/{resource_uuid}', (self.env['namespace'], 'application', self.apps_uuid), params=self.get_event_params())
+        return self.url_path('/events/{namespace}/{resource_type}/{resource_uuid}', (self.env['namespace'], 'application', self.apps_uuid),
+                             params=self.get_event_params())
 
     @property
     def get_log_url(self):
@@ -61,10 +65,11 @@ class Service(Common):
                 return '创建服务失败。 请求url {}, 返回code {}, 错误原因 {}'.format(url, code, response), code
 
     def get_resource_url(self, resource_name, port=80, http='http'):
-        response, code, url = self.get(self.url_path('/load_balancers/{namespace}', self.env['namespace'], params={'region_name': self.env['region_name'], 'frontend': 'true'}))
+        response, code, url = self.get(
+            self.url_path('/load_balancers/{namespace}', self.env['namespace'], params={'region_name': self.env['region_name'], 'frontend': 'true'}))
         domain, code = self.get_value(response, 'domain', resource_name)
         service_url = http + '://' + domain + ':' + port.__str__()
-        print '服务地址{}'.format(service_url)
+        logger.debug('服务地址{}'.format(service_url))
         self.service_url = service_url
         return service_url
 
@@ -78,7 +83,8 @@ class Service(Common):
         return exec_container.get_expect_string(self.service_uuid, cmd, expect, index, version)
 
     def update_load_balance(self):
-        response, code, url = self.get(self.url_path('/load_balancers/{namespace}', self.env['namespace'], params={'region_name': self.env['region_name'], 'frontend': 'true'}))
+        response, code, url = self.get(
+            self.url_path('/load_balancers/{namespace}', self.env['namespace'], params={'region_name': self.env['region_name'], 'frontend': 'true'}))
         load_balance_name, code = self.get_value(response, 'name')
         load_balance_id, code = self.get_value(response, 'load_balancer_id')
         load_balance_type, code = self.get_value(response, 'type')
@@ -89,7 +95,7 @@ class Service(Common):
     def get_event_params(self, size='20', **kwargs):
         if kwargs:
             pass
-        params = {'start_time': '{}'.format(Common.start_time), 'end_time': '{}'.format(Common.end_time), 'size': size}
+        params = {'start_time': '{}'.format(Common.get_start_time()), 'end_time': '{}'.format(Common.get_end_time()), 'size': size}
         return params
 
     def get_event(self, operation, resource_type):
@@ -108,7 +114,7 @@ class Service(Common):
         if kwargs:
             pass
         end_time = time.time()
-        start_time = end_time - 604800
+        start_time = end_time - 1800
         params = {'start_time': '{}'.format(start_time), 'end_time': '{}'.format(end_time)}
         return params
 
@@ -137,8 +143,9 @@ class Service(Common):
             for i in range(len(response)):
                 data = response[i][dps]
                 if data:
-                    for index in range(len(data.values())):
-                        if len(data.values()) > 20 and data.values()[index]:
+                    metrics_values = list(data.values())
+                    for index in range(len(metrics_values)):
+                        if len(metrics_values) > 20 and metrics_values[index]:
                             return "测试通过", True
         else:
             return "no metric for this service", False
@@ -152,4 +159,3 @@ class Service(Common):
 
 
 service = Service()
-
