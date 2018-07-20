@@ -24,5 +24,7 @@ SMTP = {
     'smtp_ssl': os.getenv('SMTP_SSL', True)
 }
 
-LOG_LEVEL = "DEBUG"
+LOG_LEVEL = "INFO"
 LOG_PATH = "/var/log/mathilde/"
+REPO_NAME="hello-world"
+SPACE_NAME="staging"

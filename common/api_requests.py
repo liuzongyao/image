@@ -21,8 +21,7 @@ class AlaudaRequest(object):
         else:
             self.auth = (self.namespace, self.password)
 
-    def send(self, path, auth=None, method='GET', data={}, headers={},
-             params={}, version='v1'):
+    def send(self, method, path, auth=None, data={}, headers={}, params={}, version='v1'):
         url = self._get_url(path, version)
 
         if headers:
@@ -47,15 +46,11 @@ class AlaudaRequest(object):
         if files:
             args['files'] = files
         logger.info('Requesting url={}, method={}, args={}'.format(url, method, args))
-        if method == 'POST':
-            response = requests.post(url, **args)
-        elif method == 'PUT':
-            response = requests.put(url, **args)
-        elif method == 'DELETE':
-            response = requests.delete(url, **args)
+        response = requests.request(method, url, **args)
+        if response.status_code < 200 or response.status_code > 300:
+            logger.info("response code={}, text={}".format(response.status_code, response.json()))
         else:
-            response = requests.get(url, **args)
-        logger.info("response code={}, text={}".format(response.status_code, response.text))
+            logger.info("response code={}".format(response.status_code))
 
         return response
 

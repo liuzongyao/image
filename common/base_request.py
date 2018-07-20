@@ -25,15 +25,18 @@ class Common(AlaudaRequest):
             "$SVN_REPO_PASSWORD": settings.SVN_REPO_PASSWORD,
             "$SVN_REPO_USERNAME": settings.SVN_REPO_USERNAME,
             "$SVN_REPO": settings.SVN_REPO,
-            "$REGISTRY": self.registry_name
+            "$REGISTRY": self.registry_name,
+            "$REPO_NAME": settings.REPO_NAME,
+            "$SPACE_NAME": settings.SPACE_NAME
         }
         self.generate_all_data("./test_data/", self.common_data)
+        self.final_status = ["S", "F", "Running", "Error"]
 
     def get_region_data(self):
         """
         :return: 给self.region_data赋值集群信息  给self.region_id赋值集群ID
         """
-        response = self.send("regions/{}/{}/".format(self.namespace, self.region_name), method="GET")
+        response = self.send(method="GET", path="regions/{}/{}/".format(self.namespace, self.region_name))
         assert response.status_code == 200, response.json()
         self.region_data = response.json()
         flag, self.region_id = self.get_value(self.region_data, ["id"])
@@ -43,7 +46,7 @@ class Common(AlaudaRequest):
         """
         :return: 给self.build_endpoint赋值构建的集群ID
         """
-        response = self.send("private-build-endpoints/{}".format(self.namespace), method="GET")
+        response = self.send(method="GET", path="private-build-endpoints/{}".format(self.namespace))
         assert response.status_code == 200, response.text
         for content in response.json():
             if content['region_id'] == self.region_id:
@@ -149,15 +152,23 @@ class Common(AlaudaRequest):
         return {"start_time": current_time - 1800, "end_time": current_time}
 
     def get_status(self, url, key, expect_value):
+        """
+        :param url: 获取服务或者构建详情的url
+        :param key: 获取状态的key 需要是个数组，传入层级的key
+        :param expect_value:最终判断状态
+        :return: true or false
+        """
         cnt = 0
         flag = False
         while cnt < 60 and not flag:
-            response = self.send(url, method="GET")
+            response = self.send(method="GET", path=url)
             assert response.status_code == 200, "get status failed"
             code, value = self.get_value(response.json(), [key])
             assert code, value
             if value == expect_value:
                 flag = True
+                break
+            if value in self.final_status:
                 break
             sleep(5)
         return flag
@@ -167,10 +178,24 @@ class Common(AlaudaRequest):
         cnt = 0
         flag = False
         while cnt < 30 and not flag:
-            response = self.send(url, method="GET", params=params)
+            response = self.send(method="GET", path=url, params=params)
             assert response.status_code == 200, "get log failed"
-            if expect_value in response.content:
+            if expect_value in response.text:
                 flag = True
                 break
             sleep(5)
         return flag
+
+    def get_uuid_accord_name(self, contents, name_key, name_value, uuid_key):
+        """
+        方法丑陋 欢迎指正
+        :param contents: 列表数组
+        :param name_key: 资源名称的key
+        :param name_value: 资源名称的value
+        :param uuid_key: 资源uuid的key
+        :return: 资源的uuid
+        """
+        for content in contents:
+            if content[name_key] == name_value:
+                return content[uuid_key]
+        return ""
