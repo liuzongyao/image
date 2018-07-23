@@ -12,15 +12,15 @@ class AlaudaRequest(object):
             'Content-Type': 'application/json'
         }
         self.params = {"project_name": settings.PROJECT_NAME}
-        self.namespace = settings.NAMESPACE
-        self.username = settings.USERNAME
+        self.account = settings.ACCOUNT
+        self.sub_account = settings.SUB_ACCOUNT
         self.region_name = settings.REGION_NAME
         self.password = settings.PASSWORD
         self.registry_name = settings.REGISTRY_NAME
-        if self.username:
-            self.auth = ("{}/{}".format(self.namespace, self.username), self.password)
+        if self.sub_account:
+            self.auth = ("{}/{}".format(self.account, self.sub_account), self.password)
         else:
-            self.auth = (self.namespace, self.password)
+            self.auth = (self.account, self.password)
 
     def send(self, method, path, auth=None, data={}, headers={}, params={}, version='v1'):
         url = self._get_url(path, version)

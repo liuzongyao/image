@@ -6,12 +6,12 @@ class PrivateBuild(Common):
         super().__init__()
 
     def get_build_config_url(self, config_id=None):
-        return config_id and "private-build-configs/{}/{}".format(self.namespace, config_id) or \
-               "private-build-configs/{}/".format(self.namespace)
+        return config_id and "private-build-configs/{}/{}".format(self.account, config_id) or \
+               "private-build-configs/{}/".format(self.account)
 
     def get_build_history_url(self, history_id=None):
-        return history_id and "private-builds/{}/{}".format(self.namespace, history_id) or \
-               "private-builds/{}".format(self.namespace)
+        return history_id and "private-builds/{}/{}".format(self.account, history_id) or \
+               "private-builds/{}".format(self.account)
 
     def create_build(self, file, data):
         url = self.get_build_config_url()
@@ -30,7 +30,7 @@ class PrivateBuild(Common):
     def trigger_build(self, config_id):
         url = self.get_build_history_url()
         data = {"build_config_name": config_id}
-        params = {"namespace": self.namespace}
+        params = {"namespace": self.account}
         return self.send(method="POST", path=url, data=data, params=params)
 
     def get_build_status(self, history_id):

@@ -1,9 +1,8 @@
 import os
 
 API_URL = os.getenv("API_URL", "https://api-staging.alauda.cn")
-NAMESPACE = os.getenv("NAMESPACE", "testorg001")
-#USERNAME = os.getenv("USERNAME", "")
-USERNAME=""
+ACCOUNT = os.getenv("ACCOUNT", "testorg001")
+SUB_ACCOUNT = os.getenv("SUB_ACCOUNT", "")
 PASSWORD = os.getenv("PASSWORD", "alauda_staging")
 REGION_NAME = os.getenv("REGION_NAME", "aws_newk8s")
 REGISTRY_NAME = os.getenv("REGISTRY_NAME", "awsnewk8s")

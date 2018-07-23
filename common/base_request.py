@@ -4,6 +4,7 @@ from common.logging import Logging
 from common import settings
 import os
 from time import sleep, time
+from common.utils import retry
 
 logger = Logging.get_logger()
 
@@ -19,7 +20,7 @@ class Common(AlaudaRequest):
         self.get_region_data()
         self.get_build_endpontid()
         self.common_data = {
-            "$NAMESPACE": self.namespace,
+            "$NAMESPACE": self.account,
             "$REGION_ID": self.region_id,
             "$BUILD_ENDPOINT_ID": self.build_endpointid,
             "$SVN_REPO_PASSWORD": settings.SVN_REPO_PASSWORD,
@@ -32,21 +33,23 @@ class Common(AlaudaRequest):
         self.generate_all_data("./test_data/", self.common_data)
         self.final_status = ["S", "F", "Running", "Error"]
 
+    @retry()
     def get_region_data(self):
         """
         :return: 给self.region_data赋值集群信息  给self.region_id赋值集群ID
         """
-        response = self.send(method="GET", path="regions/{}/{}/".format(self.namespace, self.region_name))
+        response = self.send(method="GET", path="regions/{}/{}/".format(self.account, self.region_name))
         assert response.status_code == 200, response.json()
         self.region_data = response.json()
         flag, self.region_id = self.get_value(self.region_data, ["id"])
         assert flag, self.region_id
 
+    @retry()
     def get_build_endpontid(self):
         """
         :return: 给self.build_endpoint赋值构建的集群ID
         """
-        response = self.send(method="GET", path="private-build-endpoints/{}".format(self.namespace))
+        response = self.send(method="GET", path="private-build-endpoints/{}".format(self.account))
         assert response.status_code == 200, response.text
         for content in response.json():
             if content['region_id'] == self.region_id:
@@ -189,7 +192,7 @@ class Common(AlaudaRequest):
     def get_uuid_accord_name(self, contents, name, uuid_key):
         """
         方法丑陋 欢迎指正
-        :param contents: 列表数组
+        :param contents: 通过返回体获取到的列表数组 [{"key":""value"...},{"key":""value"...}...]
         :param name: 资源名称的一个字典:{"name": "resource_name"}
         :param uuid_key: 资源uuid的key
         :return: 资源的uuid
