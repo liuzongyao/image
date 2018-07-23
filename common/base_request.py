@@ -164,6 +164,7 @@ class Common(AlaudaRequest):
         cnt = 0
         flag = False
         while cnt < 60 and not flag:
+            cnt += 1
             response = self.send(method="GET", path=url)
             assert response.status_code == 200, "get status failed"
             code, value = self.get_value(response.json(), [key])
@@ -177,10 +178,11 @@ class Common(AlaudaRequest):
         return flag
 
     def get_logs(self, url, expect_value):
-        params = self.generate_time_params()
         cnt = 0
         flag = False
         while cnt < 30 and not flag:
+            cnt += 1
+            params = self.generate_time_params()
             response = self.send(method="GET", path=url, params=params)
             assert response.status_code == 200, "get log failed"
             if expect_value in response.text:
@@ -202,3 +204,16 @@ class Common(AlaudaRequest):
                 if name[key] == content[key]:
                     return content[uuid_key]
         return ""
+
+    def update_result(self, result, flag, case_name):
+        """
+        如果是非block的验证点，先将结果更新到result内，在最后判断case的执行结果
+        :param result: 最终用来判断case执行成功与失败的集合 :{"flag":True/False, case_name: "failed"}
+        :param flag: True/False
+        :param error_name: case的名称
+        :return: result
+        """
+        if not flag:
+            result['flag'] = False
+            result.update({case_name: "failed"})
+        return result
