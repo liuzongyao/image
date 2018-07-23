@@ -1,6 +1,0 @@
-{
-  "update_strategy": {
-    "max_unavailable": "1", 
-    "max_surge": "1"
-  }
-}

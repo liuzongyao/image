@@ -1,8 +1,0 @@
-{
-  "region_id": "073f6e29-ca7b-4054-b918-64aa3c9f3a77", 
-  "volume_type": "io1", 
-  "name": "vol-1", 
-  "driver_name": "ebs", 
-  "space_name": "staging", 
-  "size": 10
-}

@@ -25,5 +25,5 @@ SMTP = {
 
 LOG_LEVEL = "INFO"
 LOG_PATH = "/var/log/mathilde/"
-REPO_NAME="hello-world"
-SPACE_NAME="staging"
+REPO_NAME = "hello-world"
+SPACE_NAME = "staging"
