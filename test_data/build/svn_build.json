@@ -1,0 +1,29 @@
+{
+  "auto_tag_type": "TIME",
+  "image_repo": {
+    "project": {
+      "name": "$NAMESPACE"
+    },
+    "name": "$REPO_NAME",
+    "registry": {
+      "name": "$REGISTRY"
+    }
+  },
+  "name": "$NAME",
+  "endpoint_id": "$BUILD_ENDPOINT_ID",
+  "auto_build_enabled": False,
+  "customize_tag": "latest",
+  "space_name": "$SPACE_NAME",
+  "namespace": "$NAMESPACE",
+  "image_cache_enabled": False,
+  "code_repo": {
+    "code_repo_password": "$SVN_REPO_PASSWORD",
+    "dockerfile_location": "/",
+    "code_repo_username": "$SVN_REPO_USERNAME",
+    "code_repo_client": "SIMPLE_SVN",
+    "code_repo_type": "DIR",
+    "build_context_path": "/",
+    "code_repo_path": "$SVN_REPO",
+    "code_repo_type_value": "/"
+  }
+}
