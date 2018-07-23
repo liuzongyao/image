@@ -11,6 +11,7 @@ class AlaudaRequest(object):
         self.headers = {
             'Content-Type': 'application/json'
         }
+        self.params = {"project_name": settings.PROJECT_NAME}
         self.namespace = settings.NAMESPACE
         self.username = settings.USERNAME
         self.region_name = settings.REGION_NAME
@@ -33,8 +34,8 @@ class AlaudaRequest(object):
 
         args['auth'] = auth or self.auth
 
-        if params:
-            args['params'] = params
+        params.update(self.params)
+        args['params'] = params
 
         if data is not None:
             if headers['Content-Type'] == 'application/json':
@@ -48,7 +49,7 @@ class AlaudaRequest(object):
         logger.info('Requesting url={}, method={}, args={}'.format(url, method, args))
         response = requests.request(method, url, **args)
         if response.status_code < 200 or response.status_code > 300:
-            logger.info("response code={}, text={}".format(response.status_code, response.json()))
+            logger.info("response code={}, text={}".format(response.status_code, response.text))
         else:
             logger.info("response code={}".format(response.status_code))
 

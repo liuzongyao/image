@@ -186,16 +186,16 @@ class Common(AlaudaRequest):
             sleep(5)
         return flag
 
-    def get_uuid_accord_name(self, contents, name_key, name_value, uuid_key):
+    def get_uuid_accord_name(self, contents, name, uuid_key):
         """
         方法丑陋 欢迎指正
         :param contents: 列表数组
-        :param name_key: 资源名称的key
-        :param name_value: 资源名称的value
+        :param name: 资源名称的一个字典:{"name": "resource_name"}
         :param uuid_key: 资源uuid的key
         :return: 资源的uuid
         """
         for content in contents:
-            if content[name_key] == name_value:
-                return content[uuid_key]
+            for key in name.keys():
+                if name[key] == content[key]:
+                    return content[uuid_key]
         return ""

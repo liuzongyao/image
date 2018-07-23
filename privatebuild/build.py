@@ -45,4 +45,4 @@ class PrivateBuild(Common):
         url = self.get_build_config_url()
         respoonse = self.send(method="GET", path=url)
         assert respoonse.status_code == 200, "get build list failed"
-        return self.get_uuid_accord_name(respoonse.json(), "name", build_name, "uuid")
+        return self.get_uuid_accord_name(respoonse.json(), {"name": build_name}, "uuid")
