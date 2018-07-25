@@ -1,6 +1,6 @@
 # coding=utf-8
 from common.api_requests import AlaudaRequest
-from common.logging import Logging
+from common.log import Logging
 from common import settings
 import os
 from time import sleep, time
@@ -11,7 +11,7 @@ logger = Logging.get_logger()
 
 class Common(AlaudaRequest):
     def __init__(self):
-        super().__init__()
+        super(Common, self).__init__()
         print(self.region_name)
         self.tmp_dir = "./temp_data/"
         self.region_data = {}
@@ -23,8 +23,8 @@ class Common(AlaudaRequest):
             "$NAMESPACE": self.account,
             "$REGION_ID": self.region_id,
             "$BUILD_ENDPOINT_ID": self.build_endpointid,
-            "$SVN_REPO_PASSWORD": settings.SVN_REPO_PASSWORD,
-            "$SVN_REPO_USERNAME": settings.SVN_REPO_USERNAME,
+            "$SVN_PASSWORD": settings.SVN_PASSWORD,
+            "$SVN_USERNAME": settings.SVN_USERNAME,
             "$SVN_REPO": settings.SVN_REPO,
             "$REGISTRY": self.registry_name,
             "$REPO_NAME": settings.REPO_NAME,
