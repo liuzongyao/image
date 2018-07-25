@@ -24,7 +24,7 @@ docker run -t --name vipercd \
 	index.alauda.cn/alaudaorg/api-test:latest
 
 
-# Code Standard
+# Code Standard   提交代码要保证flake8通过
 
 1.只要有改动，一定要保证改动影响到的case跑通过之后才可以提交PR
 
