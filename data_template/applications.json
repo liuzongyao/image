@@ -1,6 +1,0 @@
-{
-  "files": "compose.yaml", 
-  "region": "awsoldk8s", 
-  "space_name": "staging", 
-  "app_name": "ssssss"
-}

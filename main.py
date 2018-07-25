@@ -1,13 +1,27 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-# Author:zongyao liu
-# Date 2018.4.24
 
 import pytest
-from common.result import result
+from common.utils import send_email, read_result
+from common import settings
+from common.log import Logging
+import tarfile
+import os
+
+logger = Logging.get_logger()
 
 if __name__ == '__main__':
-    run_command = ['-s', '-m demo', './test_case/newk8s_service/deployment_service.py', "--html=./report/pytest.html"]
+    run_command = ['-s', settings.TESTCASES, "--html=./report/pytest.html"]
+    if settings.CASE_TYPE:
+        run_command.append("-m {}".format(settings.CASE_TYPE))
+    print(run_command)
     pytest.main(run_command)
-    body = result.update_results()
-    result.send_email('hello world', body)
+    resultflag, html = read_result()
+    with tarfile.open("./report.tar", "w:gz") as tar:
+        tar.add("./report", arcname=os.path.basename("./report"))
+    send_email(
+        "[{}] ({}) ({}) API E2E Test".format(resultflag, settings.ENV, settings.REGION_NAME),
+        html, settings.RECIPIENTS, "./report.tar")
+    logger.info("********* begin to print result *********")
+    logger.info(html)
+    logger.info("********* begin to print result *********")

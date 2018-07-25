@@ -3,7 +3,7 @@ from common.base_request import Common
 
 class PrivateBuild(Common):
     def __init__(self):
-        super().__init__()
+        super(PrivateBuild, self).__init__()
 
     def get_build_config_url(self, config_id=None):
         return config_id and "private-build-configs/{}/{}".format(self.account, config_id) or \

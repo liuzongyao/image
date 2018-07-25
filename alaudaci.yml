@@ -1,0 +1,6 @@
+pre_ci_boot:
+
+    image: index.alauda.cn/alaudaorg/api-test
+    tag: latest
+ci:
+    - flake8

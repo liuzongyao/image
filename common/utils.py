@@ -1,9 +1,12 @@
+# coding=utf-8
 from time import sleep
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.header import Header
 from common.settings import SMTP
 import smtplib
+from common.match_case import casename
+from bs4 import BeautifulSoup
 
 
 def retry(times=3, sleep_secs=3):
@@ -60,10 +63,60 @@ def send_email(subject, body, recipients, file_path):
         server.set_debuglevel(SMTP['debug_level'])
         server.login(SMTP['username'], SMTP['password'])
         server.sendmail(from_email, recipients, msg.as_string())
-        print("发送邮件成功")
+        print("send email successfully")
     except Exception as e:
         # don't fatal if email was not send
-        print("发送邮件失败，错误原因：{}".format(e))
+        print("send email failed，the reason is：{}".format(e))
     finally:
         if server:
             server.quit()
+
+
+def read_result():
+    with open("./report/pytest.html", "r") as fp:
+        report = BeautifulSoup(fp, "html.parser")
+        tbodys = report.select("tbody")
+        html = '<table border="1">\n' \
+               '<thead>\n' \
+               '<tr>\n' \
+               '<td>Case name</td>\n' \
+               '<td>Case flag</td>\n' \
+               '<td>Case details</td>' \
+               '\n</tr>\n' \
+               '</thead>\n' \
+               '<tbody>'
+        not_run_count = 0
+        pass_count = 0
+        failed_count = 0
+        rerun_count = 0
+        result_flag = 'Success'
+        for tbody in tbodys:
+            tds = tbody.select("td")
+            case_name = casename().get(tds[1].text.split("::")[-1], tds[1].text.split("::")[-1])
+            if tds[0].text == "Passed" and tds[2].text == "0.00":
+                html = html + '\n<tr>\n<td>{}</td>'.format(case_name) + \
+                       '\n<td style="color:orange;">{}</td>'.format("未运行") + \
+                       '\n<td style="color:orange;">{}</td>'.format(tds[2].text) + '\n</tr>'
+                not_run_count += 1
+            elif tds[0].text == "Passed" and tds[2].text != "0.00":
+                html = html + '\n<tr>\n<td>{}</td>'.format(case_name) + '\n<td style="color:green;">{}</td>'.format(
+                    tds[0].text) + '\n<td style="color:green;">{}</td>'.format(tds[2].text) + '\n</tr>'
+                pass_count += 1
+            elif tds[0].text == "Failed":
+                error_message = "{},失败请单独执行case:{}".format(tbody.select("span")[0].text, tds[1].text)
+                html = html + '\n<tr>\n<td>{}</td>'.format(case_name) + '\n<td style="color:red;">{}</td>'.format(
+                    tds[0].text) + '\n<td style="color:red;">{}</td>'.format(error_message) + '\n</tr>'
+                failed_count += 1
+                result_flag = 'Failed'
+            elif tds[0].text == "Rerun":
+                html = html + '\n<tr>\n<td>{}</td>'.format(case_name) + \
+                       '\n<td style="color:orange;">{}</td>'.format(tds[0].text) + \
+                       '\n<td style="color:orange;">{}</td>'.format(tbody.select("span")[0].text) + '\n</tr>'
+                rerun_count += 1
+            else:
+                pass
+        html_header = "{}, Pass {} cases,  {} cases not run, Fail {} cases, Rerun {} cases".format(
+            report.select("p")[1].text, pass_count, not_run_count, failed_count, rerun_count)
+        html = html_header + html + '\n</tbody>\n</table>'
+
+        return result_flag, html

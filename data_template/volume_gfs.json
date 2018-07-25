@@ -1,7 +1,0 @@
-{
-  "size": 10, 
-  "space_name": "staging", 
-  "driver_name": "glusterfs", 
-  "region_id": "073f6e29-ca7b-4054-b918-64aa3c9f3a77", 
-  "name": "demo"
-}

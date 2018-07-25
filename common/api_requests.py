@@ -1,5 +1,5 @@
 import requests
-from common.logging import Logging
+from common.log import Logging
 from common import settings
 
 logger = Logging.get_logger()

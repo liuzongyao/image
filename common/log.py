@@ -1,11 +1,14 @@
 from common import settings
 import logging
+import os
 
 
 class Logging(object):
     @classmethod
     def get_logger(cls):
         level = getattr(logging, settings.LOG_LEVEL, logging.INFO)
+        if not os.path.exists(settings.LOG_PATH):
+            os.mkdir(settings.LOG_PATH)
         log_path = "{}/{}".format(settings.LOG_PATH, "pytest.log")
         cls.logger = cls.create_logger('api-test', level, log_path)
         return cls.logger
