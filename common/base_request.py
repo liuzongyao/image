@@ -123,7 +123,7 @@ class Common(AlaudaRequest):
         if not os.path.exists(tmp_dir):
             os.mkdir(tmp_dir)
         for filename in filenames:
-            to_file = os.path.join(tmp_dir, file.split("/")[-1])
+            to_file = os.path.join(tmp_dir, filename.split("/")[-1])
             with open(filename, "r") as fp:
                 content = fp.read()
             for key in data:
