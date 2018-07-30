@@ -1,6 +1,11 @@
+# What is this repository for?
+
+1. 该仓库是用来测试大平台的Jakiro API测试，使用的python pytest测试框架
+2. pytest会自动收集指定目录下所有以test开头的方法作为测试的case，并且最终会在Report下生成测试报告
+
 # RUN
 本地执行：
-1.首先运行环境需要安装python3+和pytest以及requests包
+1.首先运行环境需要安装python3+和pytest以及requests包，参考requirement.txt
 
 2.然后设置需要测试对象的环境变量
 
@@ -23,6 +28,13 @@ docker run -t --name vipercd \
 	--env-file=./local-test.env \
 	index.alauda.cn/alaudaorg/api-test:latest
 
+#Writing test cases
+
+1.新增测试模块时需要添加对应的目录，在目录下添加对应模块的方法类
+
+2.方法类需要继承基础的base_requests，方法类封装完成后在test_case下添加对应的case
+
+3.需要新建资源post的数据统一放在test_data目录下，新建属于自己模块的目录，将测试数据统一管理
 
 # Code Standard   提交代码要保证flake8通过
 
@@ -49,3 +61,5 @@ docker run -t --name vipercd \
 11.写case时尽量多的考虑下出异常的情况，保证代码健壮性
 
 12.非block case统一在测试执行结束后判断
+
+13.所有的create资源的方法，在创建前都要执行一下删除操作
