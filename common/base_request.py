@@ -146,8 +146,6 @@ class Common(AlaudaRequest):
             content = fp.read()
         for key in data:
             content = content.replace(key, data[key])
-        with open(file, "w") as fp:
-            fp.write(content)
         return eval(content)
 
     def generate_time_params(self):
