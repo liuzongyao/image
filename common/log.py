@@ -27,10 +27,14 @@ class Logging(object):
             file_handler.setFormatter(formatter)
             logger.addHandler(file_handler)
 
-            formatter = logging.Formatter('>  %(message)s')
+            formatter = logging.Formatter('>  %(asctime)s - %(name)s - %(module)s - %(funcName)s - %(levelname)s '
+                                          '- %(message)s')
             console_handler = logging.StreamHandler()
             console_handler.setLevel(level)
             console_handler.setFormatter(formatter)
             logger.addHandler(console_handler)
 
         return logger
+
+
+logger = Logging.get_logger()
