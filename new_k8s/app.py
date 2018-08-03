@@ -1,4 +1,3 @@
-import json
 import urllib3
 from urllib3.exceptions import NewConnectionError, MaxRetryError
 from time import time, sleep
@@ -16,9 +15,9 @@ class Application(Common):
     def get_create_app_url(self):
         return "/v2/apps?project_name={}".format(settings.PROJECT_NAME)
 
-    def get_app_list_url(self):
-        return "/v2/apps/?cluster={}&namespace=&name=&app_name=&label=&repository_uuid=&template_uuid=&page=1&" \
-               "page_size=20&project_name={}".format(settings.REGION_NAME, settings.PROJECT_NAME)
+    def get_app_list_url(self, app_name):
+        return "/v2/apps/?cluster={}&namespace=&name=&app_name={}&label=&repository_uuid=&template_uuid=&page=1&" \
+               "page_size=20&project_name={}".format(settings.REGION_NAME, app_name, settings.PROJECT_NAME)
 
     def app_common_url(self, uuid):
         return "/v2/apps/{}".format(uuid)
@@ -56,13 +55,13 @@ class Application(Common):
         return "/v2/services/{}/instances?project_name={}".format(service_id, settings.PROJECT_NAME)
 
     def get_app_uuid(self, app_name):
-        url = self.get_app_list_url()
+        url = self.get_app_list_url(app_name)
         response = self.send(method='get', path=url)
         assert response.status_code == 200
         contents = response.json()['results']
-        for content in contents:
-            if 'name' in content['resource'] and app_name == content['resource']['name']:
-                return content['resource']['uuid']
+        if contents:
+            return self.get_value(contents, '0.resource.uuid')
+        return False
 
     def get_service_uuid(self, app_uuid):
         url = self.app_common_url(app_uuid)
