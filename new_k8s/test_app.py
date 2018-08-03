@@ -1,6 +1,7 @@
 import pytest
 from common import settings
 from new_k8s.app import Application
+from common.log import logger
 
 
 @pytest.mark.region
@@ -39,6 +40,7 @@ class TestApplicationSuite(object):
                     "password": self.tool.password,
                     "command": 'ls'
         }
+        logger.info("kwargs: {}".format(kwargs))
         exec = self.tool.exec_container(**kwargs)
         result = self.tool.update_result(result, exec, "exec")
 

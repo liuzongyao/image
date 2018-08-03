@@ -85,7 +85,7 @@ def get_namespace_resource(region_id, namespace):
     while count < 40:
         count += 1
         response = Common().send(method='get', path=path)
-        if response.status_code == 200 and not response.json():
+        if response.status_code == 200 and not response.json() or response.status_code == 404:
             return True
         time.sleep(3)
 
@@ -213,14 +213,16 @@ class CommonData(Common):
 
     def create_namespace(self, namespace):
         try:
+            project = self.common_data['PROJECT_NAME']
+        except KeyError:
+            project = settings.PROJECT_NAME
+
+        try:
             name_space = settings.NAMESPACE
             return name_space
         except AttributeError:
             delete_namespace(self.region_id, namespace)
-            if settings.PROJECT_NAME:
-                project = settings.PROJECT_NAME
-            else:
-                project = self.common_data['PROJECT_NAME']
+
             data = {
                     "apiVersion": "v1",
                     "kind":"Namespace",
@@ -308,5 +310,5 @@ class EXEC(object):
         if child:
             child.sendline(self.parameters['command'])
             ret = child.expect('#')
-            logger.debug(child.before)
+            logger.info(child.before)
             return ret
