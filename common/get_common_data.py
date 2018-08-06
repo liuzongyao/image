@@ -2,7 +2,6 @@ import json
 import os
 import re
 import time
-import pexpect
 from pathlib import Path
 from common.base_request import Common
 from common.utils import retry
@@ -186,25 +185,25 @@ class CommonData(Common):
             return project_name
         except AttributeError:
             delete_project(project)
-            data = { "name": project,
-                     "display_name": "",
-                     "description": "",
-                     "clusters":
-                         [{
-                             "name": self.region_name,
-                             "uuid": self.region_id,
-                             "service_type": "kubernetes",
-                             "quota":
-                                 {
-                                     "cpu": 0,
-                                     "memory": 0,
-                                     "pvc_num": 0,
-                                     "pods": 0,
-                                     "storage": 0
-                                 }
-                         }],
-                     "template": "empty-template"
-                     }
+            data = {"name": project,
+                    "display_name": "",
+                    "description": "",
+                    "clusters":
+                        [{
+                            "name": self.region_name,
+                            "uuid": self.region_id,
+                            "service_type": "kubernetes",
+                            "quota":
+                                {
+                                    "cpu": 0,
+                                    "memory": 0,
+                                    "pvc_num": 0,
+                                    "pods": 0,
+                                    "storage": 0
+                                }
+                        }],
+                    "template": "empty-template"
+                    }
             content = {}
             content['data'] = json.dumps(data)
             response = self.send(method='POST', path='/v1/projects/{}/'.format(self.account), **content)
@@ -225,7 +224,7 @@ class CommonData(Common):
 
             data = {
                     "apiVersion": "v1",
-                    "kind":"Namespace",
+                    "kind": "Namespace",
                     "metadata": {
                         "name": namespace
                     }
@@ -236,79 +235,4 @@ class CommonData(Common):
                 self.region_id, project), **content)
             assert response.status_code == 201, response.text
             self.common_data['NAMESPACE'] = namespace
-            self.common_data['NAMESPACE_UUID'] = response.json()[0]['kubernetes']['metadata']['uid']
-
-
-class EXEC(object):
-    def __init__(self, **kwargs):
-        self.parameters = kwargs
-
-    def commands(self):
-        if 'username' in self.parameters:
-            cmd = 'ssh -p 4022 -t {}/{}@{} {}/{}/{}/{} /bin/sh'.format(self.parameters['organization'],
-                    self.parameters['username'], self.parameters['ip'], self.parameters['organization'],
-                    self.parameters['service_uuid'], self.parameters['pod_instance'], self.parameters['service_name'])
-        else:
-            cmd = 'ssh -p 4022 -t {}@{} {}/{}/{}/{} /bin/sh'.format(self.parameters['organization'],
-                    self.parameters['ip'], self.parameters['organization'], self.parameters['service_uuid'],
-                    self.parameters['pod_instance'], self.parameters['service_name'])
-        return cmd
-
-    def login_container(self):
-        cmd = self.commands()
-        logger.debug("exec command: {}".format(cmd))
-        child = pexpect.spawn(cmd)
-        ret = child.expect([pexpect.EOF, pexpect.TIMEOUT, 'yes/no', 'password:'])
-        if ret == 0:
-            logger.error('ssh connect terminated: {}'.format(pexpect.EOF))
-            return
-            # raise EOFError('ssh connect terminated: {}'.format(pexpect.EOF))
-        elif ret == 1:
-            logger.error('ssh connect timeout: {}'.format(pexpect.TIMEOUT))
-            return
-            # raise TimeoutError('ssh connect timeout: {}'.format(pexpect.TIMEOUT))
-        elif ret == 2:
-            child.sendline('yes')
-            rev = child.expect([pexpect.EOF, pexpect.TIMEOUT, 'password:'])
-            if rev == 0:
-                logger.error('ssh connect terminated: {}'.format(pexpect.EOF))
-                return
-                # raise EOFError('ssh connect terminated: {}'.format(pexpect.EOF))
-            elif rev == 1:
-                logger.error('ssh connect timeout: {}'.format(pexpect.TIMEOUT))
-                return
-                # raise TimeoutError('ssh connect timeout: {}'.format(pexpect.TIMEOUT))
-            elif rev == 2:
-                child.sendline(self.parameters['password'])
-                r = child.expect([pexpect.EOF, pexpect.TIMEOUT, '#'])
-                if r == 0:
-                    logger.error('ssh connect terminated: {}'.format(pexpect.EOF))
-                    return
-                    # raise EOFError('ssh connect terminated: {}'.format(pexpect.EOF))
-                elif r == 1:
-                    logger.error('ssh connect timeout: {}'.format(pexpect.TIMEOUT))
-                    return
-                    # raise TimeoutError('ssh connect timeout: {}'.format(pexpect.TIMEOUT))
-                elif r == 2:
-                    return child
-        elif ret == 3:
-            child.sendline(self.parameters['password'])
-            r = child.expect([pexpect.EOF, pexpect.TIMEOUT, '#'])
-            if r == 0:
-                logger.error('ssh connect terminated: {}'.format(pexpect.EOF))
-                return
-                # raise EOFError('ssh connect terminated: {}'.format(pexpect.EOF))
-            elif r == 1:
-                logger.error('ssh connect timeout: {}'.format(pexpect.TIMEOUT))
-                return
-                # raise TimeoutError('ssh connect timeout: {}'.format(pexpect.TIMEOUT))
-            elif r == 2:
-                return child
-
-    def send_command(self):
-        child = self.login_container()
-        if child:
-            child.sendline(self.parameters['command'])
-            ret = child.expect('#')
-            logger.info(child.before)
-            return ret
+            self.common_data['NAMESPACE_UUID'] = self.get_value(response.json(), '0.kubernetes.metadata.uid')

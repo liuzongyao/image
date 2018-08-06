@@ -1,9 +1,7 @@
 # coding=utf-8
-import os
 import json
-from requests.structures import CaseInsensitiveDict
+import pexpect
 from common.api_requests import AlaudaRequest
-from common import settings
 from common.log import logger
 from time import sleep, time
 from common.exceptions import ResponseError, ParseResponseError
@@ -46,7 +44,7 @@ class Common(AlaudaRequest):
             for key in query.split(delimiter):
                 if isinstance(json_content, list):
                     json_content = json_content[int(key)]
-                elif isinstance(json_content, (dict, CaseInsensitiveDict)):
+                elif isinstance(json_content, dict):
                     json_content = json_content[key]
                 else:
                     raise ParseResponseError(
@@ -144,15 +142,8 @@ class Common(AlaudaRequest):
             result.update({case_name: "failed"})
         return result
 
-    def get_events(self, resource_id, operation):
+    def get_events(self, url, resource_id, operation):
         for i in range(0, 40):
-            end_time = round(time(), 6)
-            start_time = end_time - 3600
-
-            url = "/v1/events/{}/?start_time={}&end_time={}&pageno=1&size=100&namespace={}&project_name={}".format(
-                settings.ACCOUNT, start_time, end_time, settings.NAMESPACE, settings.PROJECT_NAME)
-
-            logger.debug("request event url: {}".format(url))
             r = self.send(method='get', path=url)
             if r.status_code != 200:
                 return False
@@ -165,3 +156,80 @@ class Common(AlaudaRequest):
                     return True
             sleep(3)
         return False
+
+    def get_monitor(self, url):
+        count = 0
+        while count < 40:
+            count += 1
+            response = self.send(method='get', path=url)
+            code = response.status_code
+            content = response.json()
+            if code != 200:
+                logger.error("Get monitor failed")
+                return False
+            if content:
+                return True
+            sleep(3)
+        logger.warning("No monitor were obtained within two minutes, please manually check")
+        return False
+
+    def commands(self, ip, service_uuid, pod_instance, app_name):
+        if self.sub_account:
+            cmd = 'ssh -p 4022 -t {}/{}@{} {}/{}/{}/{} /bin/sh'.format(self.account, self.sub_account, ip,
+                                                                       self.account, service_uuid, pod_instance,
+                                                                       app_name)
+        else:
+            cmd = 'ssh -p 4022 -t {}@{} {}/{}/{}/{} /bin/sh'.format(self.account, ip, self.account, service_uuid,
+                                                                    pod_instance, app_name)
+        return cmd
+
+    def login_container(self, ip, service_uuid, pod_instance, app_name):
+        cmd = self.commands(ip, service_uuid, pod_instance, app_name)
+        logger.debug("exec command: {}".format(cmd))
+        child = pexpect.spawn(cmd)
+        ret = child.expect([pexpect.EOF, pexpect.TIMEOUT, 'yes/no', 'password:'])
+        if ret == 0:
+            logger.error('ssh connect terminated: {}'.format(pexpect.EOF))
+            return
+        elif ret == 1:
+            logger.error('ssh connect timeout: {}'.format(pexpect.TIMEOUT))
+            return
+        elif ret == 2:
+            child.sendline('yes')
+            rev = child.expect([pexpect.EOF, pexpect.TIMEOUT, 'password:'])
+            if rev == 0:
+                logger.error('ssh connect terminated: {}'.format(pexpect.EOF))
+                return
+            elif rev == 1:
+                logger.error('ssh connect timeout: {}'.format(pexpect.TIMEOUT))
+                return
+            elif rev == 2:
+                child.sendline(self.password)
+                r = child.expect([pexpect.EOF, pexpect.TIMEOUT, '#'])
+                if r == 0:
+                    logger.error('ssh connect terminated: {}'.format(pexpect.EOF))
+                    return
+                elif r == 1:
+                    logger.error('ssh connect timeout: {}'.format(pexpect.TIMEOUT))
+                    return
+                elif r == 2:
+                    return child
+        elif ret == 3:
+            child.sendline(self.password)
+            r = child.expect([pexpect.EOF, pexpect.TIMEOUT, '#'])
+            if r == 0:
+                logger.error('ssh connect terminated: {}'.format(pexpect.EOF))
+                return
+            elif r == 1:
+                logger.error('ssh connect timeout: {}'.format(pexpect.TIMEOUT))
+                return
+            elif r == 2:
+                return child
+
+    def send_command(self, ip, service_uuid, pod_instance, app_name, command):
+        child = self.login_container(ip, service_uuid, pod_instance, app_name)
+        if child:
+            child.sendline(command)
+            ret = child.expect('#')
+            logger.info(child.before)
+            return ret

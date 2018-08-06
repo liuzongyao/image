@@ -46,4 +46,4 @@ class AlaudaRequest(object):
         return response
 
     def _get_url(self, path):
-        return '{}{}'.format(self.endpoint, path)
+        return '{}/{}'.format(self.endpoint, path)

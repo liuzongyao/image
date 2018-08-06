@@ -1,11 +1,9 @@
-import urllib3
-from urllib3.exceptions import NewConnectionError, MaxRetryError
-from time import time, sleep
+import requests
+from requests.exceptions import ConnectionError
 from common.base_request import Common
 from common.log import logger
 from common import settings
 from common.parsercase import ParserCase
-from common.get_common_data import EXEC
 
 
 class Application(Common):
@@ -31,19 +29,21 @@ class Application(Common):
     def get_stop_app_url(self, uuid):
         return "/v2/apps/{}/stop".format(uuid)
 
-    def get_app_log_url(self, service_id, start_time, end_time):
+    def get_app_log_url(self, service_id):
+        ret = self.generate_time_params()
         return "/v1/logs/{}/search?start_time={}&end_time={}&pageno=1&size=500" \
                "&paths=stdout&read_log_source_name=default&services={}" \
                "&allow_service_id=true&mode=polling&namespace={}&project_name={}".format(settings.ACCOUNT,
-                                                                                         start_time,
-                                                                                         end_time,
+                                                                                         str(ret['start_time']),
+                                                                                         str(ret['end_time']),
                                                                                          service_id,
                                                                                          settings.ACCOUNT,
                                                                                          settings.PROJECT_NAME)
 
-    def get_app_cpu_monitor_url(self, app_id, start_time, end_time):
+    def get_app_cpu_monitor_url(self, app_id):
+        ret = self.generate_time_params()
         return "/v2/monitor/" + settings.ACCOUNT + "/metrics/query?q=avg:service.cpu.utilization{" \
-               "app_id=" + app_id + "}by{service_name}&start=" + start_time + "&end=" + end_time + "&" \
+               "app_id=" + app_id + "}by{service_name}&start=" + str(ret['start_time']) + "&end=" + str(ret['end_time']) + "&" \
                "project_name=" + settings.PROJECT_NAME
 
     def get_service_loadbalance_url(self, service_id):
@@ -53,6 +53,11 @@ class Application(Common):
 
     def get_service_instance_url(self, service_id):
         return "/v2/services/{}/instances?project_name={}".format(service_id, settings.PROJECT_NAME)
+
+    def get_app_event_url(self):
+        ret = self.generate_time_params()
+        return "/v1/events/{}/?start_time={}&end_time={}&pageno=1&size=100&namespace={}&project_name={}".format(
+                settings.ACCOUNT, str(ret['start_time']), str(ret['end_time']), settings.NAMESPACE, settings.PROJECT_NAME)
 
     def get_app_uuid(self, app_name):
         url = self.get_app_list_url(app_name)
@@ -85,7 +90,7 @@ class Application(Common):
                     domain = con['domain']
                     disable = con['disabled']
                     if not disable:
-                        return "{}://{}.{}.{}".format(protocol, service_name, service_namespace, domain)
+                        return "{}://{}.{}.{}:{}".format(protocol, service_name, service_namespace, domain, port)
             return "{}://{}:{}".format(protocol, address, port)
 
     def create_app(self, file, dir_name=None, variables={}):
@@ -97,9 +102,8 @@ class Application(Common):
     def delete_app(self, app_name):
         logger.info("************************** delete app ********************************")
         uuid = self.get_app_uuid(app_name)
-        if uuid:
-            url = self.app_common_url(uuid)
-            return self.send(method='delete', path=url)
+        url = self.app_common_url(uuid)
+        return self.send(method='delete', path=url)
 
     def update_app(self, uuid, file, dir_name=None):
         logger.info("************************** update app ********************************")
@@ -117,43 +121,13 @@ class Application(Common):
         url = self.get_stop_app_url(uuid)
         return self.send(method='put', path=url)
 
-    def get_service_log(self, service_id):
-        start_time = round(time(), 6)
-        end_time = start_time + 3600
-        url = self.get_app_log_url(service_id, start_time, end_time)
-        count = 0
-        while count < 40:
-            count += 1
-            response = self.send(method='get', path=url)
-            code = response.status_code
-            if code != 200:
-                logger.error("Get service log failed")
-                return False
-            content = response.json()
-            if content['logs']:
-                return True
-            sleep(3)
-        logger.warning("No logs were obtained within two minutes, please manually check")
-        return False
+    def get_service_log(self, service_id, expect_value):
+        url = self.get_app_log_url(service_id)
+        return self.get_logs(url, expect_value)
 
     def get_app_monitor(self, app_id):
-        start_time = int(time())
-        end_time = start_time + 3600
-        url = self.get_app_cpu_monitor_url(app_id, str(start_time), str(end_time))
-        count = 0
-        while count < 40:
-            count += 1
-            response = self.send(method='get', path=url)
-            code = response.status_code
-            content = response.json()
-            if code != 200:
-                logger.error("Get app cpu monitor failed")
-                return False
-            if content:
-                return True
-            sleep(3)
-        logger.warning("No monitor were obtained within two minutes, please manually check")
-        return False
+        url = self.get_app_cpu_monitor_url(app_id)
+        return self.get_monitor(url)
 
     def get_service_instance(self, service_id):
         url = self.get_service_instance_url(service_id)
@@ -166,37 +140,24 @@ class Application(Common):
         url = self.app_common_url(app_id)
         return self.get_status(url, key, expect_status)
 
+    def get_app_events(self, app_id, operation):
+        url = self.get_app_event_url()
+        return self.get_events(url, app_id, operation)
+
     def access_service(self, service_url, query):
         logger.info("************************** access service ********************************")
-        http = urllib3.PoolManager()
         try:
-            ret = http.request('GET', service_url)
-            logger.info(ret.data)
-            if ret.status == 200 and query in ret.data.decode('utf-8'):
+            ret = requests.get(service_url)
+            logger.info(ret.text)
+            if ret.status_code == 200 and query in ret.text:
                 return True
-        except (NewConnectionError, MaxRetryError) as e:
-            logger.error("access service failed")
+        except ConnectionError as e:
+            logger.error("access service failed: {}".format(e))
         return False
 
-    def exec_container(self, **kwargs):
-        """
-        .e.g: kwargs =
-                {
-                    "organization": "testorg001",                                   // required
-                    "username": settings.SUB_ACCOUNT,                             // optional
-                    "ip": "52.80.87.235",                                           // required
-                    "service_uuid": "dc07a499-ecf2-4f73-8f85-188990a8415c",         // required
-                    "pod_instance": "jenkins-notdelete1-6d4df7bc77-v266t",          // required
-                    "service_name": "jenkins-notdelete1",                            // required, app name
-                    "password": settings.PASSWORD,                                // required
-                    "command": 'ls'                                               // required
-                }
-        :param kwargs: dict
-        :return:
-        """
+    def exec_container(self, ip, service_uuid, pod_instance, app_name, command):
         logger.info("************************** exec ********************************")
-        exec_instance = EXEC(**kwargs)
-        ret = exec_instance.send_command()
+        ret = self.send_command(ip, service_uuid, pod_instance, app_name, command)
         if ret == 0:
             return True
         return False

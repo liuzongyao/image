@@ -1,7 +1,6 @@
 import pytest
 from common import settings
 from new_k8s.app import Application
-from common.log import logger
 
 
 @pytest.mark.region
@@ -31,25 +30,16 @@ class TestApplicationSuite(object):
 
         # exec
         pod_instance = self.tool.get_service_instance(service_uuid)
-        kwargs = {
-                    "organization": self.tool.account,
-                    "ip": settings.HAPROXY_IP,
-                    "service_uuid": service_uuid,
-                    "pod_instance": pod_instance,
-                    "service_name": self.app_name,
-                    "password": self.tool.password,
-                    "command": 'ls'
-        }
-        logger.info("kwargs: {}".format(kwargs))
-        exec = self.tool.exec_container(**kwargs)
+        ip = settings.HAPROXY_IP
+        exec = self.tool.exec_container(ip, service_uuid, pod_instance, self.app_name, 'ls')
         result = self.tool.update_result(result, exec, "exec")
 
         # get logs
-        log_result = self.tool.get_service_log(service_uuid)
+        log_result = self.tool.get_service_log(service_uuid, 'logglogloglog')
         result = self.tool.update_result(result, log_result, "get service log")
 
         # get app event
-        event_result = self.tool.get_events(app_uuid, 'create')
+        event_result = self.tool.get_app_events(app_uuid, 'create')
         result = self.tool.update_result(result, event_result, 'get app event')
 
         # get monitor
@@ -75,6 +65,6 @@ class TestApplicationSuite(object):
 
         # delete app
         delete_app = self.tool.delete_app(self.app_name)
-        assert delete_app.status_code == 204
+        assert delete_app.status_code == 204, delete_app.text
 
         assert result['flag'], result
