@@ -66,7 +66,7 @@ class Application(Common):
         contents = response.json()['results']
         if contents:
             return self.get_value(contents, '0.resource.uuid')
-        return False
+        return " "
 
     def get_service_uuid(self, app_uuid):
         url = self.app_common_url(app_uuid)
