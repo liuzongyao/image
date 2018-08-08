@@ -100,8 +100,3 @@ class ParserCase(object):
 
     def parser_case(self):
         return self.generate_case(self.file, dir_name=self.dir_name)
-
-
-if __name__ == "__main__":
-    r = ParserCase('create_app.yml').parser_case()
-    print(r)
