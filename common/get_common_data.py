@@ -1,11 +1,10 @@
 import os
-import re
 from pathlib import Path
 from common.base_request import Common
 from common import settings
 from common.log import logger
 from common.utils import retry
-from common.parsercase import ParserCase
+from common.parsercase import ParserCase, data_value
 
 
 def target_file():
@@ -22,28 +21,17 @@ def input_file(content):
     :param content: str
     :return:
     """
-    substring = re.compile(r'[A-Z_]+')
     file = target_file()
     file_path = os.path.join(os.path.dirname(file), '../temp_data')
     if not os.path.exists(file_path):
         os.makedirs(file_path)
     new_file = os.path.join(file_path, 'temporary.py')
 
-    text = re.findall(substring, content)
-
-    # De-weighting
     with open(file, 'r') as read:
         with open(new_file, 'w+') as write:
             for line in read:
-                line_sub = re.match(substring, line)
-                if line_sub:
-                    line_start = line_sub.group()
-                    if line_start in text:
-                        continue
                 write.writelines(line)
-
-    with open(new_file, 'a+') as add:
-        add.writelines(content)
+            write.writelines(content)
 
 
 def delete_role(role_name):
@@ -57,7 +45,7 @@ def delete_role(role_name):
 
 
 def delete_project(project_name):
-    if project_name.startswith('e2e'):
+    if 'CREATE_PROJECT' in data_value():
         for suffix in ('-project_admin', '-project_auditor'):
             role_name = project_name + suffix
             # delete project role first
@@ -72,7 +60,7 @@ def delete_project(project_name):
                 project_name, response.status_code, response.text))
             return False
     else:
-        logger.info("The name of project is not start with 'e2e', no need to delete")
+        logger.info("The project no need to delete")
         return True
 
 
@@ -80,7 +68,6 @@ class CommonData(Common):
     def __init__(self):
         super(CommonData, self).__init__()
         self.common = ''
-        self.project_name = 'e2e-project'
         self.get_region_data()
         self.get_build_endpontid()
         self.get_load_balance_info()
@@ -124,12 +111,21 @@ class CommonData(Common):
                 self.common = self.common + 'HAPROXY_IP = "{}"\n'.format(content['address'])
                 break
 
+    def get_project(self):
+        path = '/v1/projects/{}/{}'.format(settings.ACCOUNT, settings.PROJECT_NAME)
+        response = self.send(method='get', path=path)
+        if response.status_code == 200:
+            logger.info('The {} is exist, no need to create'.format(settings.PROJECT_NAME))
+            return True
+        if response.status_code == 404:
+            return False
+
     def create_project(self):
-        if not settings.PROJECT_NAME:
-            delete_project(self.project_name)
-            data = ParserCase('project.yml', variables={"project": self.project_name}).parser_case()
+        ret = self.get_project()
+        if ret is False:
+            data = ParserCase('project.yml', variables={"project": settings.PROJECT_NAME}).parser_case()
             content = {}
             content['data'] = data
             response = self.send(method='POST', path='/v1/projects/{}/'.format(self.account), **content)
             assert response.status_code == 201, response.text
-            self.common = self.common + 'PROJECT_NAME = "{}"\n'.format(self.project_name)
+            self.common = self.common + 'CREATE_PROJECT = True\n'

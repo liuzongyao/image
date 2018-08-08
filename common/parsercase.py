@@ -21,6 +21,15 @@ def extract_variables(content):
         return []
 
 
+def add_file(content):
+    file_path = [os.path.join(os.getcwd(), 'temp_data'), os.path.join(os.path.dirname(os.getcwd()), 'temp_data')]
+    for path in file_path:
+        if os.path.exists(path):
+            file = os.path.join(path, 'temporary.py')
+            with open(file, 'a+') as f:
+                f.writelines(content)
+
+
 def data_value():
     file_path = [os.path.join(os.getcwd(), 'temp_data'), os.path.join(os.path.dirname(os.getcwd()), 'temp_data')]
     for path in file_path:
@@ -46,21 +55,8 @@ class ParserCase(object):
         contents = FileUtils.load_file(file, dir_name=dir_name)
         return contents
 
-    def parser_file(self, content):
-        if isinstance(content, dict):
-            for key, value in content.items():
-                content[key] = self.parser_file(value)
-        if isinstance(content, str):
-            if content.endswith((".yaml", ".yml", ".json")):
-                content = self.parameterize(content)
-        if isinstance(content, list):
-            for index, con in enumerate(content):
-                content[index] = self.parser_file(con)
-        return content
-
     def generate_case(self, file, dir_name=None):
         content = self.parameterize(file, dir_name=dir_name)
-        content = self.parser_file(content)
 
         variables = {}
 
