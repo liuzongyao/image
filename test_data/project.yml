@@ -1,0 +1,14 @@
+name: $project
+display_name: ""
+description: ""
+clusters:
+- name: $REGION_NAME
+  uuid: $REGION_ID
+  service_type: "kubernetes"
+  quota:
+    cpu: 0
+    memory: 0
+    pvc_num: 0
+    pods: 0
+    storage: 0
+template: "empty-template"

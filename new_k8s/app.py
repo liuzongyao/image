@@ -3,7 +3,7 @@ from requests.exceptions import ConnectionError
 from common.base_request import Common
 from common.log import logger
 from common import settings
-from common.parsercase import ParserCase
+from common.parsercase import ParserCase, data_value
 
 
 class Application(Common):
@@ -11,11 +11,11 @@ class Application(Common):
         super(Application, self).__init__()
 
     def get_create_app_url(self):
-        return "/v2/apps?project_name={}".format(settings.PROJECT_NAME)
+        return "/v2/apps?project_name={}".format(data_value().get('PROJECT_NAME'))
 
     def get_app_list_url(self, app_name):
         return "/v2/apps/?cluster={}&namespace=&name=&app_name={}&label=&repository_uuid=&template_uuid=&page=1&" \
-               "page_size=20&project_name={}".format(settings.REGION_NAME, app_name, settings.PROJECT_NAME)
+               "page_size=20&project_name={}".format(settings.REGION_NAME, app_name, data_value().get('PROJECT_NAME'))
 
     def app_common_url(self, uuid):
         return "/v2/apps/{}".format(uuid)
@@ -38,26 +38,28 @@ class Application(Common):
                                                                                          str(ret['end_time']),
                                                                                          service_id,
                                                                                          settings.ACCOUNT,
-                                                                                         settings.PROJECT_NAME)
+                                                                                         data_value().get(
+                                                                                             'PROJECT_NAME'))
 
     def get_app_cpu_monitor_url(self, app_id):
         ret = self.generate_time_params()
         return "/v2/monitor/" + settings.ACCOUNT + "/metrics/query?q=avg:service.cpu.utilization{" \
-               "app_id=" + app_id + "}by{service_name}&start=" + str(ret['start_time']) + "&end=" + str(ret['end_time']) + "&" \
-               "project_name=" + settings.PROJECT_NAME
+               "app_id=" + app_id + "}by{service_name}&start=" + str(ret['start_time']) + "&end=" + \
+               str(ret['end_time']) + "&project_name=" + data_value().get('PROJECT_NAME')
 
     def get_service_loadbalance_url(self, service_id):
         return "/v1/load_balancers/{}?region_name={}&detail=false&service_id={}" \
                "&frontend=true&project_name={}".format(settings.ACCOUNT, settings.REGION_NAME, service_id,
-                                                       settings.PROJECT_NAME)
+                                                       data_value().get('PROJECT_NAME'))
 
     def get_service_instance_url(self, service_id):
-        return "/v2/services/{}/instances?project_name={}".format(service_id, settings.PROJECT_NAME)
+        return "/v2/services/{}/instances?project_name={}".format(service_id, data_value().get('PROJECT_NAME'))
 
-    def get_app_event_url(self):
+    def get_app_event_url(self, namespace):
         ret = self.generate_time_params()
         return "/v1/events/{}/?start_time={}&end_time={}&pageno=1&size=100&namespace={}&project_name={}".format(
-                settings.ACCOUNT, str(ret['start_time']), str(ret['end_time']), settings.NAMESPACE, settings.PROJECT_NAME)
+                settings.ACCOUNT, str(ret['start_time']), str(ret['end_time']), namespace,
+                data_value().get('PROJECT_NAME'))
 
     def get_app_uuid(self, app_name):
         url = self.get_app_list_url(app_name)
@@ -105,10 +107,10 @@ class Application(Common):
         url = self.app_common_url(uuid)
         return self.send(method='delete', path=url)
 
-    def update_app(self, uuid, file, dir_name=None):
+    def update_app(self, uuid, file, dir_name=None, variables={}):
         logger.info("************************** update app ********************************")
         url = self.app_common_url(uuid)
-        content = ParserCase(file, dir_name=dir_name).parser_case()
+        content = ParserCase(file, dir_name=dir_name, variables=variables).parser_case()
         return self.send(method='patch', path=url, **content)
 
     def start_app(self, uuid):
@@ -140,8 +142,8 @@ class Application(Common):
         url = self.app_common_url(app_id)
         return self.get_status(url, key, expect_status)
 
-    def get_app_events(self, app_id, operation):
-        url = self.get_app_event_url()
+    def get_app_events(self, app_id, operation, namespace):
+        url = self.get_app_event_url(namespace)
         return self.get_events(url, app_id, operation)
 
     def access_service(self, service_url, query):

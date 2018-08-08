@@ -1,6 +1,7 @@
+import os
 import re
 from common.loadfile import FileUtils
-from common.import_variable import search_conf_item
+
 
 variable_regexp = r"\$([\w_]+)"
 
@@ -20,11 +21,27 @@ def extract_variables(content):
         return []
 
 
+def data_value():
+    file_path = [os.path.join(os.getcwd(), 'temp_data'), os.path.join(os.path.dirname(os.getcwd()), 'temp_data')]
+    for path in file_path:
+        if os.path.exists(path):
+            file = os.path.join(path, 'temporary.py')
+            data_dict = {}
+            with open(file, 'r') as f:
+                for line in f:
+                    if '=' in line and 'SMTP' not in line:
+                        data = line.split('=')
+                        data_dict[data[0].strip()] = eval(data[1].strip())
+            return data_dict
+
+
 class ParserCase(object):
     def __init__(self, file, dir_name=None, variables={}):
         self.file = file
         self.dir_name = dir_name
         self.variables = variables
+        self.data = data_value()
+        print(self.data)
 
     def parameterize(self, file, dir_name=None):
         contents = FileUtils.load_file(file, dir_name=dir_name)
@@ -42,50 +59,6 @@ class ParserCase(object):
                 content[index] = self.parser_file(con)
         return content
 
-    def parser_variable(self, content):
-        """
-        get all the variables in the case and parser variable
-        :param content: dict
-        :return:
-        e.g.
-            {
-                "url": "$API_URL/v1/regions/$NAMESPACE/" ,
-                "method": "get" ,
-                "headers":  {
-                    "content-type": "application/json" ,
-                    "Authorization": "Token ${token()}"
-                }
-                "kubernetes": [
-                    {
-                         "name": "$NAMESPACE"
-                    }
-                ]
-            }
-
-            => {
-                    "API_URL": "http://23.100.93.31:20081",
-                    "NAMESPACE": "alauda"
-                }
-        """
-        variables = {}
-        if isinstance(content, dict):
-            for key, value in content.items():
-                if isinstance(value, str):
-                    variable_list = extract_variables(value)
-                    if variable_list:
-                        for variable in variable_list:
-                            variable_value = search_conf_item('variable', variable)
-                            variables[variable] = variable_value
-                if isinstance(value, dict):
-                    ret = self.parser_variable(value)
-                    variables.update(ret)
-                if isinstance(value, (list, dict)):
-                    for index, v in enumerate(value):
-                        if isinstance(v, dict):
-                            ret = self.parser_variable(v)
-                            variables.update(ret)
-        return variables
-
     def generate_case(self, file, dir_name=None):
         content = self.parameterize(file, dir_name=dir_name)
         content = self.parser_file(content)
@@ -101,8 +74,7 @@ class ParserCase(object):
         if variables:
             self.replace_varible(variables, content)
 
-        module_variable = self.parser_variable(content)
-        self.replace_varible(module_variable, content)
+        self.replace_varible(self.data, content)
         return content
 
     def replace_varible(self, sources, content):
@@ -128,3 +100,8 @@ class ParserCase(object):
 
     def parser_case(self):
         return self.generate_case(self.file, dir_name=self.dir_name)
+
+
+if __name__ == "__main__":
+    r = ParserCase('create_app.yml').parser_case()
+    print(r)

@@ -1,15 +1,9 @@
 variables:
-  app_name: ceshi
+  description: ceshi
 data:
   resource:
-    name: $app_name
     description: $description
-  namespace:
-    name: $NAMESPACE
-    uuid: $NAMESPACE_UUID
-  cluster:
-    name: $REGION_NAME
-    uuid: $REGION_ID
+  namespace: $NAMESPACE
   kubernetes:
     - apiVersion: extensions/v1beta1
       firstTimestamp: null
@@ -22,10 +16,12 @@ data:
         replicas: 1
         strategy:
           type: RollingUpdate
+        selector:
+          matchLabels:
+            service.alauda.io/name: $app_name
         template:
           metadata:
             labels:
-              app.alauda.io/name: $app_name
               service.alauda.io/name: $app_name
           spec:
             affinity: {}
@@ -54,24 +50,3 @@ data:
           apiVersion: extensions/v1beta1
           kind: Deployment
           name: $app_name
-    - apiVersion: v1
-      firstTimestamp: null
-      kind: Service
-      lastTimestamp: null
-      metadata:
-        annotations:
-          loadbalancer.alauda.io/bind: '[{"container_port":80,"protocol":"http","name":"$HAPROXY_NAME","port":80}]'
-        labels:
-          app.alauda.io/name: $app_name
-          app.rubick.alauda.io/name: $app_name
-          service.alauda.io/name: $app_name
-        name: $app_name
-        namespace: $NAMESPACE
-      spec:
-        ports:
-        - name: 22-22
-          port: 22
-          protocol: TCP
-          targetPort: 22
-        selector:
-          service.alauda.io/name: $app_name

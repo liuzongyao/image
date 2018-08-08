@@ -1,12 +1,11 @@
-import json
 import os
 import re
-import time
 from pathlib import Path
 from common.base_request import Common
-from common.utils import retry
 from common import settings
 from common.log import logger
+from common.utils import retry
+from common.parsercase import ParserCase
 
 
 def target_file():
@@ -25,11 +24,16 @@ def input_file(content):
     """
     substring = re.compile(r'[A-Z_]+')
     file = target_file()
-    file_new = file + '-new'
+    file_path = os.path.join(os.path.dirname(file), '../temp_data')
+    if not os.path.exists(file_path):
+        os.makedirs(file_path)
+    new_file = os.path.join(file_path, 'temporary.py')
+
     text = re.findall(substring, content)
 
+    # De-weighting
     with open(file, 'r') as read:
-        with open(file_new, 'w+') as write:
+        with open(new_file, 'w+') as write:
             for line in read:
                 line_sub = re.match(substring, line)
                 if line_sub:
@@ -38,70 +42,8 @@ def input_file(content):
                         continue
                 write.writelines(line)
 
-    os.remove(file)
-    os.rename(file_new, file)
-
-    with open(file, 'a+') as add:
+    with open(new_file, 'a+') as add:
         add.writelines(content)
-
-
-def put_dict_to_file(content):
-    """
-    :param content: dict
-    :return:
-    """
-    string = ''
-    if isinstance(content, dict):
-        for key, value in content.items():
-            string += '{} = "{}"\n'.format(key, value)
-        if string:
-            input_file(string)
-
-
-def clear_file():
-    """
-    Clean up dynamically generated data in files
-    :return:
-    """
-    file = target_file()
-    file_new = file + '-new'
-
-    with open(file, 'r') as read:
-        with open(file_new, 'w+') as write:
-            while True:
-                line = read.readline()
-                write.writelines(line)
-                if line.startswith('# Dynamic generate'):
-                    break
-    os.remove(file)
-    os.rename(file_new, file)
-
-
-def get_namespace_resource(region_id, namespace):
-    path = "/v2/kubernetes/clusters/{}/namespaces/" \
-           "{}/resources?project_name={}".format(region_id, namespace, settings.PROJECT_NAME)
-    count = 0
-    while count < 40:
-        count += 1
-        response = Common().send(method='get', path=path)
-        if response.status_code == 200 and not response.json() or response.status_code == 404:
-            return True
-        time.sleep(3)
-
-    return False
-
-
-def delete_namespace(region_id, namespace):
-    resource = get_namespace_resource(region_id, namespace)
-    if namespace.startswith('e2e') and resource:
-        response = Common().send(method='DELETE', path='/v2/kubernetes/clusters/{}/namespaces/{}'.format(
-                region_id, namespace))
-        try:
-            assert response.status_code == 204
-            logger.info('Delete namespace {} success'.format(namespace))
-        except AssertionError:
-            logger.error('Delete namespace: {} failed, Response code: {}, message: {}'.format(
-                namespace, response.status_code, response.text))
 
 
 def delete_role(role_name):
@@ -124,23 +66,25 @@ def delete_project(project_name):
         try:
             assert response.status_code == 204
             logger.info('Delete project {} success'.format(project_name))
+            return True
         except AssertionError:
             logger.error('Delete project {} failed, Response code: {}, message: {}'.format(
                 project_name, response.status_code, response.text))
+            return False
+    else:
+        logger.info("The name of project is not start with 'e2e', no need to delete")
+        return True
 
 
 class CommonData(Common):
     def __init__(self):
         super(CommonData, self).__init__()
-        self.project_name = "e2e-project"
-        self.namespace = 'e2e-namespace'
-        self.common_data = {}
+        self.common = ''
+        self.project_name = 'e2e-project'
         self.get_region_data()
         self.get_build_endpontid()
         self.get_load_balance_info()
-        self.create_project(self.project_name)
-        self.create_namespace(self.namespace)
-        put_dict_to_file(self.common_data)
+        input_file(self.common)
 
     @retry()
     def get_region_data(self):
@@ -151,7 +95,7 @@ class CommonData(Common):
         assert response.status_code == 200, response.json()
         self.region_data = response.json()
         self.region_id = self.get_value(self.region_data, "id")
-        self.common_data['REGION_ID'] = self.region_id
+        self.common = self.common + 'REGION_ID = "{}"\n'.format(self.region_id)
 
     @retry()
     def get_build_endpontid(self):
@@ -163,7 +107,7 @@ class CommonData(Common):
         for content in response.json():
             if content['region_id'] == self.region_id:
                 self.build_endpointid = content['endpoint_id']
-                self.common_data['BUILD_ENDPOINTID'] = self.build_endpointid
+                self.common = self.common + 'BUILD_ENDPOINTID = "{}"\n'.format(self.build_endpointid)
                 break
 
     @retry()
@@ -175,64 +119,15 @@ class CommonData(Common):
         contents = response.json()
         for content in contents:
             if "name" in content:
-                self.common_data['HAPROXY_NAME'] = content['name']
-                self.common_data['HAPROXY_IP'] = content['address']
+                self.common = self.common + 'HAPROXY_NAME = "{}"\n'.format(content['name'])
+                self.common = self.common + 'HAPROXY_IP = "{}"\n'.format(content['address'])
                 break
 
-    def create_project(self, project):
-        try:
-            project_name = settings.PROJECT_NAME
-            return project_name
-        except AttributeError:
-            delete_project(project)
-            data = {"name": project,
-                    "display_name": "",
-                    "description": "",
-                    "clusters":
-                        [{
-                            "name": self.region_name,
-                            "uuid": self.region_id,
-                            "service_type": "kubernetes",
-                            "quota":
-                                {
-                                    "cpu": 0,
-                                    "memory": 0,
-                                    "pvc_num": 0,
-                                    "pods": 0,
-                                    "storage": 0
-                                }
-                        }],
-                    "template": "empty-template"
-                    }
-            content = {}
-            content['data'] = json.dumps(data)
-            response = self.send(method='POST', path='/v1/projects/{}/'.format(self.account), **content)
-            assert response.status_code == 201, response.text
-            self.common_data['PROJECT_NAME'] = project
-
-    def create_namespace(self, namespace):
-        try:
-            project = self.common_data['PROJECT_NAME']
-        except KeyError:
-            project = settings.PROJECT_NAME
-
-        try:
-            name_space = settings.NAMESPACE
-            return name_space
-        except AttributeError:
-            delete_namespace(self.region_id, namespace)
-
-            data = {
-                    "apiVersion": "v1",
-                    "kind": "Namespace",
-                    "metadata": {
-                        "name": namespace
-                    }
-            }
+    def create_project(self):
+        if not settings.PROJECT_NAME:
+            data = ParserCase('project.yml', variables={"project": self.project_name}).parser_case()
             content = {}
             content['data'] = data
-            response = self.send(method='POST', path='/v2/kubernetes/clusters/{}/namespaces?project_name={}'.format(
-                self.region_id, project), **content)
+            response = self.send(method='POST', path='/v1/projects/{}/'.format(self.account), **content)
             assert response.status_code == 201, response.text
-            self.common_data['NAMESPACE'] = namespace
-            self.common_data['NAMESPACE_UUID'] = self.get_value(response.json(), '0.kubernetes.metadata.uid')
+            self.common = self.common + 'PROJECT_NAME = "{}"\n'.format(self.project_name)

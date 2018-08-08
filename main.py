@@ -6,7 +6,8 @@ import pytest
 from common.utils import send_email, read_result
 from common import settings
 from common.log import logger
-from common.get_common_data import CommonData, delete_project, delete_namespace, clear_file
+from common.get_common_data import CommonData, delete_project
+from common.parsercase import data_value
 
 
 def setup():
@@ -14,9 +15,7 @@ def setup():
 
 
 def teardown():
-    delete_namespace(settings.REGION_ID, settings.NAMESPACE)
-    delete_project(settings.PROJECT_NAME)
-    clear_file()
+    delete_project(data_value().get('PROJECT_NAME'))
 
 
 def main():
@@ -41,7 +40,6 @@ def main():
         logger.info(html)
         logger.info("********* begin to print result *********")
 
-        # 清理settings文件中由case自动添加的内容
         teardown()
     except KeyboardInterrupt:
         teardown()
