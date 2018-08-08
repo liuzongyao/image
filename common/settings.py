@@ -12,8 +12,8 @@ SVN_REPO = os.getenv("SVN_REPO", "http://svn-password.k8s-st.haproxy-54-223-242-
 SVN_USERNAME = os.getenv("SVN_USERNAME", "User_Name-01")
 SVN_PASSWORD = os.getenv("SVN_PASSWORD", "alauda_Test-!@#")
 TESTCASES = os.getenv("TESTCASES", "")
-CASE_TYPE = os.getenv("CASE_TYPE", "new_k8s_app")
-PROJECT_NAME = os.getenv("PROJECT_NAME", "jhhtest")
+CASE_TYPE = os.getenv("CASE_TYPE")
+PROJECT_NAME = os.getenv("PROJECT_NAME", "")
 ENV = os.getenv("ENV", "Staging")
 RECIPIENTS = os.getenv("RECIPIENTS", ["hchan@alauda.io"])
 
