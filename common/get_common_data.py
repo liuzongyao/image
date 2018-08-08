@@ -84,6 +84,7 @@ class CommonData(Common):
         self.get_region_data()
         self.get_build_endpontid()
         self.get_load_balance_info()
+        self.create_project()
         input_file(self.common)
 
     @retry()
@@ -125,6 +126,7 @@ class CommonData(Common):
 
     def create_project(self):
         if not settings.PROJECT_NAME:
+            delete_project(self.project_name)
             data = ParserCase('project.yml', variables={"project": self.project_name}).parser_case()
             content = {}
             content['data'] = data

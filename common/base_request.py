@@ -255,7 +255,6 @@ class Common(AlaudaRequest):
         data = ParserCase(file, variables={"NAMESPACE": namespace}).parser_case()
         content = {}
         content['data'] = data
-        print(content)
         response = self.send(method="post", path=path, **content)
         assert response.status_code == 201, response.text
         uuid = self.get_value(response.json(), '0.kubernetes.metadata.uid')

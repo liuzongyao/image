@@ -41,7 +41,6 @@ class ParserCase(object):
         self.dir_name = dir_name
         self.variables = variables
         self.data = data_value()
-        print(self.data)
 
     def parameterize(self, file, dir_name=None):
         contents = FileUtils.load_file(file, dir_name=dir_name)
