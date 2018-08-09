@@ -6,6 +6,7 @@ SUB_ACCOUNT = os.getenv("SUB_ACCOUNT", "")
 PASSWORD = os.getenv("PASSWORD", "alauda_staging")
 REGION_NAME = os.getenv("REGION_NAME", "aws_newk8s")
 REGISTRY_NAME = os.getenv("REGISTRY_NAME", "awsnewk8s")
+IMAGE = os.getenv("IMAGE", "index.alauda.cn/alaudaorg/qaimages:helloworld")
 
 SVN_REPO = os.getenv("SVN_REPO", "http://svn-password.k8s-st.haproxy-54-223-242-27-alaudacn.myalauda.cn/alauda_test/")
 SVN_USERNAME = os.getenv("SVN_USERNAME", "User_Name-01")

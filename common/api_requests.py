@@ -1,8 +1,7 @@
+import json
 import requests
-from common.log import Logging
+from common.log import logger
 from common import settings
-
-logger = Logging.get_logger()
 
 
 class AlaudaRequest(object):
@@ -22,38 +21,26 @@ class AlaudaRequest(object):
         else:
             self.auth = (self.account, self.password)
 
-    def send(self, method, path, auth=None, data={}, headers={}, params={}, version='v1'):
-        url = self._get_url(path, version)
-
-        if headers:
-            headers = dict(self.headers.items() + headers.items())
+    def send(self, method, path, auth=None, **content):
+        url = self._get_url(path)
+        if auth:
+            content['auth'] = auth
         else:
-            headers = self.headers
+            content['auth'] = self.auth
 
-        args = {'headers': headers}
+        if 'headers' in content:
+            content['headers'].update(self.headers)
+        else:
+            content['headers'] = self.headers
 
-        args['auth'] = auth or self.auth
-
-        params.update(self.params)
-        args['params'] = params
-
-        if data is not None:
-            if headers['Content-Type'] == 'application/json':
-                args['json'] = data
-            else:
-                args['data'] = data
-
-        files = data and data.pop('files', None) or None
-        if files:
-            args['files'] = files
-        logger.info('Requesting url={}, method={}, args={}'.format(url, method, args))
-        response = requests.request(method, url, **args)
+        logger.info('Requesting url={}, method={}, args={}'.format(url, method, content))
+        response = requests.request(method, url, **content)
         if response.status_code < 200 or response.status_code > 300:
-            logger.info("response code={}, text={}".format(response.status_code, response.text))
+            logger.error("response code={}, text={}".format(response.status_code, response.text))
         else:
             logger.info("response code={}".format(response.status_code))
 
         return response
 
-    def _get_url(self, path, version):
-        return '{}/{}/{}'.format(self.endpoint, version, path)
+    def _get_url(self, path):
+        return '{}/{}'.format(self.endpoint, path)
