@@ -2,6 +2,7 @@ import pytest
 from new_k8s.app import Application
 from common.parsercase import data_value
 from common.project import Project
+from common.namespace import Namespace
 
 
 @pytest.mark.region
@@ -10,16 +11,17 @@ class TestApplicationSuite(object):
     def setup_class(self):
         self.tool = Application()
         self.project = Project()
+        self.n = Namespace()
         self.app_name = 'e2e-app-{}'.format(self.tool.region_name).replace('_', '-')
         self.app_describe = "e2e-app-describe"
         self.namespace = 'e2e-namespace-{}'.format(self.tool.region_name).replace('_', '-')
         self.project.create_project()
-        self.tool.delete_namespaces(self.namespace)
-        self.namespace_uuid = self.tool.create_namespaces(self.namespace, 'namespace.yml')
+        self.n.delete_namespaces(self.namespace)
+        self.namespace_uuid = self.n.create_namespaces(self.namespace, 'namespace.yml')
 
     def teardown_class(self):
         self.tool.delete_app(self.app_name)
-        self.tool.delete_namespaces(self.namespace)
+        self.n.delete_namespaces(self.namespace)
         self.project.delete_project()
 
     def test_newk8s_app(self):
