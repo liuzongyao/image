@@ -1,24 +1,6 @@
 import os
-import re
+import json
 from common.loadfile import FileUtils
-
-
-variable_regexp = r"\$([\w_]+)"
-
-
-def extract_variables(content):
-    """ extract all variable names from content, which is in format $variable
-    @param (str) content
-    @return (list) variable name list
-    e.g. $variable => ["variable"]
-         /blog/$postid => ["postid"]
-         /$var1/$var2 => ["var1", "var2"]
-         abc => []
-    """
-    try:
-        return re.findall(variable_regexp, content)
-    except TypeError:
-        return []
 
 
 def add_file(content):
@@ -47,6 +29,7 @@ def data_value():
 class ParserCase(object):
     def __init__(self, file, dir_name=None, variables={}):
         self.file = file
+        self.content = {}
         self.dir_name = dir_name
         self.variables = variables
         self.data = data_value()
@@ -58,40 +41,18 @@ class ParserCase(object):
     def generate_case(self, file, dir_name=None):
         content = self.parameterize(file, dir_name=dir_name)
 
-        variables = {}
-
-        if 'variables' in content:
-            variables = content.pop('variables')
-
         if self.variables:
-            variables.update(self.variables)
+            self.data.update(self.variables)
 
-        if variables:
-            self.replace_varible(variables, content)
-
-        self.replace_varible(self.data, content)
-        return content
+        return self.replace_varible(self.data, json.dumps(content))
 
     def replace_varible(self, sources, content):
-        """
-        replace variable
-        :param sources: dict
-        :param content: dict
-        :return:
-        """
-        if isinstance(content, dict):
-            for key, value in content.items():
-                content[key] = self.replace_varible(sources, value)
-        if isinstance(content, str):
-            variable_list = extract_variables(content)
-            for index, variable in enumerate(variable_list):
-                if variable in sources:
-                    variable_new = '$' + variable
-                    content = content.replace(variable_new, sources[variable])
-        if isinstance(content, list):
-            for index, cont in enumerate(content):
-                content[index] = self.replace_varible(sources, cont)
-        return content
+        for key, value in sources.items():
+            new_key = '{}{}'.format('$', key)
+            if new_key in content:
+                content = content.replace(new_key, value)
+        self.content['data'] = content
+        return self.content
 
     def parser_case(self):
         return self.generate_case(self.file, dir_name=self.dir_name)

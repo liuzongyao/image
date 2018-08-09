@@ -253,9 +253,7 @@ class Common(AlaudaRequest):
         path = '/v2/kubernetes/clusters/{}/namespaces?project_name={}'.format(data_value().get('REGION_ID'),
                                                                               data_value().get('PROJECT_NAME'))
         data = ParserCase(file, variables={"NAMESPACE": namespace}).parser_case()
-        content = {}
-        content['data'] = data
-        response = self.send(method="post", path=path, **content)
+        response = self.send(method="post", path=path, **data)
         assert response.status_code == 201, response.text
         uuid = self.get_value(response.json(), '0.kubernetes.metadata.uid')
         return uuid
@@ -278,9 +276,7 @@ class Common(AlaudaRequest):
         if ret is False:
             path = 'v1/spaces/{}/?project_name={}'.format(data_value().get("ACCOUNT"), data_value().get('PROJECT_NAME'))
             data = ParserCase(file, variables={"ACCOUNT": data_value().get("SPACE_NAME")}).parser_case()
-            content = {}
-            content['data'] = data
-            response = self.send(method='post', path=path, **content)
+            response = self.send(method='post', path=path, **data)
             assert response.status_code == 201, response.text
             uuid = self.get_value(response.json(), 'uuid')
             string = 'CREATE_SPACE = True\n'

@@ -33,9 +33,6 @@ class AlaudaRequest(object):
         else:
             content['headers'] = self.headers
 
-        if 'data' in content:
-            content['data'] = json.dumps(content['data'])
-
         logger.info('Requesting url={}, method={}, args={}'.format(url, method, content))
         response = requests.request(method, url, **content)
         if response.status_code < 200 or response.status_code > 300:
