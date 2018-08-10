@@ -6,11 +6,15 @@ import pytest
 from common.utils import send_email, read_result
 from common import settings
 from common.log import logger
-from common.get_common_data import CommonData
+from common.setup_teardown import SetUp, TearDown
 
 
 def setup():
-    CommonData()
+    SetUp()
+
+
+def teardown():
+    TearDown()
 
 
 def main():
@@ -34,7 +38,9 @@ def main():
     logger.info(html)
     logger.info("********* begin to print result *********")
 
+    # 清理数据
+    teardown()
+
 
 if __name__ == '__main__':
     main()
-

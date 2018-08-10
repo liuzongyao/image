@@ -2,8 +2,8 @@ resource:
   name: $app_name
   description: $description
 namespace:
-  name: $NAMESPACE_NAME
-  uuid: $NAMESPACE_UUID
+  name: $K8S_NAMESPACE
+  uuid: $K8S_NAMESPACE_UUID
 cluster:
   name: $REGION_NAME
   uuid: $REGION_ID
@@ -14,7 +14,7 @@ kubernetes:
     lastTimestamp: null
     metadata:
       name: $app_name
-      namespace: $NAMESPACE_NAME
+      namespace: $K8S_NAMESPACE
     spec:
       replicas: 1
       strategy:
@@ -43,7 +43,7 @@ kubernetes:
     lastTimestamp: null
     metadata:
       name: $app_name
-      namespace: $NAMESPACE_NAME
+      namespace: $K8S_NAMESPACE
     spec:
       maxReplicas: 20
       minReplicas: 1
@@ -63,7 +63,7 @@ kubernetes:
         app.rubick.alauda.io/name: $app_name
         service.alauda.io/name: $app_name
       name: $app_name
-      namespace: $NAMESPACE_NAME
+      namespace: $K8S_NAMESPACE
     spec:
       ports:
       - name: 22-22

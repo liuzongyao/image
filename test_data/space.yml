@@ -1,7 +1,0 @@
-name: $SPACE_NAME
-quotas:
-- name: service.mem
-  hard: 2048
-- name: service.cpu
-  hard: 2
-namespace: $ACCOUNT

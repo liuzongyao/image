@@ -11,11 +11,11 @@
   },
   "name": "$NAME",
   "endpoint_id": "$BUILD_ENDPOINT_ID",
-  "auto_build_enabled": False,
+  "auto_build_enabled": false,
   "customize_tag": "latest",
   "space_name": "$SPACE_NAME",
   "namespace": "$NAMESPACE",
-  "image_cache_enabled": False,
+  "image_cache_enabled": false,
   "code_repo": {
     "code_repo_password": "$SVN_PASSWORD",
     "dockerfile_location": "/",

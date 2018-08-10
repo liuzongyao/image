@@ -1,0 +1,14 @@
+{
+    "namespace": "$ACCOUNT",
+    "name": "$SPACE_NAME",
+    "quotas": [
+        {
+            "hard": 2,
+            "name": "service.cpu"
+        },
+        {
+            "hard": 2048,
+            "name": "service.mem"
+        }
+    ]
+}
