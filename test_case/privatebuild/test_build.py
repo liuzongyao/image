@@ -1,5 +1,5 @@
 import pytest
-from privatebuild.build import PrivateBuild
+from test_case.privatebuild.build import PrivateBuild
 
 
 @pytest.mark.region
@@ -15,7 +15,7 @@ class TestPrivateBuildTestSuit(object):
     def test_svn_build(self):
         result = {"flag": True}
         self.client.delete_build(self.svn_build_name)
-        ret_create = self.client.create_build("svn_build.json", {"$NAME": self.svn_build_name})
+        ret_create = self.client.create_build("./test_data/build/svn_build.json", {"$NAME": self.svn_build_name})
         assert ret_create.status_code == 201, ret_create.text
         config_id = ret_create.json()["config_id"]
 

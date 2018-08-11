@@ -1,8 +1,9 @@
 import pytest
-from new_k8s.app import Application
 from common.parsercase import data_value
-from common.project import Project
-from common.namespace import Namespace
+from namespace.namespace import Namespace
+from new_k8s.app import Application
+
+from test_case.project.project import Project
 
 
 @pytest.mark.region

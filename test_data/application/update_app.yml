@@ -1,6 +1,6 @@
 resource:
   description: $description
-namespace: $NAMESPACE
+namespace: $K8S_NAMESPACE
 kubernetes:
   - apiVersion: extensions/v1beta1
     firstTimestamp: null
@@ -8,7 +8,7 @@ kubernetes:
     lastTimestamp: null
     metadata:
       name: $app_name
-      namespace: $NAMESPACE
+      namespace: $K8S_NAMESPACE
     spec:
       replicas: 1
       strategy:
@@ -39,7 +39,7 @@ kubernetes:
     lastTimestamp: null
     metadata:
       name: $app_name
-      namespace: $NAMESPACE
+      namespace: $K8S_NAMESPACE
     spec:
       maxReplicas: 20
       minReplicas: 1

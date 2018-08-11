@@ -6,16 +6,12 @@ import pytest
 from common.utils import send_email, read_result
 from common import settings
 from common.log import logger
-from common.get_common_data import CommonData
-
-
-def setup():
-    CommonData()
+from common.setup_teardown import SetUp, TearDown
 
 
 def main():
     # 获取集群的全部固定资源
-    setup()
+    SetUp()
 
     # 执行case
     run_command = ['-s', settings.TESTCASES, "--html=./report/pytest.html"]
@@ -32,9 +28,11 @@ def main():
         html, settings.RECIPIENTS, "./report.tar")
     logger.info("********* begin to print result *********")
     logger.info(html)
-    logger.info("********* begin to print result *********")
+    logger.info("********* print result over*********")
+
+    # 清理数据
+    TearDown()
 
 
 if __name__ == '__main__':
     main()
-

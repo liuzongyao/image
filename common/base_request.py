@@ -1,22 +1,32 @@
 # coding=utf-8
-import json
 import pexpect
+import json
 from common.api_requests import AlaudaRequest
 from common.log import logger
 from time import sleep, time
 from common.exceptions import ResponseError, ParseResponseError
-from common.parsercase import ParserCase, data_value, add_file
+from common.loadfile import FileUtils
 
 
 class Common(AlaudaRequest):
     def __init__(self):
         super(Common, self).__init__()
-        print(self.region_name)
-        self.region_data = {}
-        self.build_endpointid = ''
-        self.region_id = ''
-
+        self.global_info = FileUtils.load_file(self.global_info_path)
         self.final_status = ["S", "F", "Running", "Error"]
+        self.region_id = self.global_info["$REGION_ID"]
+
+    def generate_data(self, file_path, data):
+        """
+        对指定文件替换数据，生成最终测试数据
+        :param file_path: 指定测试文件路径
+        :param data: 需要替换的数据，传入字典类型，key为文件中被替换的内容，value为替换的字符串
+        :return: 最终测试数据 类型是字符串
+        """
+        self.global_info.update(data)
+        content = json.dumps(FileUtils.load_file(file_path))
+        for key in self.global_info:
+            content = content.replace(key, self.global_info[key])
+        return content
 
     @staticmethod
     def get_value(json_content, query, delimiter='.'):
@@ -76,7 +86,8 @@ class Common(AlaudaRequest):
                 ret_list.append(data[keys[-1]])
         return ret_list
 
-    def generate_time_params(self):
+    @staticmethod
+    def generate_time_params():
         current_time = int(time())
         return {"start_time": current_time - 1800, "end_time": current_time}
 
@@ -107,7 +118,7 @@ class Common(AlaudaRequest):
         flag = False
         while cnt < 30 and not flag:
             cnt += 1
-            params = self.generate_time_params()
+            params = Common.generate_time_params()
             response = self.send(method="GET", path=url, params=params)
             assert response.status_code == 200, "get log failed"
             if expect_value in response.text:
@@ -145,10 +156,10 @@ class Common(AlaudaRequest):
 
     def get_events(self, url, resource_id, operation):
         for i in range(0, 40):
-            r = self.send(method='get', path=url)
-            if r.status_code != 200:
+            repsponse = self.send(method='get', path=url)
+            if repsponse.status_code != 200:
                 return False
-            content = json.loads(r.text).get("results", [])
+            content = repsponse.json().get("results", [])
             # logger.debug("Requesting the api of events, got content{}".format(content))
 
             for j in range(0, len(content)):
