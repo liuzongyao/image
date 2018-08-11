@@ -5,3 +5,4 @@ pytest-rerunfailures
 bs4
 flake8
 pexpect
+pyyaml
