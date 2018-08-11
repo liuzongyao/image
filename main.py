@@ -9,17 +9,9 @@ from common.log import logger
 from common.setup_teardown import SetUp, TearDown
 
 
-def setup():
-    SetUp()
-
-
-def teardown():
-    TearDown()
-
-
 def main():
     # 获取集群的全部固定资源
-    setup()
+    SetUp()
 
     # 执行case
     run_command = ['-s', settings.TESTCASES, "--html=./report/pytest.html"]
@@ -36,10 +28,10 @@ def main():
         html, settings.RECIPIENTS, "./report.tar")
     logger.info("********* begin to print result *********")
     logger.info(html)
-    logger.info("********* begin to print result *********")
+    logger.info("********* print result over*********")
 
     # 清理数据
-    teardown()
+    TearDown()
 
 
 if __name__ == '__main__':

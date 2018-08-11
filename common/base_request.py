@@ -15,17 +15,15 @@ class Common(AlaudaRequest):
         self.final_status = ["S", "F", "Running", "Error"]
         self.region_id = self.global_info["$REGION_ID"]
 
-    def generate_data(self, file, data):
+    def generate_data(self, file_path, data):
         """
         对指定文件替换数据，生成最终测试数据
-        :param file: 指定测试文件路径
+        :param file_path: 指定测试文件路径
         :param data: 需要替换的数据，传入字典类型，key为文件中被替换的内容，value为替换的字符串
-        :return: 最终测试数据
+        :return: 最终测试数据 类型是字符串
         """
         self.global_info.update(data)
-        print(FileUtils.load_file(file))
-        content = json.dumps(FileUtils.load_file(file))
-        print(content)
+        content = json.dumps(FileUtils.load_file(file_path))
         for key in self.global_info:
             content = content.replace(key, self.global_info[key])
         return content

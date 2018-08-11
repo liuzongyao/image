@@ -1,3 +1,4 @@
+# coding=utf-8
 import requests
 from common.log import logger
 from common import settings
@@ -22,6 +23,14 @@ class AlaudaRequest(object):
             self.auth = (self.account, self.password)
 
     def send(self, method, path, auth=None, **content):
+        """
+        使用和原生的requests.request一致，只是对url和auth params做了些特殊处理
+        :param method:
+        :param path:
+        :param auth:
+        :param content:
+        :return:
+        """
         url = self._get_url(path)
         if auth:
             content["auth"] = auth

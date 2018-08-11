@@ -9,6 +9,9 @@ from test_case.space.space import Space
 
 
 class SetUp(AlaudaRequest):
+    """
+    测试前先获取global信息已经新建一些测试的必须资源
+    """
     def __init__(self):
         super(SetUp, self).__init__()
         self.common = {
@@ -55,6 +58,9 @@ class SetUp(AlaudaRequest):
 
     @retry()
     def get_load_balance_info(self):
+        """
+        :return:获取haproxy的ip和name
+        """
         response = self.send(method='GET',
                              path='/v1/load_balancers/{}?region_name={}'.format(self.account, self.region_name))
         assert response.status_code == 200, response.text
@@ -66,6 +72,7 @@ class SetUp(AlaudaRequest):
 
     def input_file(self, content):
         """
+        将global数据写入临时文件
         :param content: str
         :return:
         """
@@ -91,6 +98,9 @@ class SetUp(AlaudaRequest):
 
 
 class TearDown(AlaudaRequest):
+    """
+    测试结束后删除setup创建的资源
+    """
     def __init__(self):
         super(TearDown, self).__init__()
         self.namespace_client = Namespace()

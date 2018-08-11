@@ -6,7 +6,7 @@ class Project(Common):
         return project_name and "v1/projects/{}/{}".format(self.account, project_name) or \
                "v1/projects/{}/".format(self.account)
 
-    def get_project(self, project_name):
+    def get_project_resources(self, project_name):
         path = self.get_project_config_url(project_name)
         return self.send(method='get', path=path)
 
