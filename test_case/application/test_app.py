@@ -1,7 +1,6 @@
 import pytest
 
 from test_case.application.app import Application
-from test_case.namespace.namespace import Namespace
 
 
 @pytest.mark.region
@@ -9,7 +8,6 @@ from test_case.namespace.namespace import Namespace
 class TestApplicationSuite(object):
     def setup_class(self):
         self.tool = Application()
-        self.n = Namespace()
         self.app_name = 'e2e-app-{}'.format(self.tool.region_name).replace('_', '-')
         self.app_describe = "e2e-app-describe"
 
@@ -33,8 +31,7 @@ class TestApplicationSuite(object):
 
         # exec
         pod_instance = self.tool.get_service_instance(service_uuid)
-        ip = self.tool.global_info['$HAPROXY_IP']
-        exec_result = self.tool.exec_container(ip, service_uuid, pod_instance, self.app_name, 'ls')
+        exec_result = self.tool.exec_container(service_uuid, pod_instance, self.app_name, 'ls')
         result = self.tool.update_result(result, exec_result, "exec")
 
         # get logs

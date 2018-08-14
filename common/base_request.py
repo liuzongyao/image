@@ -240,7 +240,8 @@ class Common(AlaudaRequest):
             elif r == 2:
                 return child
 
-    def send_command(self, ip, service_uuid, pod_instance, app_name, command):
+    def send_command(self, service_uuid, pod_instance, app_name, command):
+        ip = self.global_info['$HAPROXY_IP']
         child = self.login_container(ip, service_uuid, pod_instance, app_name)
         if child:
             child.sendline(command)
