@@ -32,19 +32,19 @@ class TestApplicationSuite(object):
 
         # get app detail
         detail_result = self.application.get_app_detail(app_uuid)
-        assert detail_result.status_code == 200, detail_result.text
+        result = self.application.update_result(result, detail_result.status_code == 200, 'get app detail failed')
         app_describe = self.application.get_app_status(app_uuid, 'resource.description', "$description")
-        assert app_describe, "get app detail {} failed".format(self.app_name)
+        result = self.application.update_result(result, app_describe, 'get app detail  error')
 
         # list app
         list_result = self.application.list_app()
-        assert list_result.status_code == 200, list_result.text
-        assert self.app_name in list_result.text, 'list app error'
+        result = self.application.update_result(result, list_result.status_code == 200, 'list app failed')
+        result = self.application.update_result(result, self.app_name in list_result.text, 'list app error')
 
         # get app yaml
         appyaml_result = self.application.get_app_yaml(app_uuid)
-        assert appyaml_result.status_code == 200, appyaml_result.text
-        assert "Deployment" in appyaml_result.text, appyaml_result.text
+        result = self.application.update_result(result, appyaml_result.status_code == 200, 'get app yaml failed')
+        result = self.application.update_result(result, "Deployment" in appyaml_result.text, 'get app yaml error')
 
         # get app event
         event_result = self.application.get_app_events(app_uuid, 'create', self.application.global_info['$NAMESPACE'])
@@ -94,9 +94,9 @@ class TestApplicationSuite(object):
 
         # get service yaml
         svcyaml_result = self.application.get_service_yaml(service_uuid)
-        assert svcyaml_result.status_code == 200, svcyaml_result.text
-        assert "updateservice" in svcyaml_result.text, svcyaml_result.text
-        assert "livenessProbe" in svcyaml_result.text, svcyaml_result.text
+        result = self.application.update_result(result, svcyaml_result.status_code == 200, "get service yaml failed")
+        result = self.application.update_result(result, "updateservice" in svcyaml_result.text, "get svc yaml error")
+        result = self.application.update_result(result, "livenessProbe" in svcyaml_result.text, "get svc yaml error")
 
         # get service log source
         service_log_source = self.application.get_service_log_source(service_uuid)
@@ -122,8 +122,10 @@ class TestApplicationSuite(object):
         assert app_status, "service: {} rollbacktoversion failed".format(self.app_name)
         sleep(5)
         svcyaml_result = self.application.get_service_yaml(service_uuid)
-        assert svcyaml_result.status_code == 200, svcyaml_result.text
-        assert "updateservice" not in svcyaml_result.text, svcyaml_result.text
+        result = self.application.update_result(result, svcyaml_result.status_code == 200,
+                                                "after rollback,get yaml failed")
+        result = self.application.update_result(result, "updateservice" not in svcyaml_result.text,
+                                                "after rollback ,get service yaml error")
 
         # rollback
         roll_result = self.application.rollback_service(service_uuid)
@@ -146,7 +148,7 @@ class TestApplicationSuite(object):
         # update app
         update_result = self.application.update_app(app_uuid, './test_data/application/update_app.yml',
                                                     {"$app_name": self.app_name,
-                                              "$description": self.app_describe})
+                                                     "$description": self.app_describe})
         # update action success or not
         assert update_result.status_code == 200, update_result.text
         # app is running or not
@@ -167,7 +169,7 @@ class TestApplicationSuite(object):
         if len(slaveips) > 1:
             update_result = self.application.update_app(app_uuid, './test_data/application/update_app_affinity.yml',
                                                         {"$app_name": self.app_name,
-                                                  "$description": self.app_describe})
+                                                         "$description": self.app_describe})
             assert update_result.status_code == 200, update_result.text
             app_status = self.application.get_app_status(app_uuid, 'resource.status', 'Running')
             assert app_status, "app: {} is not running".format(self.app_name)

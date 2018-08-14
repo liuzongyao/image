@@ -31,6 +31,7 @@ class SetUp(AlaudaRequest):
         self.get_build_endpontid()
         self.get_load_balance_info()
         self.get_slave_ips()
+        self.input_file(self.common)
         self.namespace_client = Namespace()
         self.space_client = Space()
         self.prepare()
