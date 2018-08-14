@@ -29,10 +29,10 @@ kubernetes:
             resources:
               limits:
                 cpu: 20m
-                memory: 100M
+                memory: 50M
               requests:
                 cpu: 20m
-                memory: 100M
+                memory: 50M
   - apiVersion: autoscaling/v1
     firstTimestamp: null
     kind: HorizontalPodAutoscaler

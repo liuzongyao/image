@@ -21,14 +21,14 @@ def main():
     pytest.main(run_command)
 
     resultflag, html = read_result()
+    logger.info("********* begin to print result *********")
+    logger.info(html)
+    logger.info("********* print result over*********")
     with tarfile.open("./report.tar", "w:gz") as tar:
         tar.add("./report", arcname=os.path.basename("./report"))
     send_email(
         "[{}] ({}) ({}) API E2E Test".format(resultflag, settings.ENV, settings.REGION_NAME),
         html, settings.RECIPIENTS, "./report.tar")
-    logger.info("********* begin to print result *********")
-    logger.info(html)
-    logger.info("********* print result over*********")
 
     # 清理数据
     TearDown()

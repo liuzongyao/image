@@ -30,6 +30,7 @@ class SetUp(AlaudaRequest):
         self.get_region_data()
         self.get_build_endpontid()
         self.get_load_balance_info()
+        self.get_slave_ips()
         self.namespace_client = Namespace()
         self.space_client = Space()
         self.prepare()
@@ -72,6 +73,18 @@ class SetUp(AlaudaRequest):
             if "name" in content:
                 self.common.update({"$HAPROXY_NAME": content['name'], "$HAPROXY_IP": content['address']})
                 break
+
+    def get_slave_ips(self):
+        response = self.send(method='GET',
+                             path='/v1/regions/{}/{}/nodes/'.format(self.account, self.region_name))
+        assert response.status_code == 200, response.text
+        contents = response.json()
+        slaveips = []
+        for content in contents:
+            if content.get("type") == "SYSLAVE" or content.get("type") == "SLAVE" and content.get("attr").get(
+                    "schedulable") is True:
+                slaveips.append(content.get("private_ip"))
+        self.common.update({"$SLAVEIPS": ','.join(slaveips)})
 
     def input_file(self, content):
         """

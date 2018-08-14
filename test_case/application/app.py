@@ -1,8 +1,12 @@
+import sys
+from time import sleep
+
 import requests
 from requests.exceptions import ConnectionError
+
+from common import settings
 from common.base_request import Common
 from common.log import logger
-from common import settings
 
 
 class Application(Common):
@@ -46,6 +50,35 @@ class Application(Common):
     def get_app_event_url(self, namespace):
         return "/v1/events/{}?namespace={}&pageno=1&size=100".format(settings.ACCOUNT, namespace)
 
+    def get_stop_service_url(self, uuid):
+        return "/v2/services/{}/stop".format(uuid)
+
+    def get_start_service_url(self, uuid):
+        return "/v2/services/{}/start".format(uuid)
+
+    def get_common_service_url(self, uuid):
+        return "/v2/services/{}".format(uuid)
+
+    def get_service_mem_monitor_url(self, uuid):
+        return "/v2/monitor/{}/metrics/query?q=avg:service.mem.utilization{}by{}".format(settings.ACCOUNT,
+                                                                                         "{service_id=" + uuid + "}",
+                                                                                         "{instance_id}")
+
+    def get_service_log_source_url(self, uuid):
+        return "/v2/services/{}/logs/sources".format(uuid)
+
+    def get_service_yam_url(self, uuid):
+        return "/v2/services/{}/yaml".format(uuid)
+
+    def get_rollbackto_service_url(self, uuid, version=1):
+        return "/v2/services/{}/rollback?rollback_to={}".format(uuid, version)
+
+    def get_rollback_service_url(self, uuid):
+        return "/v2/services/{}/rollback".format(uuid)
+
+    def get_pod_rebuild_url(self, region_id, namespace, podname):
+        return "/v2/kubernetes/clusters/{}/pods/{}/{}".format(region_id, namespace, podname)
+
     def get_app_uuid(self, app_name):
         url = self.get_app_list_url(app_name)
         response = self.send(method='get', path=url)
@@ -55,11 +88,11 @@ class Application(Common):
             return self.get_value(contents, '0.resource.uuid')
         return " "
 
-    def get_service_uuid(self, app_uuid):
+    def get_service_uuid(self, app_uuid, key='services.0.resource.uuid'):
         url = self.app_common_url(app_uuid)
         response = self.send(method='get', path=url)
         assert response.status_code == 200
-        return self.get_value(response.json(), 'services.0.resource.uuid')
+        return self.get_value(response.json(), key)
 
     def get_service_url(self, service_uuid):
         url = self.get_service_loadbalance_url(service_uuid)
@@ -108,11 +141,28 @@ class Application(Common):
         url = self.get_stop_app_url(uuid)
         return self.send(method='put', path=url)
 
+    def get_app_yaml(self, uuid):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        url = self.get_app_yam_url(uuid)
+        return self.send(method='get', path=url)
+
+    def get_app_detail(self, uuid):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        url = self.app_common_url(uuid)
+        return self.send(method='get', path=url)
+
+    def list_app(self):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        url = self.get_app_list_url("")
+        return self.send(method='get', path=url)
+
     def get_service_log(self, service_id, expect_value):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
         url = self.get_app_log_url(service_id)
         return self.get_logs(url, expect_value)
 
     def get_app_monitor(self, app_id):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
         url = self.get_app_cpu_monitor_url(app_id)
         return self.get_monitor(url)
 
@@ -124,12 +174,26 @@ class Application(Common):
             return self.get_value(content, '0.metadata.name')
 
     def get_app_status(self, app_id, key, expect_status):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
         url = self.app_common_url(app_id)
         return self.get_status(url, key, expect_status)
 
     def get_app_events(self, app_id, operation, namespace):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
         url = self.get_app_event_url(namespace)
         return self.get_events(url, app_id, operation)
+
+    def check_exists(self, url, expect_status):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        cnt = 0
+        flag = False
+        while cnt < 60 and not flag:
+            cnt += 1
+            response = self.send(method="GET", path=url)
+            if response.status_code == expect_status:
+                flag = True
+            sleep(5)
+        return flag
 
     def access_service(self, service_url, query):
         logger.info("************************** access service ********************************")
@@ -148,3 +212,59 @@ class Application(Common):
         if ret == 0:
             return True
         return False
+
+    def stop_service(self, service_id):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        url = self.get_stop_service_url(service_id)
+        return self.send(method='put', path=url)
+
+    def start_service(self, service_id):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        url = self.get_start_service_url(service_id)
+        return self.send(method='put', path=url)
+
+    def delete_service(self, service_id):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        url = self.get_common_service_url(service_id)
+        return self.send(method='delete', path=url)
+
+    def update_service(self, service_id, file, data):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        url = self.get_common_service_url(service_id)
+        data = self.generate_data(file, data)
+        return self.send(method='patch', path=url, data=data)
+
+    def get_service_monitor(self, service_id):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        url = self.get_service_mem_monitor_url(service_id)
+        return self.get_monitor(url)
+
+    def get_service_log_source(self, service_id):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        url = self.get_service_log_source_url(service_id)
+        return self.send(method='get', path=url)
+
+    def get_service_yaml(self, service_id):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        url = self.get_service_yam_url(service_id)
+        return self.send(method='get', path=url)
+
+    def get_service_instances(self, service_id):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        url = self.get_service_instance_url(service_id)
+        return self.send(method='get', path=url)
+
+    def rollback_service(self, service_id):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        url = self.get_rollbackto_service_url(service_id)
+        return self.send(method='put', path=url)
+
+    def rollback_service_toversion(self, service_id):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        url = self.get_rollback_service_url(service_id)
+        return self.send(method='put', path=url)
+
+    def rebuild_pod(self, region_id, namespace, podname):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        url = self.get_pod_rebuild_url(region_id, namespace, podname)
+        return self.send(method='delete', path=url)
