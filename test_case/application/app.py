@@ -142,9 +142,9 @@ class Application(Common):
             logger.error("access service failed: {}".format(e))
         return False
 
-    def exec_container(self, ip, service_uuid, pod_instance, app_name, command):
+    def exec_container(self, service_uuid, pod_instance, app_name, command):
         logger.info("************************** exec ********************************")
-        ret = self.send_command(ip, service_uuid, pod_instance, app_name, command)
+        ret = self.send_command(service_uuid, pod_instance, app_name, command)
         if ret == 0:
             return True
         return False
