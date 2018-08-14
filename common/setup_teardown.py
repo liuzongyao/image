@@ -12,6 +12,7 @@ class SetUp(AlaudaRequest):
     """
     测试前先获取global信息已经新建一些测试的必须资源
     """
+
     def __init__(self):
         super(SetUp, self).__init__()
         self.common = {
@@ -22,15 +23,17 @@ class SetUp(AlaudaRequest):
             "$REGISTRY": settings.REGISTRY_NAME,
             "$REPO_NAME": settings.REPO_NAME,
             "$SPACE_NAME": settings.SPACE_NAME,
-            "$K8S_NAMESPACE": settings.K8S_NAMESPACE
+            "$REGION_NAME": settings.REGION_NAME,
+            "$K8S_NAMESPACE": settings.K8S_NAMESPACE,
+            "$IMAGE": settings.IMAGE
         }
         self.get_region_data()
         self.get_build_endpontid()
         self.get_load_balance_info()
-        self.input_file(self.common)
         self.namespace_client = Namespace()
         self.space_client = Space()
         self.prepare()
+        self.input_file(self.common)
 
     @retry()
     def get_region_data(self):
@@ -90,6 +93,11 @@ class SetUp(AlaudaRequest):
                                                                {"$K8S_NAMESPACE": settings.K8S_NAMESPACE})
             assert response.status_code == 201, "prepare data failed: create namespace failed {}".format(response.text)
 
+        response = self.namespace_client.get_namespaces(settings.K8S_NAMESPACE)
+        assert response.status_code == 200, "prepare data failed: get namespace detail failed {}".format(response.text)
+        namespace_uuid = response.json()["kubernetes"]["metadata"]["uid"]
+        self.common.update({"$K8S_NS_UUID": namespace_uuid})
+
         response = self.space_client.get_space(settings.SPACE_NAME)
         if response.status_code != 200:
             response = self.space_client.create_space("./test_data/space/space.json",
@@ -101,6 +109,7 @@ class TearDown(AlaudaRequest):
     """
     测试结束后删除setup创建的资源
     """
+
     def __init__(self):
         super(TearDown, self).__init__()
         self.namespace_client = Namespace()

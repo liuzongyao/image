@@ -3,7 +3,6 @@ from requests.exceptions import ConnectionError
 from common.base_request import Common
 from common.log import logger
 from common import settings
-from common.parsercase import ParserCase, data_value
 
 
 class Application(Common):
@@ -11,11 +10,11 @@ class Application(Common):
         super(Application, self).__init__()
 
     def get_create_app_url(self):
-        return "/v2/apps?project_name={}".format(data_value().get('PROJECT_NAME'))
+        return "/v2/apps"
 
     def get_app_list_url(self, app_name):
         return "/v2/apps/?cluster={}&namespace=&name=&app_name={}&label=&repository_uuid=&template_uuid=&page=1&" \
-               "page_size=20&project_name={}".format(settings.REGION_NAME, app_name, data_value().get('PROJECT_NAME'))
+               "page_size=20".format(settings.REGION_NAME, app_name)
 
     def app_common_url(self, uuid):
         return "/v2/apps/{}".format(uuid)
@@ -30,36 +29,22 @@ class Application(Common):
         return "/v2/apps/{}/stop".format(uuid)
 
     def get_app_log_url(self, service_id):
-        ret = self.generate_time_params()
-        return "/v1/logs/{}/search?start_time={}&end_time={}&pageno=1&size=500" \
-               "&paths=stdout&read_log_source_name=default&services={}" \
-               "&allow_service_id=true&mode=polling&namespace={}&project_name={}".format(settings.ACCOUNT,
-                                                                                         str(ret['start_time']),
-                                                                                         str(ret['end_time']),
-                                                                                         service_id,
-                                                                                         settings.ACCOUNT,
-                                                                                         data_value().get(
-                                                                                             'PROJECT_NAME'))
+        return "/v1/logs/{}/search?&services={}&namespace={}".format(settings.ACCOUNT, service_id, settings.ACCOUNT)
 
     def get_app_cpu_monitor_url(self, app_id):
-        ret = self.generate_time_params()
-        return "/v2/monitor/" + settings.ACCOUNT + "/metrics/query?q=avg:service.cpu.utilization{" \
-               "app_id=" + app_id + "}by{service_name}&start=" + str(ret['start_time']) + "&end=" + \
-               str(ret['end_time']) + "&project_name=" + data_value().get('PROJECT_NAME')
+        return "/v2/monitor/{}/metrics/query?q=avg:service.cpu.utilization{}by{}".format(settings.ACCOUNT,
+                                                                                         "{app_id=" + app_id + "}",
+                                                                                         "{service_name}")
 
     def get_service_loadbalance_url(self, service_id):
         return "/v1/load_balancers/{}?region_name={}&detail=false&service_id={}" \
-               "&frontend=true&project_name={}".format(settings.ACCOUNT, settings.REGION_NAME, service_id,
-                                                       data_value().get('PROJECT_NAME'))
+               "&frontend=true".format(settings.ACCOUNT, settings.REGION_NAME, service_id)
 
     def get_service_instance_url(self, service_id):
-        return "/v2/services/{}/instances?project_name={}".format(service_id, data_value().get('PROJECT_NAME'))
+        return "/v2/services/{}/instances".format(service_id)
 
     def get_app_event_url(self, namespace):
-        ret = self.generate_time_params()
-        return "/v1/events/{}/?start_time={}&end_time={}&pageno=1&size=100&namespace={}&project_name={}".format(
-                settings.ACCOUNT, str(ret['start_time']), str(ret['end_time']), namespace,
-                data_value().get('PROJECT_NAME'))
+        return "/v1/events/{}?namespace={}&pageno=1&size=100".format(settings.ACCOUNT, namespace)
 
     def get_app_uuid(self, app_name):
         url = self.get_app_list_url(app_name)
@@ -95,11 +80,11 @@ class Application(Common):
                         return "{}://{}.{}.{}:{}".format(protocol, service_name, service_namespace, domain, port)
             return "{}://{}:{}".format(protocol, address, port)
 
-    def create_app(self, file, dir_name=None, variables={}):
+    def create_app(self, file, data):
         logger.info("************************** create app ********************************")
         url = self.get_create_app_url()
-        content = ParserCase(file, dir_name=dir_name, variables=variables).parser_case()
-        return self.send(method='post', path=url, **content)
+        data = self.generate_data(file, data)
+        return self.send(method='post', path=url, data=data)
 
     def delete_app(self, app_name):
         logger.info("************************** delete app ********************************")
@@ -107,11 +92,11 @@ class Application(Common):
         url = self.app_common_url(uuid)
         return self.send(method='delete', path=url)
 
-    def update_app(self, uuid, file, dir_name=None, variables={}):
+    def update_app(self, uuid, file, data):
         logger.info("************************** update app ********************************")
         url = self.app_common_url(uuid)
-        content = ParserCase(file, dir_name=dir_name, variables=variables).parser_case()
-        return self.send(method='patch', path=url, **content)
+        data = self.generate_data(file, data)
+        return self.send(method='patch', path=url, data=data)
 
     def start_app(self, uuid):
         logger.info("************************** start app ********************************")
@@ -157,9 +142,9 @@ class Application(Common):
             logger.error("access service failed: {}".format(e))
         return False
 
-    def exec_container(self, ip, service_uuid, pod_instance, app_name, command):
+    def exec_container(self, service_uuid, pod_instance, app_name, command):
         logger.info("************************** exec ********************************")
-        ret = self.send_command(ip, service_uuid, pod_instance, app_name, command)
+        ret = self.send_command(service_uuid, pod_instance, app_name, command)
         if ret == 0:
             return True
         return False
