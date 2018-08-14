@@ -156,7 +156,8 @@ class Common(AlaudaRequest):
 
     def get_events(self, url, resource_id, operation):
         for i in range(0, 40):
-            repsponse = self.send(method='get', path=url)
+            params = Common.generate_time_params()
+            repsponse = self.send(method='get', path=url, params=params)
             if repsponse.status_code != 200:
                 return False
             content = repsponse.json().get("results", [])
@@ -173,7 +174,8 @@ class Common(AlaudaRequest):
         count = 0
         while count < 40:
             count += 1
-            response = self.send(method='get', path=url)
+            params = Common.generate_time_params()
+            response = self.send(method='get', path=url, params=params)
             code = response.status_code
             content = response.json()
             if code != 200:
