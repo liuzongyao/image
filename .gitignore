@@ -1,0 +1,7 @@
+*.pyc
+__pycache__
+.idea
+report
+report.tar
+temp_data
+.pytest_cache
