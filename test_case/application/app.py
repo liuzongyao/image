@@ -1,5 +1,4 @@
 import sys
-from time import sleep
 
 import requests
 from requests.exceptions import ConnectionError
@@ -182,18 +181,6 @@ class Application(Common):
         logger.info(sys._getframe().f_code.co_name.center(50, '*'))
         url = self.get_app_event_url(namespace)
         return self.get_events(url, app_id, operation)
-
-    def check_exists(self, url, expect_status):
-        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
-        cnt = 0
-        flag = False
-        while cnt < 60 and not flag:
-            cnt += 1
-            response = self.send(method="GET", path=url)
-            if response.status_code == expect_status:
-                flag = True
-            sleep(5)
-        return flag
 
     def access_service(self, service_url, query):
         logger.info("************************** access service ********************************")

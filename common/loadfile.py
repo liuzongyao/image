@@ -1,8 +1,10 @@
 # coding=utf-8
-import json
-import yaml
 import io
+import json
 import os
+
+import yaml
+
 from common.exceptions import FileNotExist
 
 

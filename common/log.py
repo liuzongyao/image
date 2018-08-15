@@ -1,6 +1,7 @@
-from common import settings
 import logging
 import os
+
+from common import settings
 
 
 class Logging(object):

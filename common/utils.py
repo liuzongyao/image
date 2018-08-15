@@ -1,12 +1,14 @@
 # coding=utf-8
-from time import sleep
+import smtplib
+from email.header import Header
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from email.header import Header
-from common.settings import SMTP
-import smtplib
-from common.match_case import casename
+from time import sleep
+
 from bs4 import BeautifulSoup
+
+from common.match_case import casename
+from common.settings import SMTP
 
 
 def retry(times=3, sleep_secs=3):

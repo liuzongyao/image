@@ -1,11 +1,14 @@
 # coding=utf-8
-import pexpect
 import json
-from common.api_requests import AlaudaRequest
-from common.log import logger
+import sys
 from time import sleep, time
+
+import pexpect
+
+from common.api_requests import AlaudaRequest
 from common.exceptions import ResponseError, ParseResponseError
 from common.loadfile import FileUtils
+from common.log import logger
 
 
 class Common(AlaudaRequest):
@@ -248,3 +251,15 @@ class Common(AlaudaRequest):
             ret = child.expect('#')
             logger.info(child.before)
             return ret
+
+    def check_exists(self, url, expect_status):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        cnt = 0
+        flag = False
+        while cnt < 60 and not flag:
+            cnt += 1
+            response = self.send(method="GET", path=url)
+            if response.status_code == expect_status:
+                flag = True
+            sleep(5)
+        return flag
