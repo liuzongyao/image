@@ -24,7 +24,7 @@ class TestVolumeSuite(object):
         result = self.volume.update_result(result, len(self.region_volumes) == len(driver_result.json()),
                                            "get driver error")
         create_result = self.volume.create_volume("./test_data/volume/glusterfs.json",
-                                                  {"$volume_name": self.gfs_name, '"$size"': "10"})
+                                                  {"$volume_name": self.gfs_name, '"$size"': "1"})
         assert create_result.status_code == 201, create_result.text
         volume_id = create_result.json().get("id")
 
@@ -55,7 +55,7 @@ class TestVolumeSuite(object):
         result = self.volume.update_result(result, len(self.region_volumes) == len(driver_result.json()),
                                            "get driver error")
         create_result = self.volume.create_volume("./test_data/volume/ebs.json",
-                                                  {"$volume_name": self.ebs_name, '"$size"': "10"})
+                                                  {"$volume_name": self.ebs_name, '"$size"': "1"})
         assert create_result.status_code == 201, create_result.text
         volume_id = create_result.json().get("id")
 

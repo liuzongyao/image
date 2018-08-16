@@ -3,5 +3,5 @@
   "volume_type": "gp2",
   "name": "$volume_name",
   "driver_name": "ebs",
-  "size": 10
+  "size": "$size"
 }

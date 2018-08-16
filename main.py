@@ -8,7 +8,7 @@ import pytest
 from common import settings
 from common.log import logger
 from common.setup_teardown import SetUp, TearDown
-from common.utils import read_result
+from common.utils import read_result, send_email
 
 
 def main():
