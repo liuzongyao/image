@@ -15,7 +15,9 @@ class SyncRegistry(Common):
     def get_registry_list(self):
         path = self.get_registry_list_url()
         response = self.send(method='get', path=path)
-        return response.json()
+        if response.status_code == 200:
+            return response.json()
+        return []
 
     def get_registry_uuid(self, registry_name=None, is_public=None):
         """
