@@ -109,7 +109,7 @@ class SetUp(AlaudaRequest):
         if response.status_code != 200:
             response = self.project_client.create_project('./test_data/project/project.yml',
                                                           {"$project": settings.PROJECT_NAME,
-                                                           "$REGION_NAME": self.registry_name,
+                                                           "$REGION_NAME": self.region_name,
                                                            "$REGION_ID": self.common.get("$REGION_ID")})
             assert response.status_code == 201, "prepare data failed: create project failed {}".format(response.text)
             self.common.update({"CREATE_PROJECT": True, "$PROJECT_UUID": response.json()['uuid']})
