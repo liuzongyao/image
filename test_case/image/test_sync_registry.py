@@ -20,19 +20,20 @@ class TestSyncRegistrySuite(object):
 
         self.sync_tool.delete_sync_config(self.sync_config_name)
 
+        self.get_publick_registry = self.sync_tool.get_registry_uuid(is_public=True)
+
+
     def teardown_class(self):
         self.sync_tool.delete_sync_config(self.sync_config_name)
 
     def test_sync_public_registry(self):
-        result = {"flag": True}
-        get_publick_registry = self.sync_tool.get_registry_uuid(is_public=True)
-        if not get_publick_registry:
-            assert result['flag'], "no public registry, no need to run"
+        if not self.get_publick_registry:
+            assert True, "no public registry, no need to run"
             return
         else:
             # create sync config
             create_ret = self.sync_tool.create_sync_config('./test_data/image/create_sync_config.yaml',
-                                                           {"$INTERNAL_ID": get_publick_registry[1],
+                                                           {"$INTERNAL_ID": self.get_publick_registry[1],
                                                             "$CONFIG_NAME": self.sync_config_name})
             assert create_ret.status_code == 201, "create sync config: {} failed, Error code: {}, response: {}".format(
                 self.sync_config_name, create_ret.status_code, create_ret.text)
@@ -49,8 +50,8 @@ class TestSyncRegistrySuite(object):
             update_result = self.sync_tool.update_sync_config(self.sync_config_name,
                                                               './test_data/image/update_sync_config.yaml',
                                                               {"$CONFIG_ID": config_id,
-                                                               "$ENDPOINT": get_publick_registry[2],
-                                                               "$INTERNAL_ID": get_publick_registry[1],
+                                                               "$ENDPOINT": self.get_publick_registry[2],
+                                                               "$INTERNAL_ID": self.get_publick_registry[1],
                                                                "$DEST_ID": dest_id,
                                                                "$CONFIG_NAME": self.sync_config_name,
                                                                "$PROJECT_NAME": self.sync_tool.params.get('project_name'
