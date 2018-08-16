@@ -73,12 +73,11 @@ class SetUp(AlaudaRequest):
                              path='/v1/load_balancers/{}?region_name={}'.format(self.account, self.region_name))
         assert response.status_code == 200, response.text
         contents = response.json()
-        assert len(contents) > 0, "get_load_balance_info is []"
-        content = contents[-1]
-        # for content in contents:
-        if "name" in content:
-            self.common.update({"$HAPROXY_NAME": content['name'], "$HAPROXY_IP": content['address']})
-            # break
+        assert len(contents) > 0, "get_load_balance_info is 空列表"
+        for content in contents:
+            if content['type'] == "nginx" or content["type"] == "haproxy":
+                self.common.update({"$HAPROXY_NAME": content['name'], "$HAPROXY_IP": content['address']})
+                break
 
     def get_slave_ips(self):
         response = self.send(method='GET',
