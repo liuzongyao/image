@@ -105,6 +105,11 @@ class TestSyncRegistrySuite(object):
                 .format(get_log_ret.status_code,get_log_ret.text)
 
             # delete sync config
-            delete_result = self.sync_tool.delete_sync_config(self.sync_config_name)
-            assert delete_result.status_code == 204, "delete sync config failed, error code: {}, response: {}"\
+            delete_config = self.sync_tool.delete_sync_config(self.sync_config_name)
+            assert delete_config.status_code == 204, "delete sync config failed, error code: {}, response: {}"\
+                .format(delete_config.status_code, delete_config.text)
+
+            # verify delete result
+            delete_result = self.sync_tool.get_sync_config_detail(self.sync_config_name)
+            assert delete_result.status_code == 404, "delete sync config failed, error code: {}, response: {}"\
                 .format(delete_result.status_code, delete_result.text)
