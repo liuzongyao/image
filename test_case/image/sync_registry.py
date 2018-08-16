@@ -14,18 +14,16 @@ class SyncRegistry(Common):
 
     def get_registry_list(self):
         path = self.get_registry_list_url()
-        response = self.send(method='get', path=path)
-        if response.status_code == 200:
-            return response.json()
-        return []
+        return self.send(method='get', path=path)
 
-    def get_registry_uuid(self, registry_name=None, is_public=None):
+    def get_registry_uuid(self, contents, registry_name=None, is_public=None):
         """
         Get the registry name and uuid
         :param: string(registry_name)
-        :return: bool(is_public)
+        :param: bool(is_public)
+        :param: list(contents)
+        :return tuple
         """
-        contents = self.get_registry_list()
         length = len(contents)
         for i in range(length):
             if contents[i]['name'] == registry_name:

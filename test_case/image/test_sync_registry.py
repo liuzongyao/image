@@ -20,8 +20,9 @@ class TestSyncRegistrySuite(object):
 
         self.sync_tool.delete_sync_config(self.sync_config_name)
 
-        self.get_publick_registry = self.sync_tool.get_registry_uuid(is_public=True)
+        self.registry_list = self.sync_tool.get_registry_list().json()
 
+        self.get_publick_registry = self.sync_tool.get_registry_uuid(self.registry_list, is_public=True)
 
     def teardown_class(self):
         self.sync_tool.delete_sync_config(self.sync_config_name)
