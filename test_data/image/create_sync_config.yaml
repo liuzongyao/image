@@ -1,0 +1,13 @@
+source:
+  info:
+    registry_name: $REGISTRY
+    project_name: ~
+    repository_name: $REPO_NAME
+dest:
+- dest_type: "INTERNAL_REGISTRY"
+  internal_id: $INTERNAL_ID
+space_name: $SPACE_NAME
+config_name: $CONFIG_NAME
+cpu: 0.5
+memory: 512
+namespace: $NAMESPACE

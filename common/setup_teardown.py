@@ -6,6 +6,8 @@ from common.utils import retry
 from common import settings
 from test_case.namespace.namespace import Namespace
 from test_case.space.space import Space
+from test_case.project.project import Project
+from common.loadfile import FileUtils
 
 
 class SetUp(AlaudaRequest):
@@ -34,6 +36,7 @@ class SetUp(AlaudaRequest):
         self.input_file(self.common)
         self.namespace_client = Namespace()
         self.space_client = Space()
+        self.project_client = Project()
         self.prepare()
         self.input_file(self.common)
 
@@ -101,22 +104,35 @@ class SetUp(AlaudaRequest):
             write.writelines(json.dumps(content))
 
     def prepare(self):
+        # create project
+        response = self.project_client.get_project()
+        if response.status_code != 200:
+            response = self.project_client.create_project('./test_data/project/project.yml',
+                                                          {"$project": settings.PROJECT_NAME,
+                                                           "$REGION_NAME": self.registry_name,
+                                                           "$REGION_ID": self.common.get("$REGION_ID")})
+            assert response.status_code == 201, "prepare data failed: create project failed {}".format(response.text)
+            self.common.update({"CREATE_PROJECT": True, "$PROJECT_UUID": response.json()['uuid']})
+        else:
+            self.common.update({"$PROJECT_UUID": response.json()['uuid']})
+
+        # create k8s namespace
         response = self.namespace_client.get_namespaces(settings.K8S_NAMESPACE)
         if response.status_code != 200:
             response = self.namespace_client.create_namespaces("./test_data/namespace/namespace.yml",
                                                                {"$K8S_NAMESPACE": settings.K8S_NAMESPACE})
             assert response.status_code == 201, "prepare data failed: create namespace failed {}".format(response.text)
+            self.common.update({"CREATE_NAMESPACE": True})
 
-        response = self.namespace_client.get_namespaces(settings.K8S_NAMESPACE)
-        assert response.status_code == 200, "prepare data failed: get namespace detail failed {}".format(response.text)
-        namespace_uuid = response.json()["kubernetes"]["metadata"]["uid"]
-        self.common.update({"$K8S_NS_UUID": namespace_uuid})
-
+        # create space
         response = self.space_client.get_space(settings.SPACE_NAME)
         if response.status_code != 200:
             response = self.space_client.create_space("./test_data/space/space.json",
                                                       {"$SPACE_NAME": settings.SPACE_NAME})
             assert response.status_code == 201, "prepare data failed: create space failed {}".format(response.text)
+            self.common.update({"CREATE_SPACE": True, "$SPACE_UUID": response.json()['uuid']})
+        else:
+            self.common.update({"$SPACE_UUID": response.json()['uuid']})
 
 
 class TearDown(AlaudaRequest):
@@ -126,10 +142,19 @@ class TearDown(AlaudaRequest):
 
     def __init__(self):
         super(TearDown, self).__init__()
+        self.global_info = FileUtils.load_file(self.global_info_path)
         self.namespace_client = Namespace()
         self.space_client = Space()
+        self.project_client = Project()
         self.delete()
 
     def delete(self):
-        self.namespace_client.delete_namespaces(settings.K8S_NAMESPACE)
-        self.space_client.delete_space(settings.SPACE_NAME)
+        if "CREATE_NAMESPACE" in self.global_info:
+            self.namespace_client.delete_namespaces(settings.K8S_NAMESPACE)
+
+        if "CREATE_SPACE" in self.global_info:
+            self.space_client.delete_space(settings.SPACE_NAME)
+
+        if "CREATE_PROJECT" in self.global_info:
+            self.project_client.delete_project_role()
+            self.project_client.delete_project(settings.PROJECT_NAME)

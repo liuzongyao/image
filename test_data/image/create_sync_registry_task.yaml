@@ -1,0 +1,5 @@
+config_name: $CONFIG_ID
+tag: $TAG
+dest_id_list:
+- $DEST_ID
+namespace: $NAMESPACE
