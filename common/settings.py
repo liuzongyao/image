@@ -16,8 +16,8 @@ CASE_TYPE = os.getenv("CASE_TYPE")
 PROJECT_NAME = os.getenv("PROJECT_NAME", "default")
 ENV = os.getenv("ENV", "Staging")
 RECIPIENTS = os.getenv("RECIPIENTS", ["hchan@alauda.io"])
-K8S_NAMESPACE = os.getenv("K8S_NAMESPACE", "e2e-default2-{}".format(REGION_NAME).replace("_", "-"))
-SPACE_NAME = os.getenv("SPACE_NAME", "e2e-default-{}".format(REGION_NAME).replace("_", "-"))
+K8S_NAMESPACE = os.getenv("K8S_NAMESPACE", "alauda-default2-{}".format(REGION_NAME).replace("_", "-"))
+SPACE_NAME = os.getenv("SPACE_NAME", "alauda-default-{}".format(REGION_NAME).replace("_", "-"))
 
 SMTP = {
     'host': os.getenv('SMTP_HOST', 'smtpdm.aliyun.com'),

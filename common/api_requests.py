@@ -1,7 +1,8 @@
 # coding=utf-8
 import requests
-from common.log import logger
+
 from common import settings
+from common.log import logger
 
 
 class AlaudaRequest(object):

@@ -1,9 +1,10 @@
 # coding=utf-8
-import os
 import json
+import os
+
+from common import settings
 from common.api_requests import AlaudaRequest
 from common.utils import retry
-from common import settings
 from test_case.namespace.namespace import Namespace
 from test_case.space.space import Space
 
@@ -46,7 +47,9 @@ class SetUp(AlaudaRequest):
         assert response.status_code == 200, response.json()
         self.region_data = response.json()
         self.region_id = self.region_data["id"]
+        self.region_volume = ",".join(self.region_data.get("features").get("volume").get("features"))
         self.common.update({"$REGION_ID": self.region_id})
+        self.common.update({"$REGION_VOLUME": self.region_volume})
 
     @retry()
     def get_build_endpontid(self):
@@ -70,8 +73,9 @@ class SetUp(AlaudaRequest):
                              path='/v1/load_balancers/{}?region_name={}'.format(self.account, self.region_name))
         assert response.status_code == 200, response.text
         contents = response.json()
+        assert len(contents) > 0, "get_load_balance_info is 空列表"
         for content in contents:
-            if "name" in content:
+            if content['type'] == "nginx" or content["type"] == "haproxy":
                 self.common.update({"$HAPROXY_NAME": content['name'], "$HAPROXY_IP": content['address']})
                 break
 

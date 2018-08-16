@@ -43,42 +43,13 @@ kubernetes:
             volumeMounts:
               - mountPath: /localpath/test/
                 name: hostpath
+              - mountPath: /ebs/test/
+                name: ebspath
           volumes:
+            - name: ebspath
+              awsElasticBlockStore:
+                volumeID: $ebs_driverid
+                fsType: ext4
             - name: hostpath
               hostPath:
               path: /localpath/test/
-  - apiVersion: autoscaling/v1
-    firstTimestamp: null
-    kind: HorizontalPodAutoscaler
-    lastTimestamp: null
-    metadata:
-      name: $app_name
-      namespace: $K8S_NAMESPACE
-    spec:
-      maxReplicas: 20
-      minReplicas: 1
-      scaleTargetRef:
-        apiVersion: extensions/v1beta1
-        kind: Deployment
-        name: $app_name
-  - apiVersion: v1
-    firstTimestamp: null
-    kind: Service
-    lastTimestamp: null
-    metadata:
-      annotations:
-        loadbalancer.alauda.io/bind: '[{"container_port":80,"protocol":"http","name":"$HAPROXY_NAME","port":80}]'
-      labels:
-        app.alauda.io/name: $app_name
-        app.rubick.alauda.io/name: $app_name
-        service.alauda.io/name: $app_name
-      name: $app_name
-      namespace: $K8S_NAMESPACE
-    spec:
-      ports:
-      - name: 22-22
-        port: 22
-        protocol: TCP
-        targetPort: 22
-      selector:
-        service.alauda.io/name: $app_name

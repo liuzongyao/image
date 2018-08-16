@@ -3,6 +3,7 @@ from time import sleep
 import pytest
 
 from test_case.application.app import Application
+from test_case.volume.volume import Volume
 
 
 @pytest.mark.region
@@ -10,11 +11,24 @@ from test_case.application.app import Application
 class TestApplicationSuite(object):
     def setup_class(self):
         self.application = Application()
-        self.app_name = 'e2e-app-{}'.format(self.application.region_name).replace('_', '-')
-        self.app_describe = "e2e-app-describe"
+        self.app_name = 'alauda-app-{}'.format(self.application.region_name).replace('_', '-')
+        self.app_describe = "alauda-app-describe"
+
+        self.volume = Volume()
+        self.region_volumes = self.volume.global_info['$REGION_VOLUME'].split(",")
+        self.appwithgfs_name = 'alauda-appwithgfs-{}'.format(self.application.region_name).replace('_', '-')
+        self.gfs_name = 'alauda-gfsforapp-{}'.format(self.volume.region_name).replace('_', '-')
+        self.appwithebs_name = 'alauda-appwithebs-{}'.format(self.application.region_name).replace('_', '-')
+        self.ebs_name = 'alauda-ebsforapp-{}'.format(self.volume.region_name).replace('_', '-')
 
     def teardown_class(self):
         self.application.delete_app(self.app_name)
+        self.application.delete_app(self.appwithgfs_name)
+        self.application.delete_app(self.appwithebs_name)
+        volume_id = self.volume.get_volume_id_from_list(self.gfs_name)
+        self.volume.delete_volume(volume_id)
+        volume_id = self.volume.get_volume_id_from_list(self.ebs_name)
+        self.volume.delete_volume(volume_id)
 
     def test_newk8s_app(self):
         result = {"flag": True}
@@ -168,8 +182,7 @@ class TestApplicationSuite(object):
         slaveips = self.application.global_info["$SLAVEIPS"].split(",")
         if len(slaveips) > 1:
             update_result = self.application.update_app(app_uuid, './test_data/application/update_app_affinity.yml',
-                                                        {"$app_name": self.app_name,
-                                                         "$description": self.app_describe})
+                                                        {"$app_name": self.app_name, "$description": self.app_describe})
             assert update_result.status_code == 200, update_result.text
             app_status = self.application.get_app_status(app_uuid, 'resource.status', 'Running')
             assert app_status, "app: {} is not running".format(self.app_name)
@@ -192,3 +205,54 @@ class TestApplicationSuite(object):
         assert delete_flag, "delete app failed"
 
         assert result['flag'], result
+
+    def test_gfs_app(self):
+        if "glusterfs" not in self.region_volumes:
+            assert True, "集群不支持glusterfs"
+            return
+        volume_id = self.volume.get_volume_id_from_list(self.gfs_name)
+        self.volume.delete_volume(volume_id)
+        create_result = self.volume.create_volume("./test_data/volume/glusterfs.json",
+                                                  {"$volume_name": self.gfs_name, '"$size"': "10"})
+        assert create_result.status_code == 201, create_result.text
+        volume_id = create_result.json().get("id")
+
+        self.application.delete_app(self.appwithgfs_name)
+        create_app = self.application.create_app('./test_data/application/create_app_gfs.yml',
+                                                 {"$app_name": self.appwithgfs_name, "$gfs_name": self.gfs_name})
+        assert create_app.status_code == 201, create_app.text
+        content = create_app.json()
+        app_uuid = self.application.get_value(content, 'resource.uuid')
+        # get app status
+        app_status = self.application.get_app_status(app_uuid, 'resource.status', 'Running')
+        self.application.delete_app(self.appwithgfs_name)
+        self.application.check_exists(self.application.app_common_url(app_uuid), 404)
+        sleep(60)
+        self.volume.delete_volume(volume_id)
+        assert app_status, "app: {} is not running".format(self.appwithgfs_name)
+
+    def test_ebs_app(self):
+        if "ebs" not in self.region_volumes:
+            assert True, "集群不支持ebs"
+            return
+        volume_id = self.volume.get_volume_id_from_list(self.ebs_name)
+        self.volume.delete_volume(volume_id)
+        create_result = self.volume.create_volume("./test_data/volume/ebs.json",
+                                                  {"$volume_name": self.ebs_name, '"$size"': "10"})
+        assert create_result.status_code == 201, create_result.text
+        volume_id = create_result.json().get("id")
+        driver_volume_id = create_result.json().get("driver_volume_id")
+
+        self.application.delete_app(self.appwithebs_name)
+        create_app = self.application.create_app('./test_data/application/create_app_ebs.yml',
+                                                 {"$app_name": self.appwithebs_name, "$ebs_driverid": driver_volume_id})
+        assert create_app.status_code == 201, create_app.text
+        content = create_app.json()
+        app_uuid = self.application.get_value(content, 'resource.uuid')
+        # get app status
+        app_status = self.application.get_app_status(app_uuid, 'resource.status', 'Running')
+        self.application.delete_app(self.appwithebs_name)
+        self.application.check_exists(self.application.app_common_url(app_uuid), 404)
+        sleep(60)
+        self.volume.delete_volume(volume_id)
+        assert app_status, "app: {} is not running".format(self.appwithebs_name)

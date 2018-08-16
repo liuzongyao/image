@@ -1,0 +1,7 @@
+{
+  "region_id": "$REGION_ID",
+  "volume_type": "gp2",
+  "name": "$volume_name",
+  "driver_name": "ebs",
+  "size": "$size"
+}

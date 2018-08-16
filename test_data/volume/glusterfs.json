@@ -1,0 +1,6 @@
+{
+  "region_id": "$REGION_ID",
+  "name": "$volume_name",
+  "driver_name": "glusterfs",
+  "size": "$size"
+}
