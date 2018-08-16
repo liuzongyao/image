@@ -6,8 +6,11 @@ from common.log import logger
 
 
 class Volume(Common):
+    def __init__(self):
+        super(Volume, self).__init__()
+
     def get_list_volume_url(self):
-        return 'v1/storage/{}/volumes?region_id={}'.format(settings.ACCOUNT, self.global_info["$REGION_ID"])
+        return 'v1/storage/{}/volumes?region_id={}'.format(settings.ACCOUNT, self.region_id)
 
     def get_drivers_url(self):
         return 'v1/storage/{}/{}/drivers/'.format(settings.ACCOUNT, settings.REGION_NAME)
