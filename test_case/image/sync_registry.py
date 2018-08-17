@@ -5,31 +5,9 @@ class SyncRegistry(Common):
     def __init__(self):
         super(SyncRegistry, self).__init__()
 
-    def get_registry_list_url(self):
-        return "/v1/registries/{}/".format(self.account)
-
     def common_url(self, config_id=None):
         return config_id and "/v1/sync-registry/{}/configs/{}".format(self.account, config_id) or \
                "/v1/sync-registry/{}/configs".format(self.account)
-
-    def get_registry_list(self):
-        path = self.get_registry_list_url()
-        return self.send(method='get', path=path)
-
-    def get_registry_uuid(self, contents, registry_name=None, is_public=None):
-        """
-        Get the registry name and uuid
-        :param: string(registry_name)
-        :param: bool(is_public)
-        :param: list(contents)
-        :return tuple
-        """
-        length = len(contents)
-        for i in range(length):
-            if contents[i]['name'] == registry_name:
-                return contents[i]['name'], contents[i]['uuid'], contents[i]['endpoint']
-            if contents[i]['is_public'] == is_public:
-                return contents[i]['name'], contents[i]['uuid'], contents[i]['endpoint']
 
     def create_sync_config(self, file, data):
         path = self.common_url()

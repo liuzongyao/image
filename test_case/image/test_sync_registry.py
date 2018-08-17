@@ -20,9 +20,7 @@ class TestSyncRegistrySuite(object):
 
         self.sync_tool.delete_sync_config(self.sync_config_name)
 
-        self.registry_list = self.sync_tool.get_registry_list().json()
-
-        self.get_publick_registry = self.sync_tool.get_registry_uuid(self.registry_list, is_public=True)
+        self.get_publick_registry = self.sync_tool.global_info.get('PUBLIC')
 
     def teardown_class(self):
         self.sync_tool.delete_sync_config(self.sync_config_name)
@@ -34,7 +32,7 @@ class TestSyncRegistrySuite(object):
         else:
             # create sync config
             create_ret = self.sync_tool.create_sync_config('./test_data/image/create_sync_config.yaml',
-                                                           {"$INTERNAL_ID": self.get_publick_registry[1],
+                                                           {"$INTERNAL_ID": self.get_publick_registry[0]['uuid'],
                                                             "$CONFIG_NAME": self.sync_config_name})
             assert create_ret.status_code == 201, "create sync config: {} failed, Error code: {}, response: {}".format(
                 self.sync_config_name, create_ret.status_code, create_ret.text)
@@ -51,8 +49,8 @@ class TestSyncRegistrySuite(object):
             update_result = self.sync_tool.update_sync_config(self.sync_config_name,
                                                               './test_data/image/update_sync_config.yaml',
                                                               {"$CONFIG_ID": config_id,
-                                                               "$ENDPOINT": self.get_publick_registry[2],
-                                                               "$INTERNAL_ID": self.get_publick_registry[1],
+                                                               "$ENDPOINT": self.get_publick_registry[0]['endpoint'],
+                                                               "$INTERNAL_ID": self.get_publick_registry[0]['uuid'],
                                                                "$DEST_ID": dest_id,
                                                                "$CONFIG_NAME": self.sync_config_name,
                                                                "$PROJECT_NAME": self.sync_tool.params.get('project_name'
@@ -80,9 +78,9 @@ class TestSyncRegistrySuite(object):
             assert get_repo_tag_ret.status_code == 200, "get {} tag failed, Error code: {}, Response: {}".format(
                 self.repo_name, get_repo_tag_ret.status_code, get_repo_tag_ret.text)
 
-            repo_tag = self.sync_tool.get_value(get_repo_tag_ret.json(), 'results.0.tag_name')
+            assert len(get_repo_tag_ret.json()) > 0, "the tag of repo: {} is null".format(self.repo_name)
 
-            assert len(repo_tag) > 0, "the tag of repo: {} is null".format(self.repo_name)
+            repo_tag = self.sync_tool.get_value(get_repo_tag_ret.json(), 'results.0.tag_name')
 
             # create sync registry task
             create_task_result = self.history_tool.create_sync_history_task(

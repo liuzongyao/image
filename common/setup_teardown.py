@@ -34,6 +34,7 @@ class SetUp(AlaudaRequest):
         self.get_build_endpontid()
         self.get_load_balance_info()
         self.get_slave_ips()
+        self.get_registry_uuid()
         self.input_file(self.common)
         self.namespace_client = Namespace()
         self.space_client = Space()
@@ -81,6 +82,29 @@ class SetUp(AlaudaRequest):
             if content['type'] == "nginx" or content["type"] == "haproxy":
                 self.common.update({"$HAPROXY_NAME": content['name'], "$HAPROXY_IP": content['address']})
                 break
+
+    @retry()
+    def get_registry_uuid(self):
+        response = self.send(method='get', path="/v1/registries/{}/".format(self.account))
+        assert response.status_code == 200, response.text
+        public = []
+        private = []
+        contents = response.json()
+        for index, content in enumerate(contents):
+            public_dict = {}
+            private_dict = {}
+
+            if content['is_public']:
+                public_dict['name'] = content['name']
+                public_dict['uuid'] = content['uuid']
+                public_dict['endpoint'] = content['endpoint']
+                public.append(public_dict)
+            else:
+                private_dict['name'] = content['name']
+                private_dict['uuid'] = content['uuid']
+                private_dict['endpoint'] = content['endpoint']
+                private.append(private_dict)
+        self.common.update({"PUBLIC": public, "PRIVATE": private})
 
     def get_slave_ips(self):
         response = self.send(method='GET',
