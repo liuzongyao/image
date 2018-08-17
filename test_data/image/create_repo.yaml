@@ -1,0 +1,4 @@
+name: $REPO_IMAGE
+is_public: false
+description: "repo daemon"
+full_description: "repo daemon"

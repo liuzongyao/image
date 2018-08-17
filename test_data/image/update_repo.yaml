@@ -1,0 +1,4 @@
+scan_enabled: false
+is_public: false
+description: "repo daemon"
+full_description: $UPDATE_REPO

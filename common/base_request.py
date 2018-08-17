@@ -28,7 +28,8 @@ class Common(AlaudaRequest):
         self.global_info.update(data)
         content = json.dumps(FileUtils.load_file(file_path))
         for key in self.global_info:
-            content = content.replace(key, self.global_info[key])
+            if isinstance(self.global_info[key], str):
+                content = content.replace(key, self.global_info[key])
         return content
 
     @staticmethod
