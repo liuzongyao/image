@@ -38,4 +38,21 @@ class Logging(object):
         return logger
 
 
+class Colored(object):
+    RED = '\033[1;31m'  # 高亮红色
+
+    RESET = '\033[0m'  # 终端默认颜色
+
+    def color_str(self, color, s):
+        return '{}{}{}'.format(
+            getattr(self, color),
+            s,
+            self.RESET
+        )
+
+    def red(self, s):
+        return self.color_str('RED', s)
+
+
 logger = Logging.get_logger()
+color = Colored()

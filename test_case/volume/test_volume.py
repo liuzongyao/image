@@ -1,12 +1,16 @@
+import pytest
+
 from test_case.volume.volume import Volume
 
 
+@pytest.mark.volume
 class TestVolumeSuite(object):
     def setup_class(self):
         self.volume = Volume()
         self.gfs_name = 'alauda-gfs-{}'.format(self.volume.region_name).replace('_', '-')
         self.ebs_name = 'alauda-ebs-{}'.format(self.volume.region_name).replace('_', '-')
         self.region_volumes = self.volume.global_info['$REGION_VOLUME'].split(",")
+        self.teardown_class(self)
 
     def teardown_class(self):
         volume_id = self.volume.get_volume_id_from_list(self.gfs_name)
@@ -14,6 +18,7 @@ class TestVolumeSuite(object):
         volume_id = self.volume.get_volume_id_from_list(self.ebs_name)
         self.volume.delete_volume(volume_id)
 
+    @pytest.mark.BAT
     def test_gfs_volume(self):
         if "glusterfs" not in self.region_volumes:
             assert True, "集群不支持glusterfs"
