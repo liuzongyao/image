@@ -3,6 +3,8 @@ from time import sleep
 import pytest
 
 from test_case.application.app import Application
+from test_case.persistentvolumeclaims.pvc import Pvc
+from test_case.persistentvolumes.pv import Pv
 from test_case.volume.volume import Volume
 
 
@@ -21,15 +23,32 @@ class TestApplicationSuite(object):
         self.appwithebs_name = 'alauda-appwithebs-{}'.format(self.application.region_name).replace('_', '-')
         self.ebs_name = 'alauda-ebsforapp-{}'.format(self.volume.region_name).replace('_', '-')
 
+        self.volume_name = 'alauda-volumeforapp-{}'.format(self.volume.region_name).replace('_', '-')
+        self.pv_name = 'alauda-pvforapp-{}'.format(self.volume.region_name).replace('_', '-')
+        self.pvc_name = 'alauda-pvcforapp-{}'.format(self.volume.region_name).replace('_', '-')
+        self.appwithpvc_name = 'alauda-appwithpvc-{}'.format(self.application.region_name).replace('_', '-')
+        self.pv = Pv()
+        self.pvc = Pvc()
+
+        self.teardown_class(self)
+
     def teardown_class(self):
         self.application.delete_app(self.app_name)
         self.application.delete_app(self.appwithgfs_name)
-        self.application.delete_app(self.appwithebs_name)
         volume_id = self.volume.get_volume_id_from_list(self.gfs_name)
         self.volume.delete_volume(volume_id)
+
+        self.application.delete_app(self.appwithebs_name)
         volume_id = self.volume.get_volume_id_from_list(self.ebs_name)
         self.volume.delete_volume(volume_id)
 
+        self.application.delete_app(self.appwithpvc_name)
+        self.pvc.delete_pvc(self.pvc.global_info["$K8S_NAMESPACE"], self.pvc_name)
+        self.pv.delete_pv(self.pv_name)
+        volume_id = self.volume.get_volume_id_from_list(self.volume_name)
+        self.volume.delete_volume(volume_id)
+
+    @pytest.mark.BAT
     def test_newk8s_app(self):
         result = {"flag": True}
         self.application.delete_app(self.app_name)
@@ -206,6 +225,7 @@ class TestApplicationSuite(object):
 
         assert result['flag'], result
 
+    @pytest.mark.volume
     def test_gfs_app(self):
         if "glusterfs" not in self.region_volumes:
             assert True, "集群不支持glusterfs"
@@ -231,6 +251,7 @@ class TestApplicationSuite(object):
         self.volume.delete_volume(volume_id)
         assert app_status, "app: {} is not running".format(self.appwithgfs_name)
 
+    @pytest.mark.volume
     def test_ebs_app(self):
         if "ebs" not in self.region_volumes:
             assert True, "集群不支持ebs"
@@ -256,3 +277,50 @@ class TestApplicationSuite(object):
         sleep(60)
         self.volume.delete_volume(volume_id)
         assert app_status, "app: {} is not running".format(self.appwithebs_name)
+
+    @pytest.mark.pvc
+    def test_pvc_app(self):
+        if len(self.region_volumes) == 0:
+            assert True, "集群不支持存储卷"
+            return
+        # create volume
+        if self.region_volumes[0] == "glusterfs":
+            createvolume_result = self.volume.create_volume("./test_data/volume/glusterfs.json",
+                                                            {"$volume_name": self.volume_name, '"$size"': "1"})
+        elif self.region_volumes[0] == "ebs":
+            createvolume_result = self.volume.create_volume("./test_data/volume/ebs.json",
+                                                            {"$volume_name": self.volume_name, '"$size"': "1"})
+        else:
+            assert True, "未知的存储卷类型{}".format(self.pv.global_info['$REGION_VOLUME'])
+            return
+        assert createvolume_result.status_code == 201, createvolume_result.text
+        volume_id = createvolume_result.json().get("id")
+        # create pv
+        createpv_result = self.pv.create_pv("./test_data/pv/pv.json",
+                                            {"$pv_name": self.pv_name, "$pv_policy": "Retain", "$size": "1",
+                                             "$volume_id": volume_id, "$volume_driver": self.region_volumes[0]})
+        assert createpv_result.status_code == 201, createpv_result.text
+        # create pvc
+        createpvc_result = self.pvc.create_pvc("./test_data/pvc/pvc.json",
+                                               {"$pvc_name": self.pvc_name, "$pvc_mode": "ReadWriteOnce",
+                                                "$scs_name": "", "$size": "1"})
+        assert createpvc_result.status_code == 201, createpvc_result.text
+        # create app
+        self.application.delete_app(self.appwithpvc_name)
+        create_app = self.application.create_app('./test_data/application/create_app_pvc.yml',
+                                                 {"$app_name": self.appwithpvc_name, "$pvc_name": self.pvc_name})
+        assert create_app.status_code == 201, create_app.text
+        content = create_app.json()
+        app_uuid = self.application.get_value(content, 'resource.uuid')
+        # get app status
+        app_status = self.application.get_app_status(app_uuid, 'resource.status', 'Running')
+
+        self.application.delete_app(self.appwithpvc_name)
+        self.application.check_exists(self.application.app_common_url(app_uuid), 404)
+        sleep(60)
+        self.pvc.delete_pvc(self.pvc.global_info["$K8S_NAMESPACE"], self.pvc_name)
+        self.pv.delete_pv(self.pv_name)
+        self.volume.delete_volume(volume_id)
+        assert app_status, "app: {} is not running".format(self.appwithpvc_name)
+        assert self.application.get_value(create_app.json(),
+                                          "kubernetes.0.spec.template.spec.volumes.0.persistentVolumeClaim.claimName") == self.pvc_name
