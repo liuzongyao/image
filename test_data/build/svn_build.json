@@ -2,7 +2,7 @@
   "auto_tag_type": "TIME",
   "image_repo": {
     "project": {
-      "name": "$NAMESPACE"
+      "name": ""
     },
     "name": "$REPO_NAME",
     "registry": {

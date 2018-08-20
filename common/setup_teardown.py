@@ -99,13 +99,14 @@ class SetUp(AlaudaRequest):
                 public_dict['uuid'] = content['uuid']
                 public_dict['endpoint'] = content['endpoint']
                 public.append(public_dict)
-            else:
+            elif content['name'] == settings.REGISTRY_NAME:
                 private_dict['name'] = content['name']
                 private_dict['uuid'] = content['uuid']
                 private_dict['endpoint'] = content['endpoint']
                 private.append(private_dict)
-        self.common.update({"PUBLIC": public, "PRIVATE": private})
+        self.common.update({"PUBLIC_REGISTRY": public, "PRIVATE_REGISTRY": private})
 
+    @retry()
     def get_slave_ips(self):
         response = self.send(method='GET',
                              path='/v1/regions/{}/{}/nodes/'.format(self.account, self.region_name))
@@ -128,8 +129,7 @@ class SetUp(AlaudaRequest):
         if not os.path.exists(file_path):
             os.makedirs(file_path)
         with open(self.global_info_path, 'w+') as write:
-            print(content)
-            write.writelines(json.dumps(content))
+            write.write(json.dumps(content, indent=2))
 
     def prepare(self):
         # create project
@@ -149,6 +149,11 @@ class SetUp(AlaudaRequest):
                                                                {"$K8S_NAMESPACE": settings.K8S_NAMESPACE})
             assert response.status_code == 201, "prepare data failed: create namespace failed {}".format(response.text)
             self.common.update({"CREATE_NAMESPACE": True})
+        response = self.namespace_client.get_namespaces(settings.K8S_NAMESPACE)
+
+        assert response.status_code == 200, "prepare data failed: get namespace detail failed {}".format(response.text)
+        namespace_uuid = response.json()["kubernetes"]["metadata"]["uid"]
+        self.common.update({"$K8S_NS_UUID": namespace_uuid})
 
         # create space
         response = self.space_client.get_space(settings.SPACE_NAME)

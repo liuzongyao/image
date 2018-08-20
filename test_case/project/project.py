@@ -42,4 +42,3 @@ class Project(Common):
     def delete_project(self, project_name):
         path = self.get_project_config_url(project_name)
         return self.send(method='DELETE', path=path)
-
