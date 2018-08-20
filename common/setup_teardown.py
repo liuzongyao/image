@@ -29,7 +29,7 @@ class SetUp(AlaudaRequest):
             "$SPACE_NAME": settings.SPACE_NAME,
             "$REGION_NAME": settings.REGION_NAME,
             "$K8S_NAMESPACE": settings.K8S_NAMESPACE,
-            "$IMAGE": settings.IMAGE,
+            "$IMAGE": settings.IMAGE
         }
         self.get_region_data()
         self.get_build_endpontid()
@@ -176,7 +176,7 @@ class SetUp(AlaudaRequest):
         response = self.noti_client.create_noti("./test_data/notification/notification.json",
                                                 {"$noti_name": global_noti_name, "$email": "testing@alauda.io"})
         assert response.status_code == 201, "创建全局通知失败了，原因是：{}".format(response.text)
-        self.common.update({"CREATE_NOTI": True, "$NOTI_NAME": response.json().get("name"), "$NOTI_UUID": response.json().get("uuid")})
+        self.common.update({"$NOTI_NAME": response.json().get("name"), "$NOTI_UUID": response.json().get("uuid")})
 
 
 class TearDown(AlaudaRequest):
@@ -204,6 +204,5 @@ class TearDown(AlaudaRequest):
             self.project_client.delete_project_role()
             self.project_client.delete_project(settings.PROJECT_NAME)
 
-        if "CREATE_NOTI" in self.global_info:
-            noti_id = self.global_info.get("$NOTI_UUID")
-            self.noti_client.delete_noti(noti_id)
+        noti_id = self.global_info.get("$NOTI_UUID")
+        self.noti_client.delete_noti(noti_id)
