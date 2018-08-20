@@ -1,8 +1,11 @@
+import pytest
+
 from common.log import logger
 from test_case.persistentvolumes.pv import Pv
 from test_case.volume.volume import Volume
 
 
+@pytest.mark.pv
 class TestPvSuite(object):
     def setup_class(self):
         self.volume = Volume()
@@ -10,12 +13,14 @@ class TestPvSuite(object):
         self.region_volumes = self.volume.global_info['$REGION_VOLUME'].split(",")
         self.pv = Pv()
         self.pv_name = 'alauda-pv-{}'.format(self.pv.region_name).replace('_', '-')
+        self.teardown_class(self)
 
     def teardown_class(self):
         self.pv.delete_pv(self.pv_name)
         volume_id = self.volume.get_volume_id_from_list(self.volume_name)
         self.volume.delete_volume(volume_id)
 
+    @pytest.mark.BAT
     def test_pv(self):
         if len(self.region_volumes) == 0:
             assert True, "集群不支持存储卷"

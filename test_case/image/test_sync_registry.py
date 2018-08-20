@@ -20,7 +20,7 @@ class TestSyncRegistrySuite(object):
 
         self.sync_tool.delete_sync_config(self.sync_config_name)
 
-        self.get_publick_registry = self.sync_tool.global_info.get('PUBLIC')
+        self.get_publick_registry = self.sync_tool.global_info.get('PUBLIC_REGISTRY')
 
     def teardown_class(self):
         self.sync_tool.delete_sync_config(self.sync_config_name)
@@ -57,7 +57,7 @@ class TestSyncRegistrySuite(object):
                                                                                                           ),
                                                                "$MEMORY": self.memory})
 
-            assert update_result.status_code == 200, "update sync config: {} failed, Error code: {}, response: {}"\
+            assert update_result.status_code == 200, "update sync config: {} failed, Error code: {}, response: {}" \
                 .format(self.sync_config_name, update_result.status_code, update_result.text)
 
             # verify the update info
@@ -69,7 +69,7 @@ class TestSyncRegistrySuite(object):
             memory = str(get_detail.json()['memory'])
             dest_id = self.sync_tool.get_value(get_detail.json(), 'dest.0.dest_id')
 
-            assert memory == self.memory, "update sync config failed, the value of memory should be {}, but still {}"\
+            assert memory == self.memory, "update sync config failed, the value of memory should be {}, but still {}" \
                 .format(self.memory, memory)
 
             # get repo tag
@@ -88,8 +88,9 @@ class TestSyncRegistrySuite(object):
                                                                      "$TAG": repo_tag,
                                                                      "$DEST_ID": dest_id})
 
-            assert create_task_result.status_code == 201, "create sync registry task failed, Error code:{}, Response: "\
-                "{}".format(create_task_result.status_code, create_task_result.text)
+            assert create_task_result.status_code == 201, "create sync registry task failed, Error code:{}, Response: " \
+                                                          "{}".format(create_task_result.status_code,
+                                                                      create_task_result.text)
 
             # get sync history id
             history_id = create_task_result.json()[0]
@@ -98,17 +99,15 @@ class TestSyncRegistrySuite(object):
             assert task_ret, 'sync registry failed'
 
             # get sync history log
-            get_log_ret = self.history_tool.get_sync_registry_history_log(history_id)
-
-            assert "stopping docker deamon" in get_log_ret.text, "get sync history log failed, code: {},response: {}" \
-                .format(get_log_ret.status_code, get_log_ret.text)
+            flag = self.history_tool.get_sync_registry_history_log(history_id)
+            assert flag, "get sync history log failed, stopping docker deamon not in log"
 
             # delete sync config
             delete_config = self.sync_tool.delete_sync_config(self.sync_config_name)
-            assert delete_config.status_code == 204, "delete sync config failed, error code: {}, response: {}"\
+            assert delete_config.status_code == 204, "delete sync config failed, error code: {}, response: {}" \
                 .format(delete_config.status_code, delete_config.text)
 
             # verify delete result
             delete_result = self.sync_tool.get_sync_config_detail(self.sync_config_name)
-            assert delete_result.status_code == 404, "delete sync config failed, error code: {}, response: {}"\
+            assert delete_result.status_code == 404, "delete sync config failed, error code: {}, response: {}" \
                 .format(delete_result.status_code, delete_result.text)
