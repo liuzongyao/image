@@ -33,6 +33,6 @@ class SyncRegistryHistory(Common):
         path = self.common_url(history_id=history_id)
         return self.send(method='delete', path=path)
 
-    def get_sync_registry_history_log(self, history_id):
+    def get_sync_registry_history_log(self, history_id, expect_value="stopping docker deamon"):
         path = self.get_history_log_url(history_id=history_id)
-        return self.send(method='get', path=path)
+        return self.get_logs(url=path, expect_value=expect_value)

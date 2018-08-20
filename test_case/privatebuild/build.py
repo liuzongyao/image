@@ -40,6 +40,7 @@ class PrivateBuild(Common):
 
     def get_build_id(self, build_name):
         url = self.get_build_config_url()
-        respoonse = self.send(method="GET", path=url)
+        params = {"page": 1, "page_size": 20}
+        respoonse = self.send(method="GET", path=url, params=params)
         assert respoonse.status_code == 200, "get build list failed"
-        return self.get_uuid_accord_name(respoonse.json(), {"name": build_name}, "uuid")
+        return self.get_uuid_accord_name(respoonse.json().get("results"), {"name": build_name}, "uuid")
