@@ -5,11 +5,8 @@ from common.log import logger
 
 
 class Pv(Common):
-    def __init__(self):
-        super(Pv, self).__init__()
-
-    def get_common_pv_url(self, pv_name=None):
-        if pv_name:
+    def get_common_pv_url(self, pv_name=''):
+        if pv_name != '':
             return 'v2/kubernetes/clusters/{}/persistentvolumes/{}'.format(self.region_id, pv_name)
         else:
             return 'v2/kubernetes/clusters/{}/persistentvolumes/'.format(self.region_id)

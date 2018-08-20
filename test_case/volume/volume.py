@@ -6,9 +6,6 @@ from common.log import logger
 
 
 class Volume(Common):
-    def __init__(self):
-        super(Volume, self).__init__()
-
     def get_list_volume_url(self):
         return 'v1/storage/{}/volumes?region_id={}'.format(settings.ACCOUNT, self.region_id)
 
