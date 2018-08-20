@@ -1,0 +1,9 @@
+space_name: $SPACE_NAME
+name: $INTEGRATION_NAME
+description: $DESCRIPTION
+enabled: false
+fields:
+  endpoint: $INTEGRATION_ENDPOINT
+  user_id: $INTEGRATION_USER
+  token: $INTEGRATION_TOKEN
+namespace: $NAMESPACE

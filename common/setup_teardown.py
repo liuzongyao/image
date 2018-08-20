@@ -28,7 +28,10 @@ class SetUp(AlaudaRequest):
             "$SPACE_NAME": settings.SPACE_NAME,
             "$REGION_NAME": settings.REGION_NAME,
             "$K8S_NAMESPACE": settings.K8S_NAMESPACE,
-            "$IMAGE": settings.IMAGE
+            "$IMAGE": settings.IMAGE,
+            "$INTEGRATION_ENDPOINT": settings.INTEGRATION_ENDPOINT,
+            "$INTEGRATION_USER": settings.INTEGRATION_USER,
+            "$INTEGRATION_TOKEN": settings.INTEGRATION_TOKEN
         }
         self.get_region_data()
         self.get_build_endpontid()

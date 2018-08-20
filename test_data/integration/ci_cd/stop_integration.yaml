@@ -1,0 +1,21 @@
+resource_actions:
+- integration:update
+- integration:view
+- integration:create
+- integration:delete
+space_uuid: $SPACE_UUID
+description: ""
+project_name: $PROJECT_NAME
+project_uuid: $PROJECT_UUID
+fields:
+  token: $INTEGRATION_TOKEN
+  endpoint: $INTEGRATION_ENDPOINT
+  user_id: $INTEGRATION_USER
+enabled: false
+space_name: $SPACE_NAME
+namespace: $NAMESPACE
+type: Jenkins
+id: $INTEGRATION_ID
+name: $INTEGRATION_NAME
+integration_family: 持续集成
+logo: https://s3.cn-north-1.amazonaws.com.cn/alauda-staging-integrations/assets/jenkins-logo.png
