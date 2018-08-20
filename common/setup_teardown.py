@@ -173,8 +173,8 @@ class SetUp(AlaudaRequest):
         noti_id = self.noti_client.get_noti_id_from_list(global_noti_name)
         self.noti_client.delete_noti(noti_id)
         # 创建
-        response = self.noti_client.create_noti("./test_data/notification/notification.json",
-                                                {"$noti_name": global_noti_name, "$email": "testing@alauda.io"})
+        response = self.noti_client.create_noti("./test_data/notification/global_noti.json",
+                                                {"$noti_name": global_noti_name})
         assert response.status_code == 201, "创建全局通知失败了，原因是：{}".format(response.text)
         self.common.update({"$NOTI_NAME": response.json().get("name"), "$NOTI_UUID": response.json().get("uuid")})
 

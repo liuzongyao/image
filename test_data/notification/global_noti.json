@@ -1,0 +1,12 @@
+{
+  "name":"$noti_name",
+  "space_name": "$SPACE_NAME",
+  "subscriptions": [
+    {
+      "method":"webhook",
+      "recipient":"http://requestb.in/15agxhp1",
+      "remark": "",
+      "secret": "123456"
+    }
+  ]
+}
