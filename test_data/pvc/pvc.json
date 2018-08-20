@@ -1,0 +1,19 @@
+{
+  "kind": "PersistentVolumeClaim",
+  "spec": {
+    "accessModes": [
+      "$pvc_mode"
+    ],
+    "resources": {
+      "requests": {
+        "storage": "$sizeG"
+      }
+    },
+    "storageClassName": "$scs_name"
+  },
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "$pvc_name",
+    "namespace": "$K8S_NAMESPACE"
+  }
+}

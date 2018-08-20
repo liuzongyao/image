@@ -1,0 +1,55 @@
+resource:
+  name: $app_name
+  description: $description
+namespace:
+  name: $K8S_NAMESPACE
+  uuid: $K8S_NS_UUID
+cluster:
+  name: $REGION_NAME
+  uuid: $REGION_ID
+kubernetes:
+  - apiVersion: extensions/v1beta1
+    firstTimestamp: null
+    kind: Deployment
+    lastTimestamp: null
+    metadata:
+      name: $app_name
+      namespace: $K8S_NAMESPACE
+    spec:
+      replicas: 1
+      strategy:
+        type: RollingUpdate
+      template:
+        metadata:
+          labels:
+            app.alauda.io/name: $app_name
+            service.alauda.io/name: $app_name
+        spec:
+          affinity: {}
+          containers:
+          - image: $IMAGE
+            imagePullPolicy: Always
+            name: $app_name
+            resources:
+              limits:
+                cpu: 20m
+                memory: 50M
+              requests:
+                cpu: 20m
+                memory: 50M
+            env:
+              - name: __ALAUDA_FILE_LOG_PATH__
+                value: /var/*.txt
+            volumeMounts:
+              - mountPath: /localpath/test/
+                name: hostpath
+              - mountPath: /pvc/test/
+                name: pvcpath
+                subPath: subpath
+          volumes:
+            - name: pvcpath
+              persistentVolumeClaim:
+                claimName: $pvc_name
+            - name: hostpath
+              hostPath:
+              path: /localpath/test/
