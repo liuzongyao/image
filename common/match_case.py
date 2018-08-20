@@ -8,6 +8,7 @@ def casename():
         "test_ebs_app": "应用使用ebs测试",
         "test_gfs_volume": "存储卷gfs测试",
         "test_ebs_volume": "存储卷ebs测试",
-        "test_pv": "持久卷测试"
+        "test_pv": "持久卷测试",
+        "test_noti": "通知增删改查测试"
     }
     return casename_dict

@@ -8,6 +8,7 @@ from common.utils import retry
 from test_case.namespace.namespace import Namespace
 from test_case.space.space import Space
 from test_case.project.project import Project
+from test_case.notification.notification import Notification
 from common.loadfile import FileUtils
 
 
@@ -28,7 +29,7 @@ class SetUp(AlaudaRequest):
             "$SPACE_NAME": settings.SPACE_NAME,
             "$REGION_NAME": settings.REGION_NAME,
             "$K8S_NAMESPACE": settings.K8S_NAMESPACE,
-            "$IMAGE": settings.IMAGE
+            "$IMAGE": settings.IMAGE,
         }
         self.get_region_data()
         self.get_build_endpontid()
@@ -39,6 +40,7 @@ class SetUp(AlaudaRequest):
         self.namespace_client = Namespace()
         self.space_client = Space()
         self.project_client = Project()
+        self.noti_client = Notification()
         self.prepare()
         self.input_file(self.common)
 
@@ -160,6 +162,17 @@ class SetUp(AlaudaRequest):
         else:
             self.common.update({"$SPACE_UUID": response.json()['uuid']})
 
+        # 创建全局通知，提供给构建，流水线等使用
+        global_noti_name = "e2e-global-noti"
+        # 先删除已经存在的通知
+        noti_id = self.noti_client.get_noti_id_from_list(global_noti_name)
+        self.noti_client.delete_noti(noti_id)
+        # 创建
+        response = self.noti_client.create_noti("./test_data/notification/notification.json",
+                                                {"$noti_name": global_noti_name, "$email": "testing@alauda.io"})
+        assert response.status_code == 201, "创建全局通知失败了，原因是：{}".format(response.text)
+        self.common.update({"CREATE_NOTI": True, "$NOTI_NAME": response.json().get("name"), "$NOTI_UUID": response.json().get("uuid")})
+
 
 class TearDown(AlaudaRequest):
     """
@@ -172,6 +185,7 @@ class TearDown(AlaudaRequest):
         self.namespace_client = Namespace()
         self.space_client = Space()
         self.project_client = Project()
+        self.noti_client = Notification()
         self.delete()
 
     def delete(self):
@@ -184,3 +198,7 @@ class TearDown(AlaudaRequest):
         if "CREATE_PROJECT" in self.global_info:
             self.project_client.delete_project_role()
             self.project_client.delete_project(settings.PROJECT_NAME)
+
+        if "CREATE_NOTI" in self.global_info:
+            noti_id = self.global_info.get("$NOTI_UUID")
+            self.noti_client.delete_noti(noti_id)
