@@ -45,6 +45,8 @@ kubernetes:
                 name: hostpath
               - mountPath: /pvc/test/
                 name: pvcpath
+              - mountPath: /subpath/test/
+                name: pvcpath
                 subPath: subpath
           volumes:
             - name: pvcpath
