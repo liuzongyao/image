@@ -38,8 +38,7 @@ class TestCICDSuite(object):
         # stop integration instance
         stop = self.integration_tool.stop_integration(integration_id,
                                                       './test_data/integration/ci_cd/stop_integration.yaml',
-                                                      {"$PROJECT_NAME": self.integration_tool.params['project_name'],
-                                                       "$INTEGRATION_ID": integration_id,
+                                                      {"$INTEGRATION_ID": integration_id,
                                                        "$INTEGRATION_NAME": self.integration_name})
         assert stop.status_code == 200, "stop integration instance failed, Error code: {}, Response: {}" \
             .format(stop.status_code, stop.text)
