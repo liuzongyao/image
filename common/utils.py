@@ -22,7 +22,7 @@ def retry(times=3, sleep_secs=3):
                 try:
                     data = func(*args, **kwargs)
                     success = True
-                except Exception as ex:
+                except Exception:
                     sleep(sleep_secs)
                     if count == times:
                         assert False, "get global info failed"
