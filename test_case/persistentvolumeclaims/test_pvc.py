@@ -5,6 +5,7 @@ from test_case.persistentvolumes.pv import Pv
 from test_case.volume.volume import Volume
 
 
+@pytest.mark.pvc
 class TestPvSuite(object):
     def setup_class(self):
         self.volume = Volume()
@@ -25,7 +26,7 @@ class TestPvSuite(object):
         volume_id = self.volume.get_volume_id_from_list(self.volume_name)
         self.volume.delete_volume(volume_id)
 
-    @pytest.mark.pvc
+    @pytest.mark.BAT
     def test_pvc(self):
         if len(self.region_volumes) == 0:
             assert True, "集群不支持存储卷"

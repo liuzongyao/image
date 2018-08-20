@@ -54,6 +54,7 @@ class TestApplicationSuite(object):
         volume_id = self.volume.get_volume_id_from_list(self.volume_name)
         self.volume.delete_volume(volume_id)
 
+    @pytest.mark.BAT
     def test_newk8s_app(self):
         result = {"flag": True}
         self.application.delete_app(self.app_name)
@@ -230,6 +231,7 @@ class TestApplicationSuite(object):
 
         assert result['flag'], result
 
+    @pytest.mark.volume
     def test_gfs_app(self):
         if "glusterfs" not in self.region_volumes:
             assert True, "集群不支持glusterfs"
@@ -255,6 +257,7 @@ class TestApplicationSuite(object):
         self.volume.delete_volume(volume_id)
         assert app_status, "app: {} is not running".format(self.appwithgfs_name)
 
+    @pytest.mark.volume
     def test_ebs_app(self):
         if "ebs" not in self.region_volumes:
             assert True, "集群不支持ebs"
