@@ -13,6 +13,7 @@ class TestPvSuite(object):
         self.region_volumes = self.volume.global_info['$REGION_VOLUME'].split(",")
         self.pv = Pv()
         self.pv_name = 'alauda-pv-{}'.format(self.pv.region_name).replace('_', '-')
+        self.teardown_class(self)
 
     def teardown_class(self):
         self.pv.delete_pv(self.pv_name)

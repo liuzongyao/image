@@ -10,6 +10,7 @@ class TestVolumeSuite(object):
         self.gfs_name = 'alauda-gfs-{}'.format(self.volume.region_name).replace('_', '-')
         self.ebs_name = 'alauda-ebs-{}'.format(self.volume.region_name).replace('_', '-')
         self.region_volumes = self.volume.global_info['$REGION_VOLUME'].split(",")
+        self.teardown_class(self)
 
     def teardown_class(self):
         volume_id = self.volume.get_volume_id_from_list(self.gfs_name)

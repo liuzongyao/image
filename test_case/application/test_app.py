@@ -22,10 +22,6 @@ class TestApplicationSuite(object):
         self.gfs_name = 'alauda-gfsforapp-{}'.format(self.volume.region_name).replace('_', '-')
         self.appwithebs_name = 'alauda-appwithebs-{}'.format(self.application.region_name).replace('_', '-')
         self.ebs_name = 'alauda-ebsforapp-{}'.format(self.volume.region_name).replace('_', '-')
-        volume_id = self.volume.get_volume_id_from_list(self.gfs_name)
-        self.volume.delete_volume(volume_id)
-        volume_id = self.volume.get_volume_id_from_list(self.ebs_name)
-        self.volume.delete_volume(volume_id)
 
         self.volume_name = 'alauda-volumeforapp-{}'.format(self.volume.region_name).replace('_', '-')
         self.pv_name = 'alauda-pvforapp-{}'.format(self.volume.region_name).replace('_', '-')
@@ -33,10 +29,8 @@ class TestApplicationSuite(object):
         self.appwithpvc_name = 'alauda-appwithpvc-{}'.format(self.application.region_name).replace('_', '-')
         self.pv = Pv()
         self.pvc = Pvc()
-        self.pvc.delete_pvc(self.pvc.global_info["$K8S_NAMESPACE"], self.pvc_name)
-        self.pv.delete_pv(self.pv_name)
-        volume_id = self.volume.get_volume_id_from_list(self.volume_name)
-        self.volume.delete_volume(volume_id)
+
+        self.teardown_class(self)
 
     def teardown_class(self):
         self.application.delete_app(self.app_name)

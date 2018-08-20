@@ -15,10 +15,7 @@ class TestPvSuite(object):
         self.pv_name = 'alauda-pv-{}'.format(self.pv.region_name).replace('_', '-')
         self.pvc = Pvc()
         self.pvc_name = 'alauda-pvc-{}'.format(self.pvc.region_name).replace('_', '-')
-
-        self.pv.delete_pv(self.pv_name)
-        volume_id = self.volume.get_volume_id_from_list(self.volume_name)
-        self.volume.delete_volume(volume_id)
+        self.teardown_class(self)
 
     def teardown_class(self):
         self.pvc.delete_pvc(self.pvc.global_info["$K8S_NAMESPACE"], self.pvc_name)
