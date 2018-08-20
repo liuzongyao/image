@@ -39,13 +39,13 @@ class TestPvSuite(object):
         else:
             assert True, "未知的存储卷类型{}".format(self.pv.global_info['$REGION_VOLUME'])
             return
-        result = self.pvc.update_result(result, createvolume_result.status_code == 201, createvolume_result.text)
+        assert createvolume_result.status_code == 201, createvolume_result.text
         volume_id = createvolume_result.json().get("id")
         # create pv
         createpv_result = self.pv.create_pv("./test_data/pv/pv.json",
                                             {"$pv_name": self.pv_name, "$pv_policy": "Retain", "$size": "1",
                                              "$volume_id": volume_id, "$volume_driver": self.region_volumes[0]})
-        result = self.pvc.update_result(result, createpv_result.status_code == 201, createpv_result.text)
+        assert createpv_result.status_code == 201, createpv_result.text
         # create pvc
         createpvc_result = self.pvc.create_pvc("./test_data/pvc/pvc.json",
                                                {"$pvc_name": self.pvc_name, "$pvc_mode": "ReadWriteOnce",

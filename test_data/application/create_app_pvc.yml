@@ -41,8 +41,6 @@ kubernetes:
               - name: __ALAUDA_FILE_LOG_PATH__
                 value: /var/*.txt
             volumeMounts:
-              - mountPath: /localpath/test/
-                name: hostpath
               - mountPath: /pvc/test/
                 name: pvcpath
               - mountPath: /subpath/test/
@@ -52,6 +50,3 @@ kubernetes:
             - name: pvcpath
               persistentVolumeClaim:
                 claimName: $pvc_name
-            - name: hostpath
-              hostPath:
-              path: /localpath/test/

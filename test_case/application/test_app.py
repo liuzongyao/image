@@ -322,4 +322,5 @@ class TestApplicationSuite(object):
         self.pv.delete_pv(self.pv_name)
         self.volume.delete_volume(volume_id)
         assert app_status, "app: {} is not running".format(self.appwithpvc_name)
-        assert self.pvc_name in create_app.text
+        assert self.application.get_value(create_app.json(),
+                                          "kubernetes.0.spec.template.spec.volumes.0.persistentVolumeClaim.claimName") == self.pvc_name
