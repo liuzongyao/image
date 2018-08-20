@@ -1,7 +1,7 @@
 # coding=utf-8
 from test_case.notification.notification import Notification
-from common.log import logger
 import pytest
+
 
 class TestNotiSuite(object):
     def setup_class(self):
@@ -26,7 +26,7 @@ class TestNotiSuite(object):
         noti_id = create_result.json().get("uuid")
 
         list_result = self.noti.get_noti_list()
-        self.noti.update_result(final_result, list_result.status_code==200, list_result.text)
+        self.noti.update_result(final_result, list_result.status_code == 200, list_result.text)
         self.noti.update_result(final_result, self.noti_name in list_result.text, "创建的通知不在列表中")
 
         new_email = "testing@alauda.io"
@@ -41,10 +41,5 @@ class TestNotiSuite(object):
         delete_result = self.noti.delete_noti(noti_id)
         assert delete_result.status_code == 204, delete_result.text
 
-        #验证非block的结果
+        # 验证非block的结果
         assert final_result.get("flag"), final_result
-
-
-
-
-
