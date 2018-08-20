@@ -63,3 +63,44 @@ docker run -t --name vipercd \
 12.非block case统一在测试执行结束后判断
 
 13.所有的create资源的方法，在创建前都要执行一下删除操作
+
+# 平台参数
+
+平台的一些参数和集群的信息在用例执行前会写入到./temp_data/global_info.json的文件内，
+需要注意的是这些key不要存在包含与被包含的关系 比如不要有$REPO $REPO_NAME 这样的情况，否则替换字符串会出现问题
+样例如下：
+{
+  "$NAMESPACE": "testorg001",   #账号
+  "$SVN_PASSWORD": "alauda_Test-!@#",  # svn密码
+  "$SVN_USERNAME": "User_Name-01",   # svn账号
+  "$SVN_REPO": "http://svn-password.k8s-st.haproxy-54-223-242-27-alaudacn.myalauda.cn/alauda_test/", #svn地址
+  "$REGISTRY": "awsnewk8s",  #集群对应registry名称
+  "$REPO_NAME": "hello-world",  #测试使用的镜像仓库
+  "$SPACE_NAME": "alauda-default-aws-newk8s",  #测试使用的资源空间
+  "$REGION_NAME": "aws_newk8s",   #集群名称
+  "$K8S_NAMESPACE": "alauda-default2-aws-newk8s",  #测试使用的k8s namespace
+  "$IMAGE": "index.alauda.cn/alaudaorg/qaimages:helloworld", #测试服务使用的镜像
+  "$REGION_ID": "dc07a499-ecf2-4f73-8f85-188990a8415c",  # 集群的uuid
+  "$REGION_VOLUME": "glusterfs,ebs",  #当前集群支持的存储卷类型
+  "$BUILD_ENDPOINT_ID": "2aed16f6-0bc6-402e-8091-31ea83109c13",  #构建集群的uuid
+  "$HAPROXY_NAME": "haproxy-54-222-236-194",   #集群对应负载均衡的名称
+  "$HAPROXY_IP": "54.222.236.194",   #集群对应负载均衡的ip
+  "$SLAVEIPS": "172.31.23.198,172.31.16.59,172.31.19.89,172.31.22.166", #集群内可调用节点的ip
+  "PUBLIC_REGISTRY": [
+    {
+      "name": "alauda_public_registry",  #公有镜像源的名称
+      "uuid": "aa0fd126-49c5-4abe-9355-3f924357868d",  #公有镜像源的uuid
+      "endpoint": "index-staging.alauda.cn"  #公有镜像源的地址
+    }
+  ],
+  "PRIVATE_REGISTRY": [
+    {
+      "name": "awsnewk8s",  #集群对应registry名称
+      "uuid": "b2eb2693-7245-4318-b11d-96dcd56b2fcc",  #集群对应registry的uuid
+      "endpoint": "aws-newk8s-testorg001.stagingindex.alauda.cn:5000" #集群对应registry地址
+    }
+  ],
+  "$PROJECT_UUID": "a1e03f0e-92b6-4b7f-a8ec-59a45698cb82",  # 测试使用项目的uuid
+  "$K8S_NS_UUID": "7d7d3201-a41d-11e8-a068-0212cdf75a6a",   # 测试使用的k8s namespace对应的uuid
+  "$SPACE_UUID": "d2561952-cccb-4aaa-861e-97bd4fa1ae3a"     # 测试使用资源空间对应的uuid
+}
