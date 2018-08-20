@@ -100,8 +100,8 @@ class TestSyncRegistrySuite(object):
             # get sync history log
             get_log_ret = self.history_tool.get_sync_registry_history_log(history_id)
 
-            assert "stopping docker deamon" in get_log_ret.text, "get sync history log failed, code: {},response: {}"\
-                .format(get_log_ret.status_code,get_log_ret.text)
+            assert "stopping docker deamon" in get_log_ret.text, "get sync history log failed, code: {},response: {}" \
+                .format(get_log_ret.status_code, get_log_ret.text)
 
             # delete sync config
             delete_config = self.sync_tool.delete_sync_config(self.sync_config_name)

@@ -213,7 +213,7 @@ class TestApplicationSuite(object):
         volume_id = self.volume.get_volume_id_from_list(self.gfs_name)
         self.volume.delete_volume(volume_id)
         create_result = self.volume.create_volume("./test_data/volume/glusterfs.json",
-                                                  {"$volume_name": self.gfs_name, '"$size"': "10"})
+                                                  {"$volume_name": self.gfs_name, '"$size"': "1"})
         assert create_result.status_code == 201, create_result.text
         volume_id = create_result.json().get("id")
 
@@ -238,7 +238,7 @@ class TestApplicationSuite(object):
         volume_id = self.volume.get_volume_id_from_list(self.ebs_name)
         self.volume.delete_volume(volume_id)
         create_result = self.volume.create_volume("./test_data/volume/ebs.json",
-                                                  {"$volume_name": self.ebs_name, '"$size"': "10"})
+                                                  {"$volume_name": self.ebs_name, '"$size"': "1"})
         assert create_result.status_code == 201, create_result.text
         volume_id = create_result.json().get("id")
         driver_volume_id = create_result.json().get("driver_volume_id")
