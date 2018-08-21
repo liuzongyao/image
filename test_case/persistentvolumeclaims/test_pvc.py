@@ -93,8 +93,7 @@ class TestPvSuite(object):
         result = {"flag": True}
         # create scs
         if len(self.masterips) == 0:
-            assert True, "获取master节点失败，不能创建正常使用的存储类"
-            return
+            assert False, "获取master节点失败，不能创建正常使用的存储类"
         masterip = self.masterips[0]
         create_result = self.scs.create_scs("./test_data/scs/scs.yml",
                                             {"$scs_name": self.scs_name, "$is_default": "false",
@@ -106,7 +105,8 @@ class TestPvSuite(object):
                                                {"$pvc_name": self.pvcusescs_name, "$pvc_mode": "ReadWriteOnce",
                                                 "$scs_name": self.scs_name, "$size": "1"})
         assert createpvc_result.status_code == 201, createpvc_result.text
-        time.sleep(60)
+        self.pvc.get_status(self.pvc.get_common_pvc_url(self.pvc.global_info["$K8S_NAMESPACE"], self.pvcusescs_name),
+                            "status.phase", "Bound")
         # get pvc detail
         detail_result = self.pvc.get_pvc_detail(self.pvc.global_info["$K8S_NAMESPACE"], self.pvcusescs_name)
         result = self.pvc.update_result(result, detail_result.status_code == 200, detail_result.text)
@@ -122,13 +122,11 @@ class TestPvSuite(object):
     @pytest.mark.scs
     def test_pvc_use_defaultscs(self):
         if self.default_size > 1:
-            assert True, "有两个以上的默认存储类，无法测试"
-            return
+            assert False, "有两个以上的默认存储类，无法测试"
         elif self.default_size == 0:
             # create scs
             if len(self.masterips) == 0:
-                assert True, "获取master节点失败，不能创建正常使用的存储类"
-                return
+                assert False, "获取master节点失败，不能创建正常使用的存储类"
             masterip = self.masterips[0]
             create_result = self.scs.create_scs("./test_data/scs/scs.yml",
                                                 {"$scs_name": self.defaultscs_name, "$is_default": "true",
@@ -140,7 +138,8 @@ class TestPvSuite(object):
                                                {"$pvc_name": self.pvcusedefaultscs_name, "$pvc_mode": "ReadWriteOnce",
                                                 "$size": "1"})
         assert createpvc_result.status_code == 201, createpvc_result.text
-        time.sleep(60)
+        self.pvc.get_status(self.pvc.get_common_pvc_url(self.pvc.global_info["$K8S_NAMESPACE"], self.pvcusedefaultscs_name),
+                            "status.phase", "Bound")
         # get pvc detail
         detail_result = self.pvc.get_pvc_detail(self.pvc.global_info["$K8S_NAMESPACE"], self.pvcusedefaultscs_name)
         result = self.pvc.update_result(result, detail_result.status_code == 200, detail_result.text)
