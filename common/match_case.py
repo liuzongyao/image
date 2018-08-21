@@ -10,6 +10,7 @@ def casename():
         "test_gfs_volume": "存储卷gfs测试",
         "test_ebs_volume": "存储卷ebs测试",
         "test_pv": "持久卷测试",
+        "test_ci_cd": "持续集成",
         "test_noti": "通知增删改查测试",
         "test_pvc": "持久卷声明测试"
     }

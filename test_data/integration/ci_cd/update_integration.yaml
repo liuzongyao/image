@@ -1,0 +1,9 @@
+space_name: $SPACE_NAME
+name: $INTEGRATION_NAME
+description: $DESCRIPTION
+enabled: false
+fields:
+  endpoint: $JENKINS_ENDPOINT
+  user_id: $JENKINS_USER
+  token: $JENKINS_TOKEN
+namespace: $NAMESPACE

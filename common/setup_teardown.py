@@ -29,7 +29,11 @@ class SetUp(AlaudaRequest):
             "$SPACE_NAME": settings.SPACE_NAME,
             "$REGION_NAME": settings.REGION_NAME,
             "$K8S_NAMESPACE": settings.K8S_NAMESPACE,
-            "$IMAGE": settings.IMAGE
+            "$IMAGE": settings.IMAGE,
+            "$PROJECT_NAME": settings.PROJECT_NAME,
+            "$JENKINS_ENDPOINT": settings.JENKINS_ENDPOINT,
+            "$JENKINS_USER": settings.JENKINS_USER,
+            "$JENKINS_TOKEN": settings.JENKINS_TOKEN
         }
         self.get_region_data()
         self.get_build_endpontid()

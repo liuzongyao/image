@@ -8,6 +8,10 @@ REGION_NAME = os.getenv("REGION_NAME", "aws_newk8s")
 REGISTRY_NAME = os.getenv("REGISTRY_NAME", "awsnewk8s")
 IMAGE = os.getenv("IMAGE", "index.alauda.cn/alaudaorg/qaimages:helloworld")
 # not necessary
+JENKINS_ENDPOINT = os.getenv("INTEGRATION_ENDPOINT", "http://54.222.236.194:666/")
+JENKINS_USER = os.getenv("INTEGRATION_USER", "admin")
+JENKINS_TOKEN = os.getenv("INTEGRATION_TOKEN", "87db6225603f0dc4e334b46b703bde46")
+
 SVN_REPO = os.getenv("SVN_REPO", "http://svn-password.k8s-st.haproxy-54-223-242-27-alaudacn.myalauda.cn/alauda_test/")
 SVN_USERNAME = os.getenv("SVN_USERNAME", "User_Name-01")
 SVN_PASSWORD = os.getenv("SVN_PASSWORD", "alauda_Test-!@#")
