@@ -93,7 +93,7 @@ class Common(AlaudaRequest):
         current_time = int(time())
         return {"start_time": current_time - 1800, "end_time": current_time}
 
-    def get_status(self, url, key, expect_value):
+    def get_status(self, url, key, expect_value, delimiter='.'):
         """
         :param url: 获取服务或者构建详情的url
         :param key: 获取状态的key 需要是个string，传入层级的key
@@ -106,7 +106,7 @@ class Common(AlaudaRequest):
             cnt += 1
             response = self.send(method="GET", path=url)
             assert response.status_code == 200, "get status failed"
-            value = self.get_value(response.json(), key)
+            value = self.get_value(response.json(), key, delimiter)
             if value == expect_value:
                 flag = True
                 break
@@ -261,4 +261,19 @@ class Common(AlaudaRequest):
             if response.status_code == expect_status:
                 flag = True
             sleep(5)
+        return flag
+
+    def check_value_in_response(self, url, value):
+        cnt = 0
+        flag = False
+        while cnt < 60 and not flag:
+            cnt += 1
+            response = self.send(method="GET", path=url)
+            assert response.status_code == 200, "get status failed"
+            if value in response.text:
+                flag = True
+                break
+            if value in self.final_status:
+                break
+            sleep(1)
         return flag
