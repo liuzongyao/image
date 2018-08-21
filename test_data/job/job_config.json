@@ -1,8 +1,8 @@
 {
-    "registry_index": "$IMAGE",
-    "config_name": "$JOB_NAME",
+    "registry_index": "index.alauda.cn",
+    "config_name": "$CONFIG_NAME",
     "command_type": "CUSTOM_COMMAND",
-    "command": "env",
+    "command": "echo hello",
     "cpu": 0.25,
     "memory": 64,
     "envfiles": [],
@@ -12,8 +12,8 @@
             "value": "job"
         }
     ],
-    "image_name": "$IMAGES_NAME",
-    "image_tag": "latest",
+    "image_name": "alaudaorg/qaimages",
+    "image_tag": "helloworld",
     "region_name": "$REGION_NAME",
     "region_uuid": "$REGION_UUID",
     "registry_name": "$REGISTRY",
