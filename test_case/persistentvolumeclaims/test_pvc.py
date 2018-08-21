@@ -68,6 +68,7 @@ class TestPvSuite(object):
                                                {"$pvc_name": self.pvc_name, "$pvc_mode": "ReadWriteOnce",
                                                 "$scs_name": "", "$size": "1"})
         assert createpvc_result.status_code == 201, createpvc_result.text
+        time.sleep(1)
         # list pvc
         list_result = self.pvc.list_pvc()
         result = self.pvc.update_result(result, list_result.status_code == 200, list_result.text)
