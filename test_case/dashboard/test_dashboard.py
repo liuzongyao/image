@@ -93,6 +93,9 @@ class TestDashboard(object):
         del_ret = self.dashboard.delete_chart(dashboard_id, chart_id)
         self.dashboard.update_result(final_result, del_ret.status_code == 204, del_ret.text)
 
+        check_flag = self.dashboard.check_exists(self.dashboard.get_chart_url(dashboard_id, chart_id), 405)
+        self.dashboard.update_result(final_result, check_flag, "delete chart failed")
+
         del_ret = self.dashboard.delete_dashboard(dashboard_id)
         assert del_ret.status_code == 204, del_ret.text
 
