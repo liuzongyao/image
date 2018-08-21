@@ -2,9 +2,7 @@
 import json
 import sys
 from time import sleep, time
-
 import pexpect
-
 from common.api_requests import AlaudaRequest
 from common.exceptions import ResponseError, ParseResponseError
 from common.loadfile import FileUtils
