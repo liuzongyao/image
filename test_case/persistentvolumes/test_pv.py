@@ -1,4 +1,5 @@
 import pytest
+import time
 
 from common.log import logger
 from test_case.persistentvolumes.pv import Pv
@@ -43,6 +44,7 @@ class TestPvSuite(object):
                                           {"$pv_name": self.pv_name, "$pv_policy": "Retain", "$size": "1",
                                            "$volume_id": volume_id, "$volume_driver": self.region_volumes[0]})
         assert create_result.status_code == 201, create_result.text
+        time.sleep(1)
         # list pv
         list_result = self.pv.list_pv()
         result = self.pv.update_result(result, list_result.status_code == 200, list_result.text)
