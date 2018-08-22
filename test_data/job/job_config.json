@@ -15,8 +15,7 @@
         }
     ],
     "region_name": "$REGION_NAME",
-    "region_uuid": "$REGION_UUID",
-    "registry_name": "$REGISTRY",
+    "region_uuid": "$REGION_ID",
     "space_name": "$SPACE_NAME",
     "space_uuid": "$SPACE_UUID",
     "timeout": 23
