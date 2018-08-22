@@ -13,6 +13,7 @@ def casename():
         "test_pv": "持久卷测试",
         "test_ci_cd": "持续集成",
         "test_noti": "通知增删改查测试",
-        "test_pvc": "持久卷声明测试"
+        "test_pvc": "持久卷声明测试",
+        "test_job": "任务测试"
     }
     return casename_dict

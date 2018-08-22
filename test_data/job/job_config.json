@@ -1,0 +1,23 @@
+{
+    "registry_index": "$registry",
+    "image_name": "$image_name",
+    "image_tag": "$image_tag",
+    "config_name": "$CONFIG_NAME",
+    "command_type": "CUSTOM_COMMAND",
+    "command": "echo hello",
+    "cpu": 0.25,
+    "memory": 64,
+    "envfiles": [],
+    "envvars": [
+        {
+            "name": "create",
+            "value": "job"
+        }
+    ],
+    "region_name": "$REGION_NAME",
+    "region_uuid": "$REGION_UUID",
+    "registry_name": "$REGISTRY",
+    "space_name": "$SPACE_NAME",
+    "space_uuid": "$SPACE_UUID",
+    "timeout": 23
+}
