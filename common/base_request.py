@@ -264,16 +264,21 @@ class Common(AlaudaRequest):
         return flag
 
     def check_value_in_response(self, url, value):
+        '''
+        主要用于判断创建后的资源是否在资源列表中，
+            个别资源创建后会延时出现在列表中，需要循环获取
+        :param url: 获取资源列表的url
+        :param value: 资源名称
+        :return:
+        '''
         cnt = 0
         flag = False
         while cnt < 60 and not flag:
             cnt += 1
             response = self.send(method="GET", path=url)
-            assert response.status_code == 200, "get status failed"
+            assert response.status_code == 200, "get list failed"
             if value in response.text:
                 flag = True
-                break
-            if value in self.final_status:
                 break
             sleep(1)
         return flag
