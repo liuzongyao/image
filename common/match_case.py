@@ -5,8 +5,6 @@ def casename():
         "test_dashboard": "监控面板相关测试",
         "test_svn_build": "svn快速构建",
         "test_sync_public_registry": "镜像同步",
-        "test_ci_cd": "持续集成",
-        "test_noti": "通知增删改查测试",
         "test_gfs_app": "应用使用gfs测试",
         "test_ebs_app": "应用使用ebs测试",
         "test_pvc_app": "应用使用pvc测试",
