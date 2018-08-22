@@ -1,5 +1,7 @@
 {
-    "registry_index": "index.alauda.cn",
+    "registry_index": "$REPO",
+    "image_name": "$IMNAME",
+    "image_tag": "$IMTAG",
     "config_name": "$CONFIG_NAME",
     "command_type": "CUSTOM_COMMAND",
     "command": "echo hello",
@@ -12,8 +14,6 @@
             "value": "job"
         }
     ],
-    "image_name": "alaudaorg/qaimages",
-    "image_tag": "helloworld",
     "region_name": "$REGION_NAME",
     "region_uuid": "$REGION_UUID",
     "registry_name": "$REGISTRY",
