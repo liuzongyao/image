@@ -9,7 +9,7 @@ class TestJobSuit(object):
         self.job = Job()
         self.job_config_name = "e2e-job{}".format(self.job.region_name)
         self.job_registry_index = self.job.global_info["$IMAGE"].split("/")[0]
-        self.job_image_name = self.job.global_info["$IMAGE"].split("/",1)[1].split(':')[0]
+        self.job_image_name = self.job.global_info["$IMAGE"].split("/", 1)[1].split(':')[0]
         self.job_image_tag = self.job.global_info["$IMAGE"].split(":")[1]
 
     def teardown_class(self):
@@ -35,7 +35,7 @@ class TestJobSuit(object):
         assert ret_status, "trigger job failed expected result is SUCCEEDED, actual result is {}".format(ret_status)
 
         ret_log = self.job.get_job_log(job_id)
-        result = self.job.update_result(result, ret_log ,"get job log expexcted to contain hello")
+        result = self.job.update_result(result, ret_log, "get job log expexcted to contain hello")
 
         # delete job
         ret_del = self.job.delete_job_config(self.job_config_name)
