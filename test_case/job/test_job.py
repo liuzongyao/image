@@ -21,9 +21,9 @@ class TestJobSuit(object):
 
         ret_create = self.job.create_job_config("./test_data/job/job_config.json",
                                                 {"$CONFIG_NAME": self.job_config_name,
-                                                 "$REPO": self.job_registry_index,
-                                                 "$IMNAME": self.job_image_name,
-                                                 "$IMTAG": self.job_image_tag})
+                                                 "$registry": self.job_registry_index,
+                                                 "$image_name": self.job_image_name,
+                                                 "$image_tag": self.job_image_tag})
         assert ret_create.status_code == 201, ret_create.text
         config_id = ret_create.json()["config_uuid"]
 

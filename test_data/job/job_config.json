@@ -1,7 +1,7 @@
 {
-    "registry_index": "$REPO",
-    "image_name": "$IMNAME",
-    "image_tag": "$IMTAG",
+    "registry_index": "$registry",
+    "image_name": "$image_name",
+    "image_tag": "$image_tag",
     "config_name": "$CONFIG_NAME",
     "command_type": "CUSTOM_COMMAND",
     "command": "echo hello",
