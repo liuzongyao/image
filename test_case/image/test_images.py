@@ -19,7 +19,7 @@ class TestImageSuite(object):
         self.image_tool.delete_repo(self.repo_name, reg_project_name=self.reg_project_name)
         self.image_tool.delete_reg_project(self.reg_project_name)
 
-    def test_image(self):
+    def test_project_repo(self):
         # create registry project
         create_reg_ret = self.image_tool.create_reg_project('./test_data/image/create_reg_project.yaml',
                                                             {"$REG_PROJECT_NAME": self.reg_project_name})
