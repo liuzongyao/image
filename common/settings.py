@@ -26,7 +26,7 @@ TESTCASES = os.getenv("TESTCASES", "")
 CASE_TYPE = os.getenv("CASE_TYPE")
 PROJECT_NAME = os.getenv("PROJECT_NAME", "default")
 ENV = os.getenv("ENV", "Staging")
-RECIPIENTS = get_list_from_str(os.getenv("RECIPIENTS", "hchan@alauda.io"))
+RECIPIENTS = get_list_from_str(os.getenv("RECIPIENTS", "testing@alauda.io"))
 K8S_NAMESPACE = os.getenv("K8S_NAMESPACE", "alauda-default2-{}".format(REGION_NAME).replace("_", "-"))
 SPACE_NAME = os.getenv("SPACE_NAME", "alauda-default-{}".format(REGION_NAME).replace("_", "-"))
 
