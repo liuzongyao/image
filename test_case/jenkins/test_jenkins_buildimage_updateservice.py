@@ -6,6 +6,7 @@ from test_case.image.image import Image
 from test_case.integrations.ci_cd_integrations import Integrations
 
 
+@pytest.mark.region
 @pytest.mark.buildimageupdateservice
 class TestJenkinsBuildImageUpdateService(object):
     def setup_class(self):
