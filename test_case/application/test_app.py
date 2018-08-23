@@ -88,7 +88,7 @@ class TestApplicationSuite(object):
 
         # get app event
         event_result = self.application.get_app_events(app_uuid, 'create', self.application.global_info['$NAMESPACE'])
-        result = self.application.update_result(result, event_result, '操作事件：获取应用创建时间出错')
+        result = self.application.update_result(result, event_result, '操作事件：获取应用创建事件出错')
 
         # get app monitor
         monitor_result = self.application.get_app_monitor(app_uuid)
