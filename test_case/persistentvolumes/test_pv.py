@@ -43,6 +43,7 @@ class TestPvSuite(object):
                                           {"$pv_name": self.pv_name, "$pv_policy": "Retain", "$size": "1",
                                            "$volume_id": volume_id, "$volume_driver": self.region_volumes[0]})
         assert create_result.status_code == 201, create_result.text
+        self.pv.check_value_in_response(self.pv.get_common_pv_url(), self.pv_name)
         # list pv
         list_result = self.pv.list_pv()
         result = self.pv.update_result(result, list_result.status_code == 200, list_result.text)

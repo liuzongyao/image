@@ -2,8 +2,10 @@
 def casename():
     casename_dict = {
         "test_newk8s_app": "应用测试",
+        "test_dashboard": "监控面板相关测试",
         "test_svn_build": "svn快速构建",
         "test_sync_public_registry": "镜像同步",
+        "test_project_repo": "项目下镜像的测试",
         "test_gfs_app": "应用使用gfs测试",
         "test_ebs_app": "应用使用ebs测试",
         "test_pvc_app": "应用使用pvc测试",
@@ -13,6 +15,10 @@ def casename():
         "test_ci_cd": "持续集成",
         "test_noti": "通知增删改查测试",
         "test_pvc": "持久卷声明测试",
-        "test_jenkins_buildimage_updateservice": "jenkins构建并更新服务"
+        "test_jenkins_buildimage_updateservice": "jenkins构建并更新服务",
+        "test_job_config": "任务测试",
+        "test_pvc_use_scs": "持久卷声明使用存储类测试",
+        "test_pvc_use_defaultscs": "持久卷声明使用默认存储类测试",
+        "test_scs": "存储类测试",
     }
     return casename_dict

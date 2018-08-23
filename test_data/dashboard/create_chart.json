@@ -1,0 +1,10 @@
+{
+    "metrics": [{
+        "aggregator": "$aggregator",
+        "metric": "$metric",
+        "group_by": "$group_by",
+        "type": "line",
+        "over": "region_name=$REGION_NAME"
+    }],
+    "display_name": "$chart_name"
+}

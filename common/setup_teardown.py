@@ -42,6 +42,7 @@ class SetUp(AlaudaRequest):
         self.get_build_endpontid()
         self.get_load_balance_info()
         self.get_slave_ips()
+        self.get_master_ips()
         self.get_registry_uuid()
         self.input_file(self.common)
         self.namespace_client = Namespace()
@@ -127,6 +128,18 @@ class SetUp(AlaudaRequest):
                     "schedulable") is True:
                 slaveips.append(content.get("private_ip"))
         self.common.update({"$SLAVEIPS": ','.join(slaveips)})
+
+    @retry()
+    def get_master_ips(self):
+        response = self.send(method='GET',
+                             path='/v1/regions/{}/{}/nodes/'.format(self.account, self.region_name))
+        assert response.status_code == 200, response.text
+        contents = response.json()
+        masterips = []
+        for content in contents:
+            if content.get("type") in ["SYSLAVE", "SYS"]:
+                masterips.append(content.get("private_ip"))
+        self.common.update({"$MASTERIPS": ','.join(masterips)})
 
     def input_file(self, content):
         """
