@@ -6,6 +6,9 @@ class Integrations(Common):
         return integration_id and "/v1/integrations/{}/{}".format(self.account, integration_id) or \
                "/v1/integrations/{}/".format(self.account)
 
+    def get_integration_list_url(self):
+        return "/v1/integrations/{}/?page=1&page_size=200".format(self.account)
+
     def create_integration(self, file, data):
         path = self.common_url()
         data = self.generate_data(file, data)
@@ -30,7 +33,7 @@ class Integrations(Common):
         return self.send(method='delete', path=path)
 
     def get_integration_id(self, integration_name):
-        path = self.common_url()
+        path = self.get_integration_list_url()
         response = self.send(method='get', path=path)
         if response.status_code == 200:
             contents = response.json()['results']

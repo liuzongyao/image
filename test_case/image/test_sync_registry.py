@@ -78,7 +78,7 @@ class TestSyncRegistrySuite(object):
             assert get_repo_tag_ret.status_code == 200, "get {} tag failed, Error code: {}, Response: {}".format(
                 self.repo_name, get_repo_tag_ret.status_code, get_repo_tag_ret.text)
 
-            assert len(get_repo_tag_ret.json()) > 0, "the tag of repo: {} is null".format(self.repo_name)
+            assert len(get_repo_tag_ret.json()['results']) > 0, "the tag of repo: {} is null".format(self.repo_name)
 
             repo_tag = self.sync_tool.get_value(get_repo_tag_ret.json(), 'results.0.tag_name')
 

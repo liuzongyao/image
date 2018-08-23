@@ -12,6 +12,7 @@ def casename():
         "test_pv": "持久卷测试",
         "test_ci_cd": "持续集成",
         "test_noti": "通知增删改查测试",
-        "test_pvc": "持久卷声明测试"
+        "test_pvc": "持久卷声明测试",
+        "test_jenkins_buildimage_updateservice": "jenkins构建并更新服务"
     }
     return casename_dict

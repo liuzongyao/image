@@ -21,6 +21,8 @@ class SetUp(AlaudaRequest):
         super(SetUp, self).__init__()
         self.common = {
             "$NAMESPACE": settings.ACCOUNT,
+            "$PASSWORD": settings.PASSWORD,
+            "$SVN_CREDENTIAL": settings.SVN_CREDENTIAL,
             "$SVN_PASSWORD": settings.SVN_PASSWORD,
             "$SVN_USERNAME": settings.SVN_USERNAME,
             "$SVN_REPO": settings.SVN_REPO,
@@ -28,6 +30,7 @@ class SetUp(AlaudaRequest):
             "$REPO_NAME": settings.REPO_NAME,
             "$SPACE_NAME": settings.SPACE_NAME,
             "$REGION_NAME": settings.REGION_NAME,
+            "$REG_CREDENTIAL": settings.REGISTRY_CREDENTIAL,
             "$K8S_NAMESPACE": settings.K8S_NAMESPACE,
             "$IMAGE": settings.IMAGE,
             "$PROJECT_NAME": settings.PROJECT_NAME,
