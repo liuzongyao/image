@@ -32,7 +32,8 @@ class Application(Common):
         return "/v2/apps/{}/stop".format(uuid)
 
     def get_app_log_url(self, service_id):
-        return "/v1/logs/{}/search?&services={}&namespace={}".format(settings.ACCOUNT, service_id, settings.ACCOUNT)
+        return "/v1/logs/{}/search?services={}&namespace={}&paths=stdout".format(settings.ACCOUNT, service_id,
+                                                                                 settings.ACCOUNT)
 
     def get_app_cpu_monitor_url(self, app_id):
         return "/v2/monitor/{}/metrics/query?q=avg:service.cpu.utilization{}by{}".format(settings.ACCOUNT,
@@ -241,12 +242,12 @@ class Application(Common):
         url = self.get_service_instance_url(service_id)
         return self.send(method='get', path=url)
 
-    def rollback_service(self, service_id):
+    def rollback_service_toversion(self, service_id):
         logger.info(sys._getframe().f_code.co_name.center(50, '*'))
         url = self.get_rollbackto_service_url(service_id)
         return self.send(method='put', path=url)
 
-    def rollback_service_toversion(self, service_id):
+    def rollback_service(self, service_id):
         logger.info(sys._getframe().f_code.co_name.center(50, '*'))
         url = self.get_rollback_service_url(service_id)
         return self.send(method='put', path=url)
