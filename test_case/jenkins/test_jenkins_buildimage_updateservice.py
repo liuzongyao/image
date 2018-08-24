@@ -44,15 +44,13 @@ class TestJenkinsBuildImageUpdateService(object):
     def test_jenkins_buildimage_updateservice(self):
         # get template id
         template_id = self.jenkins_tool.get_sys_template_id(self.template_name, 'uuid')
-        assert template_id, "get id of the sys template: {} failed".format(self.template_name)
+        assert template_id, "获取模板失败"
 
         # create jenkins integration instance
         create_integration = self.integration_tool.create_integration(
             './test_data/integration/ci_cd/create_integration.yaml', {"$INTEGRATION_NAME": self.integration_name})
 
-        assert create_integration.status_code == 201, "create jenkins integration instance failed, " \
-                                                      "Error code: {}, Response: {}" \
-            .format(create_integration.status_code, create_integration.text)
+        assert create_integration.status_code == 201, "创建集成中心实例失败"
 
         integration_id = create_integration.json()['id']
 
@@ -61,14 +59,14 @@ class TestJenkinsBuildImageUpdateService(object):
                                             {"$jenkins_integration_id": integration_id})
 
         ret = self.jenkins_tool.get_credential(integration_id, self.code_credential_name)
-        assert ret, "create code credential failed or get code credential failed, please confirm manually"
+        assert ret, "创建svn代码库凭证失败或获取凭证失败"
 
         # create registry credential
         self.jenkins_tool.create_credential('./test_data/jenkins/create_registry_credential.yaml',
                                             {"$jenkins_integration_id": integration_id})
 
         ret = self.jenkins_tool.get_credential(integration_id, self.registry_credential_name)
-        assert ret, "create registry credential failed or get registry credential failed, please confirm manually"
+        assert ret, "创建镜像仓库凭证失败"
 
         # get image info
         registry_endpoint = self.app_tool.get_uuid_accord_name(self.app_tool.global_info.get("PRIVATE_REGISTRY"),
@@ -77,10 +75,9 @@ class TestJenkinsBuildImageUpdateService(object):
 
         get_repo_tag_ret = self.image_tool.get_repo_tag(self.repo)
 
-        assert get_repo_tag_ret.status_code == 200, "get {} tag failed, Error code: {}, Response: {}".format(
-            self.repo, get_repo_tag_ret.status_code, get_repo_tag_ret.text)
+        assert get_repo_tag_ret.status_code == 200, "获取镜像版本列表失败"
 
-        assert len(get_repo_tag_ret.json()['results']) > 0, "the tag of repo: {} is null".format(self.repo)
+        assert len(get_repo_tag_ret.json()['results']) > 0, "镜像版本为空"
 
         repo_tag = self.app_tool.get_value(get_repo_tag_ret.json(), 'results.0.tag_name')
 
@@ -92,15 +89,14 @@ class TestJenkinsBuildImageUpdateService(object):
         ret = self.app_tool.create_app('./test_data/application/create_app.yml',
                                        {"$app_name": self.app_name, "$IMAGE": image})
 
-        assert ret.status_code == 201, "create service failed, Error code: {}, Response: {}" \
-            .format(ret.status_code, ret.text)
+        assert ret.status_code == 201, "创建应用失败"
 
         # get service status
         content = ret.json()
         app_id = self.app_tool.get_value(content, 'resource.uuid')
 
         app_status = self.app_tool.get_app_status(app_id, 'resource.status', 'Running')
-        assert app_status, "app: {} is not running".format(self.app_name)
+        assert app_status, "应用运行失败"
 
         # create jenkins pipeline
         ret = self.jenkins_tool.create_pipeline('./test_data/jenkins/create_buildimage_updateservice_pipeline_svn.yaml',
@@ -111,8 +107,7 @@ class TestJenkinsBuildImageUpdateService(object):
                                                  "$imageTag": self.repo_tag, "$imageExtraTag": self.repo_additional_tag,
                                                  "$service_name": self.app_name, "$time_out": self.time_out})
 
-        assert ret.status_code == 201, "create jenkins pipeline falied, Error code: {}, Response: {}" \
-            .format(ret.status_code, ret.text)
+        assert ret.status_code == 201, "创建Jenkins流水线项目失败"
 
         pipeline_id = ret.json()['uuid']
 
@@ -120,21 +115,19 @@ class TestJenkinsBuildImageUpdateService(object):
         ret = self.jenkins_tool.execute_pipeline('./test_data/jenkins/execute_pipeline.yaml',
                                                  {"$pipeline_uuid": pipeline_id})
 
-        assert ret.status_code == 200, "execute pipeline failed, Error code: {}, Response: {}" \
-            .format(ret.status_code, ret.text)
+        assert ret.status_code == 200, "执行流水线项目失败"
 
         history_id = ret.json()['uuid']
 
         # get pipeline status
         ret = self.jenkins_tool.get_pipeline_status(history_id, pipeline_id, 'result', 'SUCCESS')
 
-        assert ret, "Pipeline execution failed"
+        assert ret, "流水线项目执行失败"
 
         # get the service image tag
         ret = self.app_tool.get_app_detail(app_id)
 
-        assert ret.status_code == 200, "get service info failed, Error code: {}, Response: {}" \
-            .format(ret.status_code, ret.text)
+        assert ret.status_code == 200, "获取应用的镜像版本失败"
 
         image_tag = self.app_tool.get_value(ret.json(), 'kubernetes.0.spec.template.spec.containers.0.image'
                                             ).split(":")[-1]
@@ -142,49 +135,40 @@ class TestJenkinsBuildImageUpdateService(object):
         logger.info("image tag: {}".format(
             self.app_tool.get_value(ret.json(), 'kubernetes.0.spec.template.spec.containers.0.image')))
 
-        assert image_tag == self.repo_additional_tag, "update service falied, the image tag should be {}, but {}" \
-            .format(self.repo_additional_tag, image_tag)
+        assert image_tag == self.repo_additional_tag, "流水线更新应用失败"
 
         # delete service
         ret = self.app_tool.delete_app(self.app_name)
-        assert ret.status_code == 204, "delete service failed, Error code: {}, Response: {}" \
-            .format(ret.status_code, ret.text)
+        assert ret.status_code == 204, "删除应用操作失败"
 
         ret = self.app_tool.check_app_exist(app_id, 404)
 
-        assert ret, "the service should be deleted, but still exist"
+        assert ret, "应用没有被成功删除掉"
 
         # delete jenkins pipeline
         ret = self.jenkins_tool.delete_pipeline(pipeline_id)
-        assert ret.status_code == 204, "delete pipeline failed, Error code: {}, Response: {}" \
-            .format(ret.status_code, ret.text)
+        assert ret.status_code == 204, "删除Jenkins流水线项目操作失败"
 
         ret = self.jenkins_tool.get_pipeline_detail(pipeline_id)
-        assert ret.status_code == 404, "the pipeline should be deleted, but still exist"
+        assert ret.status_code == 404, "流水线没有被成功删除掉"
 
         # delete integration instance
         ret = self.integration_tool.delete_integration(integration_id)
-        assert ret.status_code == 204, "delete integration instance failed, Error code: {}, Response: {}" \
-            .format(ret.status_code, ret.text)
+        assert ret.status_code == 204, "删除集成中心实例操作失败"
 
         ret = self.integration_tool.get_integration_detail(integration_id)
-        assert ret.status_code == 404, "the integration instance should be deleted, but still exist"
+        assert ret.status_code == 404, "集成中心实例没有被成功删除掉"
 
         # delete image tag
         ret = self.image_tool.delete_repo_tag(self.repo, self.repo_tag)
-        assert ret.status_code == 204, "delete image tag failed, Error code: {}, Response: {}" \
-            .format(ret.status_code, ret.text)
+        assert ret.status_code == 204, "删除镜像版本操作失败"
 
         ret = self.image_tool.delete_repo_tag(self.repo, self.repo_additional_tag)
-        assert ret.status_code == 204, "delete image tag failed, Error code: {}, Response: {}" \
-            .format(ret.status_code, ret.text)
+        assert ret.status_code == 204, "删除镜像版本操作失败"
 
         ret = self.image_tool.get_repo_tag(self.repo)
-        assert ret.status_code == 200, "get image tag failed, Error code: {}, Response: {}" \
-            .format(ret.status_code, ret.text)
+        assert ret.status_code == 200, "获取镜像版本失败"
 
-        assert self.repo_tag not in ret.text, "the tag: {} of image: {} should be deleted, but still exist" \
-            .format(self.repo_tag, self.repo)
+        assert self.repo_tag not in ret.text, "镜像版本没有被成功删除掉"
 
-        assert self.repo_additional_tag not in ret.text, "the tag: {} of image: {} should be deleted, but still exist" \
-            .format(self.repo_additional_tag, self.repo)
+        assert self.repo_additional_tag not in ret.text, "镜像版本没有被成功删除掉"
