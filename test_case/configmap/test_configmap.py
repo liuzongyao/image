@@ -21,7 +21,7 @@ class TestCmSuite(object):
         createconfigmap_result = self.configmap.create_configmap("./test_data/configmap/configmap.json",
                                                                  {"$cm_name": self.configmap_name,
                                                                   "$cm_key": self.configmap_name})
-        assert createconfigmap_result.status_code == 201, createconfigmap_result.text
+        assert createconfigmap_result.status_code == 201, "创建cm失败:{}".format(createconfigmap_result.text)
         self.configmap.check_value_in_response(self.configmap.get_common_configmap_url(), self.configmap_name)
         # list configmap
         list_result = self.configmap.list_configmap()
@@ -31,7 +31,7 @@ class TestCmSuite(object):
         update_result = self.configmap.update_configmap(self.configmap.global_info["$K8S_NAMESPACE"],
                                                         self.configmap_name, "./test_data/configmap/configmap.json",
                                                         {"$cm_name": self.configmap_name, "$cm_key": "updatecm"})
-        assert update_result.status_code == 204, update_result.text
+        assert update_result.status_code == 204, "更新cm出错:{}".format(update_result.text)
         self.configmap.check_value_in_response(
             self.configmap.get_common_configmap_url(self.configmap.global_info["$K8S_NAMESPACE"],
                                                     self.configmap_name), "updatecm")
@@ -43,11 +43,11 @@ class TestCmSuite(object):
 
                                               self.configmap.get_value(detail_result.json(),
                                                                        "kubernetes.data.updatecm") == "updatecm",
-                                              detail_result.text)
+                                              "获取详情失败，updatecm不在详情中{}".format(detail_result.text))
         # delete configmap
         delete_result = self.configmap.delete_configmap(self.configmap.global_info["$K8S_NAMESPACE"],
                                                         self.configmap_name)
-        assert delete_result.status_code == 204
+        assert delete_result.status_code == 204, "删除cm失败：{}".format(delete_result.text)
         assert self.configmap.check_exists(
 
             self.configmap.get_common_configmap_url(self.configmap.global_info["$K8S_NAMESPACE"], self.configmap_name),

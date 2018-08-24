@@ -25,12 +25,13 @@ class TestVolumeSuite(object):
             return
         result = {"flag": True}
         driver_result = self.volume.list_drivers()
-        result = self.volume.update_result(result, driver_result.status_code == 200, driver_result.text)
+        result = self.volume.update_result(result, driver_result.status_code == 200,
+                                           "获取驱动类型失败 {}".format(driver_result.text))
         result = self.volume.update_result(result, len(self.region_volumes) == len(driver_result.json()),
-                                           "get driver error")
+                                           "获取驱动类型失败:个数和集群feature的不一样")
         create_result = self.volume.create_volume("./test_data/volume/glusterfs.json",
                                                   {"$volume_name": self.gfs_name, '"$size"': "1"})
-        assert create_result.status_code == 201, create_result.text
+        assert create_result.status_code == 201, "创建gfs失败 {}".format(create_result.text)
         volume_id = create_result.json().get("id")
 
         list_result = self.volume.list_volume()
@@ -45,9 +46,9 @@ class TestVolumeSuite(object):
                                            "获取存储卷详情失败：状态不是可用")
 
         delete_result = self.volume.delete_volume(volume_id)
-        assert delete_result.status_code == 204, delete_result.text
+        assert delete_result.status_code == 204, "删除gfs失败 {}".format(delete_result.text)
         exists_result = self.volume.check_exists(self.volume.get_common_volume_url(volume_id), 404)
-        assert exists_result, "delete volume error"
+        assert exists_result, "删除gfs后，还存在"
         assert result['flag'], result
 
     def test_ebs_volume(self):
@@ -56,12 +57,13 @@ class TestVolumeSuite(object):
             return
         result = {"flag": True}
         driver_result = self.volume.list_drivers()
-        result = self.volume.update_result(result, driver_result.status_code == 200, driver_result.text)
+        result = self.volume.update_result(result, driver_result.status_code == 200,
+                                           "获取驱动类型失败 {}".format(driver_result.text))
         result = self.volume.update_result(result, len(self.region_volumes) == len(driver_result.json()),
-                                           "get driver error")
+                                           "获取驱动类型失败:个数和集群feature的不一样")
         create_result = self.volume.create_volume("./test_data/volume/ebs.json",
                                                   {"$volume_name": self.ebs_name, '"$size"': "1"})
-        assert create_result.status_code == 201, create_result.text
+        assert create_result.status_code == 201, "创建ebs失败".format(create_result.text)
         volume_id = create_result.json().get("id")
 
         list_result = self.volume.list_volume()
@@ -76,8 +78,8 @@ class TestVolumeSuite(object):
                                            "获取存储卷详情失败：状态不是可用")
 
         delete_result = self.volume.delete_volume(volume_id)
-        assert delete_result.status_code == 204, delete_result.text
+        assert delete_result.status_code == 204, "删除ebs失败 {}".format(delete_result.text)
         exists_result = self.volume.check_exists(self.volume.get_common_volume_url(volume_id), 404)
-        assert exists_result, "delete volume error"
+        assert exists_result, "删除ebs后，还存在"
 
         assert result['flag'], result

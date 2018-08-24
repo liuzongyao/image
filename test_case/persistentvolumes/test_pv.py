@@ -36,13 +36,13 @@ class TestPvSuite(object):
         else:
             assert True, "未知的存储卷类型{}".format(self.pv.global_info['$REGION_VOLUME'])
             return
-        assert createvolume_result.status_code == 201, createvolume_result.text
+        assert createvolume_result.status_code == 201, "创建存储卷失败 {}".format(createvolume_result.text)
         volume_id = createvolume_result.json().get("id")
         # create pv
         create_result = self.pv.create_pv("./test_data/pv/pv.json",
                                           {"$pv_name": self.pv_name, "$pv_policy": "Retain", "$size": "1",
                                            "$volume_id": volume_id, "$volume_driver": self.region_volumes[0]})
-        assert create_result.status_code == 201, create_result.text
+        assert create_result.status_code == 201, "创建pv失败{}".format(create_result.text)
         self.pv.check_value_in_response(self.pv.get_common_pv_url(), self.pv_name)
         # list pv
         list_result = self.pv.list_pv()
@@ -52,7 +52,7 @@ class TestPvSuite(object):
         update_result = self.pv.update_pv(self.pv_name, "./test_data/pv/pv.json",
                                           {"$pv_name": self.pv_name, "$pv_policy": "Retain", "$size": "1",
                                            "$volume_id": volume_id, "$volume_driver": self.region_volumes[0]})
-        assert update_result.status_code == 204, update_result.text
+        assert update_result.status_code == 204, "更新pv失败{}".format(update_result.text)
         # get pv detail
         detail_result = self.pv.get_pv_detail(self.pv_name)
         logger.info(detail_result.text)
@@ -72,7 +72,7 @@ class TestPvSuite(object):
                                        "获取持久卷详情失败：回收策略不是Retain")
         # delete pv
         delete_result = self.pv.delete_pv(self.pv_name)
-        assert delete_result.status_code == 204, delete_result.text
+        assert delete_result.status_code == 204, "删除pv失败{}".format(delete_result.text)
         exists_result = self.pv.check_exists(self.pv.get_common_pv_url(self.pv_name), 404)
         assert exists_result, "删除持久卷失败"
         assert result['flag'], result

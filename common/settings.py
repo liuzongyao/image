@@ -12,7 +12,7 @@ ACCOUNT = os.getenv("ACCOUNT", "testorg001")
 SUB_ACCOUNT = os.getenv("SUB_ACCOUNT", "")
 PASSWORD = os.getenv("PASSWORD", "alauda_staging")
 REGION_NAME = os.getenv("REGION_NAME", "aws_newk8s")
-REGISTRY_NAME = os.getenv("REGISTRY_NAME", "newk8s")
+REGISTRY_NAME = os.getenv("REGISTRY_NAME", "aws_newk8s")
 IMAGE = os.getenv("IMAGE", "index.alauda.cn/alaudaorg/qaimages:helloworld")
 # not necessary
 REGISTRY_CREDENTIAL = os.getenv("REGISTRY_CREDENTIAL", "alauda-registry-credential")
