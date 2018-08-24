@@ -156,6 +156,10 @@ class Application(Common):
         url = self.get_app_list_url("")
         return self.send(method='get', path=url)
 
+    def check_app_exist(self, uuid, expect_value):
+        path = self.app_common_url(uuid)
+        return self.check_exists(path, expect_value)
+
     def get_service_log(self, service_id, expect_value):
         logger.info(sys._getframe().f_code.co_name.center(50, '*'))
         url = self.get_app_log_url(service_id)

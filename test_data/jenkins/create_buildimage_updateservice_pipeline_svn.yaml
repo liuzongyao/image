@@ -1,0 +1,46 @@
+name: $pipeline_name
+display_name: $pipeline_name
+space_name: $SPACE_NAME
+jenkins_integration_id: $jenkins_integration_id
+description: ""
+icon: ""
+type: FROM_SCM
+script: ""
+script_path: Jenkinsfile
+jenkins_integration_name: $jenkins_integration_name
+pipeline_scm:
+  source: SVN
+  repository_path: $SVN_REPO
+  branch: ~
+  credential_name: $SVN_CREDENTIAL
+triggers: []
+template:
+  uuid: $template_uuid
+  arguments_values:
+    contextDir: "./"
+    ciEnabled: false
+    buildImageEnabled: true
+    dockerfilePath: "./"
+    dockerfileFromImageRegistryCredentialsId: ""
+    image:
+      registry: $REG_URL
+      registryUUID: ""
+      repository: $REPO_NAME
+      repositoryUUID: ""
+    imageTag: $imageTag
+    imageExtraTag: $imageExtraTag
+    imageRegistryCredentialsId: $REG_CREDENTIAL
+    useImageCache: true
+    useServiceYaml: false
+    containerInfo:
+      clusterName: $REGION_NAME
+      namespace: $K8S_NAMESPACE
+      serviceName: $service_name
+      containerName: $service_name
+    command: ~
+    args: ~
+    env: ~
+    envFrom: ~
+    autoRollbackOnFail: true
+    timeout: $time_out
+namespace: $NAMESPACE

@@ -23,48 +23,47 @@ class TestImageSuite(object):
         # create registry project
         create_reg_ret = self.image_tool.create_reg_project('./test_data/image/create_reg_project.yaml',
                                                             {"$REG_PROJECT_NAME": self.reg_project_name})
-        assert create_reg_ret.status_code == 201, create_reg_ret.text
+        assert create_reg_ret.status_code == 201, "创建镜像项目操作失败"
 
         # get registry project
         get_reg_ret = self.image_tool.get_reg_project(self.reg_project_name)
-        assert get_reg_ret
+        assert get_reg_ret, "创建镜像项目失败"
 
         # create repo
         create_repo_ret = self.image_tool.create_repo('./test_data/image/create_repo.yaml',
                                                       {"$REPO_IMAGE": self.repo_name},
                                                       reg_project_name=self.reg_project_name)
-        assert create_repo_ret.status_code == 201, create_repo_ret.text
+        assert create_repo_ret.status_code == 201, "创建镜像仓库操作失败"
 
         # get repo
         get_repo_ret = self.image_tool.get_repo_detail(self.repo_name, reg_project_name=self.reg_project_name)
-        assert get_repo_ret.status_code == 200, get_repo_ret.text
+        assert get_repo_ret.status_code == 200, "创建镜像仓库失败"
 
         # update repo
         update_repo_ret = self.image_tool.update_repo(self.repo_name, './test_data/image/update_repo.yaml',
                                                       {"$UPDATE_REPO": self.update_repo},
                                                       reg_project_name=self.reg_project_name)
-        assert update_repo_ret.status_code == 200, update_repo_ret.text
+        assert update_repo_ret.status_code == 200, "更新镜像仓库操作失败"
         # get repo detail after update
         get_repo_detail = self.image_tool.get_repo_detail(self.repo_name, reg_project_name=self.reg_project_name)
-        assert get_repo_detail.status_code == 200, get_repo_detail.text
+        assert get_repo_detail.status_code == 200, "获取镜像仓库详情失败"
         # verify the update value
         content = get_repo_detail.json()
         ret = self.image_tool.get_value(content, 'full_description')
-        assert ret == self.update_repo
+        assert ret == self.update_repo, "更新镜像仓库失败"
 
         # delete repo
         delete_repo_ret = self.image_tool.delete_repo(self.repo_name, reg_project_name=self.reg_project_name)
-        assert delete_repo_ret.status_code == 204, delete_repo_ret.text
+        assert delete_repo_ret.status_code == 204, "删除镜像仓库操作失败"
 
         # verify delete result
         get_repo_ret = self.image_tool.get_repo_detail(self.repo_name, reg_project_name=self.reg_project_name)
-        assert get_repo_ret.status_code == 404, "delete repo failed, Error code:{}, Response: {}".format(
-            get_repo_ret.status_code, get_repo_ret.text)
+        assert get_repo_ret.status_code == 404, "镜像仓库没有被成功删除掉"
 
         # delete registry project
         delete_reg_ret = self.image_tool.delete_reg_project(self.reg_project_name)
-        assert delete_reg_ret.status_code == 204, delete_reg_ret.text
+        assert delete_reg_ret.status_code == 204, "删除镜像项目操作失败"
 
         # verify delete result
         get_reg_project_ret = self.image_tool.get_reg_project(self.reg_project_name)
-        assert get_reg_project_ret is False, "delete registry project failed"
+        assert get_reg_project_ret is False, "删除镜像项目失败"

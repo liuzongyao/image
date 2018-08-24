@@ -38,6 +38,15 @@ class Image(Common):
                 self.account, self.registry_name, repo_name)
         return path
 
+    def get_delete_repo_tag_url(self, repo_name, tag_name, reg_project_name=None):
+        if reg_project_name:
+            path = "/v1/registries/{}/{}/projects/{}/repositories/{}/tags/{}"\
+                .format(self.account, self.registry_name, reg_project_name, repo_name, tag_name)
+        else:
+            path = "/v1/registries/{}/{}/repositories/{}/tags/{}"\
+                .format(self.account, self.registry_name, repo_name, tag_name)
+        return path
+
     def get_reg_project_list_url(self):
         return "/v1/registries/{}/{}/projects".format(self.account, self.registry_name)
 
@@ -85,6 +94,10 @@ class Image(Common):
     def get_repo_tag(self, repo_name, reg_project_name=None):
         path = self.get_repo_tag_url(repo_name, reg_project_name=reg_project_name)
         return self.send(method='get', path=path)
+
+    def delete_repo_tag(self, repo_name, tag_name, reg_project_name=None):
+        path = self.get_delete_repo_tag_url(repo_name, tag_name, reg_project_name=reg_project_name)
+        return self.send(method='delete', path=path)
 
     def get_repo_list(self, reg_project_name=None):
         path = self.get_repo_list_url(reg_project_name=reg_project_name)
