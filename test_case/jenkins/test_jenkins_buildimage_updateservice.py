@@ -1,9 +1,9 @@
-from time import sleep
 import pytest
 from test_case.jenkins.jenkins import Jenkins
 from test_case.application.app import Application
 from test_case.image.image import Image
 from test_case.integrations.ci_cd_integrations import Integrations
+from common.log import logger
 
 
 @pytest.mark.region
@@ -26,7 +26,6 @@ class TestJenkinsBuildImageUpdateService(object):
         self.template_name = "alaudaBuildImageAndDeployService"
         self.time_out = '300'
         self.repo = self.app_tool.global_info.get("$REPO_NAME")
-
 
         self.teardown_class(self)
 
@@ -85,7 +84,7 @@ class TestJenkinsBuildImageUpdateService(object):
 
         repo_tag = self.app_tool.get_value(get_repo_tag_ret.json(), 'results.0.tag_name')
 
-        print("repo tag: {}".format(repo_tag))
+        logger.info("repo tag: {}".format(repo_tag))
 
         image = "{}/{}:{}".format(registry_endpoint, self.repo, repo_tag)
 
@@ -140,8 +139,8 @@ class TestJenkinsBuildImageUpdateService(object):
         image_tag = self.app_tool.get_value(ret.json(), 'kubernetes.0.spec.template.spec.containers.0.image'
                                             ).split(":")[-1]
 
-        print("image tag: {}".format(self.app_tool.get_value(ret.json(),
-                                                             'kubernetes.0.spec.template.spec.containers.0.image')))
+        logger.info("image tag: {}".format(
+            self.app_tool.get_value(ret.json(), 'kubernetes.0.spec.template.spec.containers.0.image')))
 
         assert image_tag == self.repo_additional_tag, "update service falied, the image tag should be {}, but {}" \
             .format(self.repo_additional_tag, image_tag)
@@ -151,10 +150,9 @@ class TestJenkinsBuildImageUpdateService(object):
         assert ret.status_code == 204, "delete service failed, Error code: {}, Response: {}" \
             .format(ret.status_code, ret.text)
 
-        sleep(15)
+        ret = self.app_tool.check_app_exist(app_id, 404)
 
-        ret = self.app_tool.get_app_detail(app_id)
-        assert ret.status_code == 404, "the service should be deleted, but still exist"
+        assert ret, "the service should be deleted, but still exist"
 
         # delete jenkins pipeline
         ret = self.jenkins_tool.delete_pipeline(pipeline_id)

@@ -92,12 +92,10 @@ class Jenkins(Common):
 
     def get_pipeline_id(self, pipeline_name):
         response = self.get_pipeline_list()
+        name = "{}-{}".format(pipeline_name, self.global_info.get("$SPACE_NAME"))
         if response.status_code == 200:
             contents = response.json()['results']
-            for index, content in enumerate(contents):
-                name = "{}-{}".format(pipeline_name, self.global_info.get("$SPACE_NAME"))
-                if content['name'] == name:
-                    return content['uuid']
+            return self.get_uuid_accord_name(contents, {"name": name}, 'uuid')
         return ''
 
     def delete_pipeline(self, pipeline_uuid):
