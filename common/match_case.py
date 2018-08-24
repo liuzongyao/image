@@ -4,7 +4,7 @@ def casename():
         "test_newk8s_app": "应用测试",
         "test_dashboard": "监控面板相关测试",
         "test_svn_build": "svn快速构建",
-        "test_sync_public_registry": "镜像同步",
+        "test_sync_public_registry": "创建同步配置-获取配置详情-更新配置-触发镜像同步-获取镜像同步状态-获取镜像同步日志-删除同步配置",
         "test_project_repo": "创建镜像项目-获取镜像项目-创建镜像仓库-获取镜像仓库-更新镜像仓库-获取镜像仓库详情-验证更新结果-"
                              "删除镜像仓库-删除镜像项目",
         "test_gfs_app": "应用使用gfs测试",
