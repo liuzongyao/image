@@ -7,7 +7,7 @@ from test_case.volume.volume import Volume
 
 
 @pytest.mark.pvc
-class TestPvSuite(object):
+class TestPvcSuite(object):
     def setup_class(self):
         self.volume = Volume()
         self.volume_name = 'alauda-volforpvc-{}'.format(self.volume.region_name).replace('_', '-')
@@ -40,7 +40,7 @@ class TestPvSuite(object):
 
     @pytest.mark.BAT
     def test_pvc(self):
-        if len(self.region_volumes) == 0:
+        if self.region_volumes == ['']:
             assert True, "集群不支持存储卷"
             return
         result = {"flag": True}
@@ -70,7 +70,7 @@ class TestPvSuite(object):
         # list pvc
         list_result = self.pvc.list_pvc()
         result = self.pvc.update_result(result, list_result.status_code == 200, list_result.text)
-        result = self.pvc.update_result(result, self.pvc_name in list_result.text, "list pvcs error")
+        result = self.pvc.update_result(result, self.pvc_name in list_result.text, "获取持久卷声明列表：新建pvc不在列表中")
         # get pvc detail
         detail_result = self.pvc.get_pvc_detail(self.pvc.global_info["$K8S_NAMESPACE"], self.pvc_name)
         result = self.pvc.update_result(result, detail_result.status_code == 200, detail_result.text)
@@ -88,6 +88,9 @@ class TestPvSuite(object):
 
     @pytest.mark.scs
     def test_pvc_use_scs(self):
+        if self.region_volumes == ['']:
+            assert True, "集群不支持存储卷"
+            return
         result = {"flag": True}
         # create scs
         if len(self.masterips) == 0:
@@ -119,6 +122,9 @@ class TestPvSuite(object):
 
     @pytest.mark.scs
     def test_pvc_use_defaultscs(self):
+        if self.region_volumes == ['']:
+            assert True, "集群不支持存储卷"
+            return
         if self.default_size > 1:
             assert False, "有两个以上的默认存储类，无法测试"
         elif self.default_size == 0:
@@ -136,8 +142,9 @@ class TestPvSuite(object):
                                                {"$pvc_name": self.pvcusedefaultscs_name, "$pvc_mode": "ReadWriteOnce",
                                                 "$size": "1"})
         assert createpvc_result.status_code == 201, createpvc_result.text
-        self.pvc.get_status(self.pvc.get_common_pvc_url(self.pvc.global_info["$K8S_NAMESPACE"], self.pvcusedefaultscs_name),
-                            "status.phase", "Bound")
+        self.pvc.get_status(
+            self.pvc.get_common_pvc_url(self.pvc.global_info["$K8S_NAMESPACE"], self.pvcusedefaultscs_name),
+            "status.phase", "Bound")
         # get pvc detail
         detail_result = self.pvc.get_pvc_detail(self.pvc.global_info["$K8S_NAMESPACE"], self.pvcusedefaultscs_name)
         result = self.pvc.update_result(result, detail_result.status_code == 200, detail_result.text)

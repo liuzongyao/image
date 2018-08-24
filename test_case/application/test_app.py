@@ -3,6 +3,7 @@ from time import sleep
 import pytest
 
 from test_case.application.app import Application
+from test_case.configmap.configmap import Configmap
 from test_case.persistentvolumeclaims.pvc import Pvc
 from test_case.persistentvolumes.pv import Pv
 from test_case.volume.volume import Volume
@@ -30,6 +31,10 @@ class TestApplicationSuite(object):
         self.pv = Pv()
         self.pvc = Pvc()
 
+        self.configmap_name = 'alauda-cmforapp-{}'.format(self.volume.region_name).replace('_', '-')
+        self.appwithcm_name = 'alauda-appwithcm-{}'.format(self.application.region_name).replace('_', '-')
+        self.configmap = Configmap()
+
         self.teardown_class(self)
 
     def teardown_class(self):
@@ -47,6 +52,9 @@ class TestApplicationSuite(object):
         self.pv.delete_pv(self.pv_name)
         volume_id = self.volume.get_volume_id_from_list(self.volume_name)
         self.volume.delete_volume(volume_id)
+
+        self.application.delete_app(self.appwithcm_name)
+        self.configmap.delete_configmap(self.pvc.global_info["$K8S_NAMESPACE"], self.configmap_name)
 
     @pytest.mark.BAT
     def test_newk8s_app(self):
@@ -90,6 +98,10 @@ class TestApplicationSuite(object):
         event_result = self.application.get_app_events(app_uuid, 'create', self.application.global_info['$NAMESPACE'])
         result = self.application.update_result(result, event_result, '操作事件：获取应用创建事件出错')
 
+        # get logs
+        log_result = self.application.get_service_log(service_uuid, 'logglogloglog')
+        result = self.application.update_result(result, log_result, "获取服务日志失败")
+
         # get app monitor
         monitor_result = self.application.get_app_monitor(app_uuid)
         result = self.application.update_result(result, monitor_result, "获取集群监控失败")
@@ -98,10 +110,6 @@ class TestApplicationSuite(object):
         pod_instance = self.application.get_service_instance(service_uuid)
         exec_result = self.application.exec_container(service_uuid, pod_instance, self.app_name, 'ls')
         result = self.application.update_result(result, exec_result, "exec失败")
-
-        # get logs
-        log_result = self.application.get_service_log(service_uuid, 'logglogloglog')
-        result = self.application.update_result(result, log_result, "获取服务日志失败")
 
         # get service  monitor
         monitorsvc_result = self.application.get_service_monitor(service_uuid)
@@ -131,6 +139,10 @@ class TestApplicationSuite(object):
         assert updatesvc_result.status_code == 200, "更新组件失败：{}".format(updatesvc_result.text)
         app_status = self.application.get_app_status(app_uuid, 'resource.status', 'Running')
         assert app_status, "更新组件失败：service: {} update failed".format(self.app_name)
+
+        # get logs
+        log_result = self.application.get_service_log(service_uuid, '123')
+        result = self.application.update_result(result, log_result, "after update,get service log")
 
         # get service yaml
         svcyaml_result = self.application.get_service_yaml(service_uuid)
@@ -335,3 +347,38 @@ class TestApplicationSuite(object):
         assert app_status, "app: {} is not running".format(self.appwithpvc_name)
         assert self.application.get_value(create_app.json(),
                                           "kubernetes.0.spec.template.spec.volumes.0.persistentVolumeClaim.claimName") == self.pvc_name
+
+    @pytest.mark.configmap
+    def test_configmap_app(self):
+        result = {"flag": True}
+        # create configmap
+        createconfigmap_result = self.configmap.create_configmap("./test_data/configmap/configmap.json",
+                                                                 {"$cm_name": self.configmap_name,
+                                                                  "$cm_key": self.configmap_name})
+        assert createconfigmap_result.status_code == 201, createconfigmap_result.text
+        # create app
+        self.application.delete_app(self.appwithcm_name)
+        create_app = self.application.create_app('./test_data/application/create_app_cm.yml',
+                                                 {"$app_name": self.appwithcm_name, "$cm_name": self.configmap_name,
+                                                  "$cm_key": self.configmap_name})
+        assert create_app.status_code == 201, create_app.text
+        content = create_app.json()
+        app_uuid = self.application.get_value(content, 'resource.uuid')
+        v1 = self.application.get_value(content, 'kubernetes.0.spec.template.spec.volumes.0.configMap.name')
+        result = self.application.update_result(result, v1 == self.configmap_name, '存储卷挂载configmap失败')
+        v2 = self.application.get_value(content, 'kubernetes.0.spec.template.spec.volumes.1.configMap.name')
+        result = self.application.update_result(result, v2 == self.configmap_name, '存储卷挂载configmap失败')
+        e1 = self.application.get_value(content,
+                                        'kubernetes.0.spec.template.spec.containers.0.envFrom.0.configMapRef.name')
+        result = self.application.update_result(result, e1 == self.configmap_name, '环境变量完整引用configmap失败')
+        e2 = self.application.get_value(content,
+                                        'kubernetes.0.spec.template.spec.containers.0.env.0.valueFrom.configMapKeyRef.name')
+        result = self.application.update_result(result, e2 == self.configmap_name, '环境变量引用configmap的key失败')
+        # get app status
+        app_status = self.application.get_app_status(app_uuid, 'resource.status', 'Running')
+        assert app_status, "app: {} is not running".format(self.appwithcm_name)
+
+        self.application.delete_app(self.appwithcm_name)
+        self.application.check_exists(self.application.app_common_url(app_uuid), 404)
+        self.configmap.delete_configmap(self.configmap.global_info["$K8S_NAMESPACE"], self.configmap_name)
+        assert result['flag'], result

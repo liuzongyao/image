@@ -1,0 +1,13 @@
+{
+  "apiVersion": "v1",
+  "kind": "ConfigMap",
+  "metadata": {
+    "annotations": {
+    },
+    "namespace": "$K8S_NAMESPACE",
+    "name": "$cm_name"
+  },
+  "data": {
+    "$cm_key": "$cm_key"
+  }
+}

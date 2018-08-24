@@ -1,0 +1,61 @@
+resource:
+  name: $app_name
+  description: $description
+namespace:
+  name: $K8S_NAMESPACE
+  uuid: $K8S_NS_UUID
+cluster:
+  name: $REGION_NAME
+  uuid: $REGION_ID
+kubernetes:
+  - apiVersion: extensions/v1beta1
+    firstTimestamp: null
+    kind: Deployment
+    lastTimestamp: null
+    metadata:
+      name: $app_name
+      namespace: $K8S_NAMESPACE
+    spec:
+      replicas: 1
+      strategy:
+        type: RollingUpdate
+      template:
+        metadata:
+          labels:
+            app.alauda.io/name: $app_name
+            service.alauda.io/name: $app_name
+        spec:
+          affinity: {}
+          containers:
+          - image: $IMAGE
+            imagePullPolicy: Always
+            name: $app_name
+            resources:
+              limits:
+                cpu: 20m
+                memory: 50M
+              requests:
+                cpu: 20m
+                memory: 50M
+            env:
+              - name: cm
+                valueFrom:
+                  configMapKeyRef:
+                    name: $cm_name
+                    key: $cm_key
+            envFrom:
+              - configMapRef:
+                  name: $cm_name
+            volumeMounts:
+              - mountPath: /configmap/test/
+                name: configmappath
+              - name: configmapsubpath
+                mountPath: /test/configmap2/subpath
+                subPath: $cm_key
+          volumes:
+            - name: configmappath
+              configMap:
+                name: $cm_name
+            - name: configmapsubpath
+              configMap:
+                name: $cm_name

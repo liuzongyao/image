@@ -43,6 +43,11 @@ kubernetes:
               periodSeconds: 60
               successThreshold: 1
               timeoutSeconds: 30
+            args:
+            - -c
+            - while true; do sleep 3; echo 123; done
+            command:
+            - /bin/sh
   - apiVersion: autoscaling/v1
     firstTimestamp: null
     kind: HorizontalPodAutoscaler

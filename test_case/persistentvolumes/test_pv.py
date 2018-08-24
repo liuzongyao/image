@@ -47,7 +47,7 @@ class TestPvSuite(object):
         # list pv
         list_result = self.pv.list_pv()
         result = self.pv.update_result(result, list_result.status_code == 200, list_result.text)
-        result = self.pv.update_result(result, self.pv_name in list_result.text, "list pvs error")
+        result = self.pv.update_result(result, self.pv_name in list_result.text, "获取持久卷列表：新建pv不在列表中")
         # update pv
         update_result = self.pv.update_pv(self.pv_name, "./test_data/pv/pv.json",
                                           {"$pv_name": self.pv_name, "$pv_policy": "Retain", "$size": "1",
@@ -60,19 +60,19 @@ class TestPvSuite(object):
         result = self.pv.update_result(result, self.pv.get_value(detail_result.json(),
                                                                  "kubernetes-metadata-annotations-pv.alauda.io/volume_name",
                                                                  "-") == self.volume_name,
-                                       "get pv detail volume_name error")
+                                       "获取持久卷详情失败：关联的存储卷不是e2e创建的")
 
         result = self.pv.update_result(result,
                                        self.pv.get_value(detail_result.json(),
                                                          "kubernetes.status.phase") == "Available",
-                                       "get pv detail status error")
+                                       "获取持久卷详情失败：状态不是可用")
         result = self.pv.update_result(result,
                                        self.pv.get_value(detail_result.json(),
                                                          "kubernetes.spec.persistentVolumeReclaimPolicy") == "Retain",
-                                       "get pv detail policy error")
+                                       "获取持久卷详情失败：回收策略不是Retain")
         # delete pv
         delete_result = self.pv.delete_pv(self.pv_name)
         assert delete_result.status_code == 204, delete_result.text
         exists_result = self.pv.check_exists(self.pv.get_common_pv_url(self.pv_name), 404)
-        assert exists_result, "delete pv error"
+        assert exists_result, "删除持久卷失败"
         assert result['flag'], result

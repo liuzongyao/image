@@ -35,14 +35,14 @@ class TestVolumeSuite(object):
 
         list_result = self.volume.list_volume()
         result = self.volume.update_result(result, list_result.status_code == 200, list_result.text)
-        result = self.volume.update_result(result, self.gfs_name in list_result.text, "list volumes error")
+        result = self.volume.update_result(result, self.gfs_name in list_result.text, "获取存储卷列表：新建gfs不在列表中")
 
         detail_result = self.volume.get_volume_detail(volume_id)
         result = self.volume.update_result(result, detail_result.status_code == 200, detail_result.text)
         result = self.volume.update_result(result, detail_result.json().get("driver_name") == "glusterfs",
-                                           "get volume detail driver_name error")
+                                           "获取存储卷详情失败：driver_name不是glusterfs")
         result = self.volume.update_result(result, detail_result.json().get("state") == "available",
-                                           "get volume detail state error")
+                                           "获取存储卷详情失败：状态不是可用")
 
         delete_result = self.volume.delete_volume(volume_id)
         assert delete_result.status_code == 204, delete_result.text
@@ -66,14 +66,14 @@ class TestVolumeSuite(object):
 
         list_result = self.volume.list_volume()
         result = self.volume.update_result(result, list_result.status_code == 200, list_result.text)
-        result = self.volume.update_result(result, self.ebs_name in list_result.text, "list volumes error")
+        result = self.volume.update_result(result, self.ebs_name in list_result.text, "获取存储卷列表：新建ebs不在列表中")
 
         detail_result = self.volume.get_volume_detail(volume_id)
         result = self.volume.update_result(result, detail_result.status_code == 200, detail_result.text)
         result = self.volume.update_result(result, detail_result.json().get("driver_name") == "ebs",
-                                           "get volume detail driver_name error")
+                                           "获取存储卷详情失败：driver_name不是ebs")
         result = self.volume.update_result(result, detail_result.json().get("state") == "available",
-                                           "get volume detail state error")
+                                           "获取存储卷详情失败：状态不是可用")
 
         delete_result = self.volume.delete_volume(volume_id)
         assert delete_result.status_code == 204, delete_result.text

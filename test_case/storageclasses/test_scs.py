@@ -29,7 +29,7 @@ class Teststorageclass():
         # list scs
         list_result = self.scs.list_scs()
         result = self.scs.update_result(result, list_result.status_code == 200, list_result.text)
-        result = self.scs.update_result(result, self.scs_name in list_result.text, "list scs error")
+        result = self.scs.update_result(result, self.scs_name in list_result.text, "获取存储类列表：新建sc不在列表中")
         # update scs
         update_result = self.scs.update_scs(self.scs_name, "./test_data/scs/scs.yml",
                                             {"$scs_name": self.scs_name, "$is_default": "true",
