@@ -13,9 +13,10 @@ SUB_ACCOUNT = os.getenv("SUB_ACCOUNT", "")
 PASSWORD = os.getenv("PASSWORD", "alauda_staging")
 REGION_NAME = os.getenv("REGION_NAME", "aws_newk8s")
 REGISTRY_NAME = os.getenv("REGISTRY_NAME", "newk8s")
-REGISTRY_CREDENTIAL = os.getenv("REGISTRY_CREDENTIAL", "alauda-registry-credential")
 IMAGE = os.getenv("IMAGE", "index.alauda.cn/alaudaorg/qaimages:helloworld")
 # not necessary
+REGISTRY_CREDENTIAL = os.getenv("REGISTRY_CREDENTIAL", "alauda-registry-credential")
+
 JENKINS_ENDPOINT = os.getenv("JENKINS_ENDPOINT", "http://52.80.105.130:8899/")
 JENKINS_USER = os.getenv("JENKINS_USER", "admin")
 JENKINS_TOKEN = os.getenv("JENKINS_TOKEN", "87d5faf547e7e6216fdc2fa2b0b91405")
