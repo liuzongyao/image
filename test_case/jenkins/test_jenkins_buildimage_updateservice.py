@@ -25,15 +25,22 @@ class TestJenkinsBuildImageUpdateService(object):
         self.repo_additional_tag = "alauda-e2e-additional"
         self.template_name = "alaudaBuildImageAndDeployService"
         self.time_out = '300'
+        self.repo = self.app_tool.global_info.get("$REPO_NAME")
+
 
         self.teardown_class(self)
 
     def teardown_class(self):
         pipeline_id = self.jenkins_tool.get_pipeline_id(self.pipeline_name)
         self.jenkins_tool.delete_pipeline(pipeline_id)
+
         self.app_tool.delete_app(self.app_name)
+
         integration_id = self.integration_tool.get_integration_id(self.integration_name)
         self.integration_tool.delete_integration(integration_id)
+
+        self.image_tool.delete_repo_tag(self.repo, self.repo_tag)
+        self.image_tool.delete_repo_tag(self.repo, self.repo_additional_tag)
 
     def test_jenkins_buildimage_updateservice(self):
         # get template id
@@ -68,20 +75,19 @@ class TestJenkinsBuildImageUpdateService(object):
         registry_endpoint = self.app_tool.get_uuid_accord_name(self.app_tool.global_info.get("PRIVATE_REGISTRY"),
                                                                {"name": self.app_tool.global_info.get("$REGISTRY")},
                                                                "endpoint")
-        repo = self.app_tool.global_info.get("$REPO_NAME")
 
-        get_repo_tag_ret = self.image_tool.get_repo_tag(repo)
+        get_repo_tag_ret = self.image_tool.get_repo_tag(self.repo)
 
         assert get_repo_tag_ret.status_code == 200, "get {} tag failed, Error code: {}, Response: {}".format(
-            repo, get_repo_tag_ret.status_code, get_repo_tag_ret.text)
+            self.repo, get_repo_tag_ret.status_code, get_repo_tag_ret.text)
 
-        assert len(get_repo_tag_ret.json()['results']) > 0, "the tag of repo: {} is null".format(repo)
+        assert len(get_repo_tag_ret.json()['results']) > 0, "the tag of repo: {} is null".format(self.repo)
 
         repo_tag = self.app_tool.get_value(get_repo_tag_ret.json(), 'results.0.tag_name')
 
         print("repo tag: {}".format(repo_tag))
 
-        image = "{}/{}:{}".format(registry_endpoint, repo, repo_tag)
+        image = "{}/{}:{}".format(registry_endpoint, self.repo, repo_tag)
 
         # create service
         ret = self.app_tool.create_app('./test_data/application/create_app.yml',
@@ -167,20 +173,20 @@ class TestJenkinsBuildImageUpdateService(object):
         assert ret.status_code == 404, "the integration instance should be deleted, but still exist"
 
         # delete image tag
-        ret = self.image_tool.delete_repo_tag(repo, self.repo_tag)
+        ret = self.image_tool.delete_repo_tag(self.repo, self.repo_tag)
         assert ret.status_code == 204, "delete image tag failed, Error code: {}, Response: {}" \
             .format(ret.status_code, ret.text)
 
-        ret = self.image_tool.delete_repo_tag(repo, self.repo_additional_tag)
+        ret = self.image_tool.delete_repo_tag(self.repo, self.repo_additional_tag)
         assert ret.status_code == 204, "delete image tag failed, Error code: {}, Response: {}" \
             .format(ret.status_code, ret.text)
 
-        ret = self.image_tool.get_repo_tag(repo)
+        ret = self.image_tool.get_repo_tag(self.repo)
         assert ret.status_code == 200, "get image tag failed, Error code: {}, Response: {}" \
             .format(ret.status_code, ret.text)
 
         assert self.repo_tag not in ret.text, "the tag: {} of image: {} should be deleted, but still exist" \
-            .format(self.repo_tag, repo)
+            .format(self.repo_tag, self.repo)
 
         assert self.repo_additional_tag not in ret.text, "the tag: {} of image: {} should be deleted, but still exist" \
-            .format(self.repo_additional_tag, repo)
+            .format(self.repo_additional_tag, self.repo)
