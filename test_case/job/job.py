@@ -1,3 +1,4 @@
+from common import settings
 from common.base_request import Common
 from common.log import logger
 
@@ -11,10 +12,17 @@ class Job(Common):
         return job_id and "v1/jobs/{}/{}".format(self.account, job_id) or \
                "v1/jobs/{}".format(self.account)
 
+    def get_job_event_url(self, namespace):
+        return "v1/events/{}/{}?pageno=1&size=20".format(self.account, namespace)
+
     def create_job_config(self, file, data):
         url = self.get_job_config_url()
         data = self.generate_data(file, data)
         return self.send(method="POST", path=url, data=data)
+
+    def get_job_events(self, job_id, operation, namespace):
+        url = self.get_job_event_url(namespace)
+        return self.get_events(url, job_id, operation)
 
     def get_job_config(self, config_id):
         url = self.get_job_config_url(config_id)
@@ -37,9 +45,9 @@ class Job(Common):
         params = {"namespaces": self.account}
         return self.send(method="POST", path=url, json=data, params=params)
 
-    def get_job_status(self, job_id):
+    def get_job_status(self, job_id, key, expect_status):
         url = self.get_job_url(job_id=job_id)
-        return self.get_status(url, 'status', 'SUCCEEDED')
+        return self.get_status(url, key, expect_status)
 
     def get_job_log(self, job_id):
         logger.info("************************** get job log ********************************")
