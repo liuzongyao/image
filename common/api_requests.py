@@ -39,17 +39,15 @@ class AlaudaRequest(object):
             content["auth"] = self.auth
 
         if "headers" in content:
-            content["headers"].update(self.headers)
-        else:
-            content["headers"] = self.headers
+            self.headers.update(content["headers"])
+        content["headers"] = self.headers
 
         # if content.get("data") is not None and content["headers"]["Content-Type"] == "application/json":
         #     content["json"] = content["data"]
         #     content.pop("data")
         if "params" in content:
-            content["params"].update(self.params)
-        else:
-            content["params"] = self.params
+            self.params.update(content["params"])
+        content["params"] = self.params
 
         logger.info("Requesting url={}, method={}, args={}".format(url, method, content))
         response = requests.request(method, url, **content)

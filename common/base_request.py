@@ -68,7 +68,7 @@ class Common(AlaudaRequest):
         return json_content
 
     @staticmethod
-    def get_value_list(data, keys):
+    def get_value_list(data, query, delimiter='.'):
         """
         get value from dict or list
         :param data: 需要被解析的数据
@@ -76,8 +76,9 @@ class Common(AlaudaRequest):
         :example data = {"key1":{"key2":[{"key3":"key4"},{"key3":"key5"}]}}
         期望获取到key4的值 keys = ["key1","key2", 0, "key3"]
         """
+        keys = query.split(delimiter)
         if len(keys) > 1:
-            flag, value = Common.get_value(data, keys[0:-1])
+            flag, value = Common.get_value(data, delimiter.join(keys[0:-1]))
             assert flag, value
             list_data = value
         else:
