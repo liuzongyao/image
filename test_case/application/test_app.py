@@ -142,11 +142,12 @@ class TestApplicationSuite(object):
 
         # get logs
         log_result = self.application.get_service_log(service_uuid, '123')
-        result = self.application.update_result(result, log_result, "after update,get service log")
+        result = self.application.update_result(result, log_result, "更新应用下的服务后，获取服务日志失败")
 
         # get service yaml
         svcyaml_result = self.application.get_service_yaml(service_uuid)
-        result = self.application.update_result(result, svcyaml_result.status_code == 200, "获取组件yaml：get service yaml failed")
+        result = self.application.update_result(result, svcyaml_result.status_code == 200,
+                                                "获取组件yaml：get service yaml failed")
         result = self.application.update_result(result, "updateservice" in svcyaml_result.text,
                                                 "获取组件yaml：get svc yaml error")
         result = self.application.update_result(result, "livenessProbe" in svcyaml_result.text,
@@ -257,13 +258,13 @@ class TestApplicationSuite(object):
         self.volume.delete_volume(volume_id)
         create_result = self.volume.create_volume("./test_data/volume/glusterfs.json",
                                                   {"$volume_name": self.gfs_name, '"$size"': "1"})
-        assert create_result.status_code == 201, create_result.text
+        assert create_result.status_code == 201, "创建gfs出错:{}".format(create_result.text)
         volume_id = create_result.json().get("id")
 
         self.application.delete_app(self.appwithgfs_name)
         create_app = self.application.create_app('./test_data/application/create_app_gfs.yml',
                                                  {"$app_name": self.appwithgfs_name, "$gfs_name": self.gfs_name})
-        assert create_app.status_code == 201, create_app.text
+        assert create_app.status_code == 201, "创建应用出错:{}".format(create_app.text)
         content = create_app.json()
         app_uuid = self.application.get_value(content, 'resource.uuid')
         # get app status
@@ -272,7 +273,7 @@ class TestApplicationSuite(object):
         self.application.check_exists(self.application.app_common_url(app_uuid), 404)
         sleep(60)
         self.volume.delete_volume(volume_id)
-        assert app_status, "app: {} is not running".format(self.appwithgfs_name)
+        assert app_status, "应用挂载gfs失败app: {} is not running".format(self.appwithgfs_name)
 
     @pytest.mark.volume
     def test_ebs_app(self):
@@ -283,14 +284,14 @@ class TestApplicationSuite(object):
         self.volume.delete_volume(volume_id)
         create_result = self.volume.create_volume("./test_data/volume/ebs.json",
                                                   {"$volume_name": self.ebs_name, '"$size"': "1"})
-        assert create_result.status_code == 201, create_result.text
+        assert create_result.status_code == 201, "创建ebs出错:{}".format(create_result.text)
         volume_id = create_result.json().get("id")
         driver_volume_id = create_result.json().get("driver_volume_id")
 
         self.application.delete_app(self.appwithebs_name)
         create_app = self.application.create_app('./test_data/application/create_app_ebs.yml',
                                                  {"$app_name": self.appwithebs_name, "$ebs_driverid": driver_volume_id})
-        assert create_app.status_code == 201, create_app.text
+        assert create_app.status_code == 201, "创建应用出错:{}".format(create_app.text)
         content = create_app.json()
         app_uuid = self.application.get_value(content, 'resource.uuid')
         # get app status
@@ -299,7 +300,7 @@ class TestApplicationSuite(object):
         self.application.check_exists(self.application.app_common_url(app_uuid), 404)
         sleep(60)
         self.volume.delete_volume(volume_id)
-        assert app_status, "app: {} is not running".format(self.appwithebs_name)
+        assert app_status, "应用挂载ebs失败app: {} is not running".format(self.appwithebs_name)
 
     @pytest.mark.pvc
     def test_pvc_app(self):
@@ -316,23 +317,23 @@ class TestApplicationSuite(object):
         else:
             assert True, "未知的存储卷类型{}".format(self.pv.global_info['$REGION_VOLUME'])
             return
-        assert createvolume_result.status_code == 201, createvolume_result.text
+        assert createvolume_result.status_code == 201, "创建存储卷出错:{}".format(createvolume_result.text)
         volume_id = createvolume_result.json().get("id")
         # create pv
         createpv_result = self.pv.create_pv("./test_data/pv/pv.json",
                                             {"$pv_name": self.pv_name, "$pv_policy": "Retain", "$size": "1",
                                              "$volume_id": volume_id, "$volume_driver": self.region_volumes[0]})
-        assert createpv_result.status_code == 201, createpv_result.text
+        assert createpv_result.status_code == 201, "创建pv出错:{}".format(createpv_result.text)
         # create pvc
         createpvc_result = self.pvc.create_pvc("./test_data/pvc/pvc.json",
                                                {"$pvc_name": self.pvc_name, "$pvc_mode": "ReadWriteOnce",
                                                 "$scs_name": "", "$size": "1"})
-        assert createpvc_result.status_code == 201, createpvc_result.text
+        assert createpvc_result.status_code == 201, "创建pvc出错:{}".format(createpvc_result.text)
         # create app
         self.application.delete_app(self.appwithpvc_name)
         create_app = self.application.create_app('./test_data/application/create_app_pvc.yml',
                                                  {"$app_name": self.appwithpvc_name, "$pvc_name": self.pvc_name})
-        assert create_app.status_code == 201, create_app.text
+        assert create_app.status_code == 201, "创建app出错:{}".format(create_app.text)
         content = create_app.json()
         app_uuid = self.application.get_value(content, 'resource.uuid')
         # get app status
@@ -344,7 +345,7 @@ class TestApplicationSuite(object):
         self.pvc.delete_pvc(self.pvc.global_info["$K8S_NAMESPACE"], self.pvc_name)
         self.pv.delete_pv(self.pv_name)
         self.volume.delete_volume(volume_id)
-        assert app_status, "app: {} is not running".format(self.appwithpvc_name)
+        assert app_status, "应用挂载pvc失败app: {} is not running".format(self.appwithpvc_name)
         assert self.application.get_value(create_app.json(),
                                           "kubernetes.0.spec.template.spec.volumes.0.persistentVolumeClaim.claimName") == self.pvc_name
 
@@ -355,13 +356,13 @@ class TestApplicationSuite(object):
         createconfigmap_result = self.configmap.create_configmap("./test_data/configmap/configmap.json",
                                                                  {"$cm_name": self.configmap_name,
                                                                   "$cm_key": self.configmap_name})
-        assert createconfigmap_result.status_code == 201, createconfigmap_result.text
+        assert createconfigmap_result.status_code == 201, "创建cm出错:{}".format(createconfigmap_result.text)
         # create app
         self.application.delete_app(self.appwithcm_name)
         create_app = self.application.create_app('./test_data/application/create_app_cm.yml',
                                                  {"$app_name": self.appwithcm_name, "$cm_name": self.configmap_name,
                                                   "$cm_key": self.configmap_name})
-        assert create_app.status_code == 201, create_app.text
+        assert create_app.status_code == 201, "创建应用出错:{}".format(create_app.text)
         content = create_app.json()
         app_uuid = self.application.get_value(content, 'resource.uuid')
         v1 = self.application.get_value(content, 'kubernetes.0.spec.template.spec.volumes.0.configMap.name')
@@ -376,7 +377,7 @@ class TestApplicationSuite(object):
         result = self.application.update_result(result, e2 == self.configmap_name, '环境变量引用configmap的key失败')
         # get app status
         app_status = self.application.get_app_status(app_uuid, 'resource.status', 'Running')
-        assert app_status, "app: {} is not running".format(self.appwithcm_name)
+        assert app_status, "应用使用configmap失败app: {} is not running".format(self.appwithcm_name)
 
         self.application.delete_app(self.appwithcm_name)
         self.application.check_exists(self.application.app_common_url(app_uuid), 404)

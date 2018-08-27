@@ -54,18 +54,18 @@ class TestPvcSuite(object):
         else:
             assert True, "未知的存储卷类型{}".format(self.pv.global_info['$REGION_VOLUME'])
             return
-        assert createvolume_result.status_code == 201, createvolume_result.text
+        assert createvolume_result.status_code == 201, "创建存储卷失败{}".format(createvolume_result.text)
         volume_id = createvolume_result.json().get("id")
         # create pv
         createpv_result = self.pv.create_pv("./test_data/pv/pv.json",
                                             {"$pv_name": self.pv_name, "$pv_policy": "Retain", "$size": "1",
                                              "$volume_id": volume_id, "$volume_driver": self.region_volumes[0]})
-        assert createpv_result.status_code == 201, createpv_result.text
+        assert createpv_result.status_code == 201, "创建pv失败{}".format(createpv_result.text)
         # create pvc
         createpvc_result = self.pvc.create_pvc("./test_data/pvc/pvc.json",
                                                {"$pvc_name": self.pvc_name, "$pvc_mode": "ReadWriteOnce",
                                                 "$scs_name": "", "$size": "1"})
-        assert createpvc_result.status_code == 201, createpvc_result.text
+        assert createpvc_result.status_code == 201, "创建pvc失败{}".format(createpvc_result.text)
         self.pvc.check_value_in_response(self.pvc.get_common_pvc_url(), self.pvc_name)
         # list pvc
         list_result = self.pvc.list_pvc()
@@ -75,13 +75,13 @@ class TestPvcSuite(object):
         detail_result = self.pvc.get_pvc_detail(self.pvc.global_info["$K8S_NAMESPACE"], self.pvc_name)
         result = self.pvc.update_result(result, detail_result.status_code == 200, detail_result.text)
         result = self.pvc.update_result(result, self.pvc.get_value(detail_result.json(), "status.phase") == "Bound",
-                                        detail_result.text)
+                                        "pvc详情状态不是绑定{}".format(detail_result.text))
         result = self.pvc.update_result(result, self.pvc.get_value(detail_result.json(),
                                                                    "kubernetes.spec.volumeName") == self.pv_name,
-                                        detail_result.text)
+                                        "pvc详情关联持久卷不是e2e创建的{}".format(detail_result.text))
         # delete pvc
         delete_result = self.pvc.delete_pvc(self.pvc.global_info["$K8S_NAMESPACE"], self.pvc_name)
-        assert delete_result.status_code == 204
+        assert delete_result.status_code == 204, "删除pvc失败 {}".format(delete_result.text)
         assert self.pvc.check_exists(self.pvc.get_common_pvc_url(self.pvc.global_info["$K8S_NAMESPACE"], self.pvc_name),
                                      404)
         assert result['flag'], result
@@ -99,23 +99,23 @@ class TestPvcSuite(object):
         create_result = self.scs.create_scs("./test_data/scs/scs.yml",
                                             {"$scs_name": self.scs_name, "$is_default": "false",
                                              "$master_ip": masterip})
-        assert create_result.status_code == 201, create_result.text
+        assert create_result.status_code == 201, "创建sc失败{}".format(create_result.text)
 
         # create pvc
         createpvc_result = self.pvc.create_pvc("./test_data/pvc/pvc.json",
                                                {"$pvc_name": self.pvcusescs_name, "$pvc_mode": "ReadWriteOnce",
                                                 "$scs_name": self.scs_name, "$size": "1"})
-        assert createpvc_result.status_code == 201, createpvc_result.text
+        assert createpvc_result.status_code == 201, "创建pvc失败{}".format(createpvc_result.text)
         self.pvc.get_status(self.pvc.get_common_pvc_url(self.pvc.global_info["$K8S_NAMESPACE"], self.pvcusescs_name),
                             "status.phase", "Bound")
         # get pvc detail
         detail_result = self.pvc.get_pvc_detail(self.pvc.global_info["$K8S_NAMESPACE"], self.pvcusescs_name)
         result = self.pvc.update_result(result, detail_result.status_code == 200, detail_result.text)
         result = self.pvc.update_result(result, self.pvc.get_value(detail_result.json(), "status.phase") == "Bound",
-                                        detail_result.text)
+                                        "pvc详情状态不是绑定{}".format(detail_result.text))
         result = self.pvc.update_result(result, self.pvc.get_value(detail_result.json(),
                                                                    "kubernetes.spec.volumeName").startswith("pvc"),
-                                        detail_result.text)
+                                        "pvc详情关联持久卷不是以pvc开头的{}".format(detail_result.text))
         self.pvc.delete_pvc(self.pvc.global_info["$K8S_NAMESPACE"], self.pvcusescs_name)
         self.scs.delete_scs(self.scs_name)
         assert result['flag'], result
@@ -135,13 +135,13 @@ class TestPvcSuite(object):
             create_result = self.scs.create_scs("./test_data/scs/scs.yml",
                                                 {"$scs_name": self.defaultscs_name, "$is_default": "true",
                                                  "$master_ip": masterip})
-            assert create_result.status_code == 201, create_result.text
+            assert create_result.status_code == 201, "创建sc失败{}".format(create_result.text)
         result = {"flag": True}
         # create pvc
         createpvc_result = self.pvc.create_pvc("./test_data/pvc/pvc_usedefault.json",
                                                {"$pvc_name": self.pvcusedefaultscs_name, "$pvc_mode": "ReadWriteOnce",
                                                 "$size": "1"})
-        assert createpvc_result.status_code == 201, createpvc_result.text
+        assert createpvc_result.status_code == 201, "创建pvc失败{}".format(createpvc_result.text)
         self.pvc.get_status(
             self.pvc.get_common_pvc_url(self.pvc.global_info["$K8S_NAMESPACE"], self.pvcusedefaultscs_name),
             "status.phase", "Bound")
@@ -149,10 +149,10 @@ class TestPvcSuite(object):
         detail_result = self.pvc.get_pvc_detail(self.pvc.global_info["$K8S_NAMESPACE"], self.pvcusedefaultscs_name)
         result = self.pvc.update_result(result, detail_result.status_code == 200, detail_result.text)
         result = self.pvc.update_result(result, self.pvc.get_value(detail_result.json(), "status.phase") == "Bound",
-                                        detail_result.text)
+                                        "pvc详情状态不是绑定{}".format(detail_result.text))
         result = self.pvc.update_result(result, self.pvc.get_value(detail_result.json(),
                                                                    "kubernetes.spec.volumeName").startswith("pvc"),
-                                        detail_result.text)
+                                        "pvc详情关联持久卷不是以pvc开头的{}".format(detail_result.text))
         self.pvc.delete_pvc(self.pvc.global_info["$K8S_NAMESPACE"], self.pvcusedefaultscs_name)
         self.scs.delete_scs(self.defaultscs_name)
         assert result['flag'], result
