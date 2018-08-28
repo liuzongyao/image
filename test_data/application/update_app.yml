@@ -43,6 +43,14 @@ kubernetes:
               requests:
                 cpu: 20m
                 memory: 50M
+            livenessProbe:
+              initialDelaySeconds: 120
+              periodSeconds: 60
+              timeoutSeconds: 30
+              successThreshold: 1
+              failureThreshold: 5
+              tcpSocket:
+                port: 80
   - apiVersion: autoscaling/v1
     firstTimestamp: null
     kind: HorizontalPodAutoscaler
