@@ -1,4 +1,3 @@
-from common import settings
 from common.base_request import Common
 from common.log import logger
 
@@ -23,10 +22,6 @@ class Job(Common):
         url = self.get_job_config_url()
         data = self.generate_data(file, data)
         return self.send(method="POST", path=url, data=data)
-
-    # def get_job_events(self, job_id, operation, namespace):
-    #     url = self.get_job_event_url("job_config",namespace)
-    #     return self.get_events(url, job_id, operation)
 
     def get_list_jobconfig(self):
         url = self.get_job_config_url("")
