@@ -4,7 +4,7 @@
     "image_tag": "$image_tag",
     "config_name": "$CONFIG_NAME",
     "command_type": "CUSTOM_COMMAND",
-    "command": "echo command",
+    "command": "env",
     "cpu": 0.25,
     "memory": 64,
     "envfiles": [],

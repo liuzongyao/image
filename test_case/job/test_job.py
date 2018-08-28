@@ -18,7 +18,7 @@ class TestJobSuit(object):
     def test_job(self):
         """
         创建任务(镜像，环境变量，超时时长)-获取创建任务事件-获取任务列表-获取任务配置详情(验证环境变量，命令，镜像)
-        -触发任务配置-查看任务历史-查看任务历史日志(验证环境变量)-停止任务-查看任务历史
+        -触发任务配置-查看任务历史-查看任务历史日志(验证环境变量)
         更新任务配置(命令)-更新任务事件-获取任务配置详情(命令)-触发任务-获取触发任务事件-任务历史列表和日志(任务命令)-删除任务历史
         -删除任务配置-查看删除任务配置事件
         :return:
@@ -62,12 +62,52 @@ class TestJobSuit(object):
         result = self.job.update_result(result, event_triggerjob, '操作事件：获取触发任务事件出错')
 
         # get job history list
+        ret_jobhisttory_list = self.job.get_list_job()
+        result = self.job.update_result(result, ret_jobhisttory_list.status_code == 200, '获取任务历史列表出错')
+        result = self.job.update_result(result, self.job_config_name in ret_jobhisttory_list.text,
+                                        '获取任务历史列表:新触发的任务不在列表中')
 
+        # get job log
+        ret_log = self.job.get_job_log(job_id, 'create')
+        result = self.job.update_result(result, ret_log, "获取任务历史日志失败，期望存在关键字create")
 
-        ret_log = self.job.get_job_log(job_id)
-        result = self.job.update_result(result, ret_log, "get job log expexcted to contain hello")
+        # update job_config
+        ret_update = self.job.update_job_config(config_id, './test_data/job/update_job_config.json',
+                                                {"$CONFIG_NAME": self.job_config_name})
+        assert ret_update.status_code == 200, "更新任务配置失败:{}".format(ret_update.text)
+
+        # get update job_config event
+        event_updatejob = self.job.get_events(config_id, "update", self.job.global_info['$NAMESPACE'])
+        result = self.job.update_result(result, event_updatejob, '操作事件:获取更新任务配置事件出错')
+
+        # get job history list
+        ret_jobhisttory_list = self.job.get_list_job()
+        result = self.job.update_result(result, ret_jobhisttory_list.status_code == 200, '获取任务历史列表出错')
+        result = self.job.update_result(result, self.job_config_name in ret_jobhisttory_list.text,
+                                        '获取任务历史列表:新触发的任务不在列表中')
+
+        # trigger update_job
+        ret_trigger = self.job.trigger_job_config(config_id)
+        assert ret_trigger.status_code == 201, "触发job_config出错:错误信息{}".format(ret_trigger.text)
+
+        job_id = ret_trigger.json()["job_uuid"]
+        ret_status = self.job.get_job_status(job_id, 'status', 'SUCCEEDED')
+        assert ret_status, "验证job状态出错： job: {} is not runnning，".format(job_id)
+
+        # get trigger job event
+        event_triggerjob = self.job.get_events(config_id, "trigger", self.job.global_info['$NAMESPACE'])
+        result = self.job.update_result(result, event_triggerjob, '操作事件：获取触发任务事件出错')
+
+        # get job log
+        ret_log = self.job.get_job_log(job_id, 'command')
+        result = self.job.update_result(result, ret_log, "获取任务历史日志失败，期望存在关键字command，")
 
         # delete job
+        ret_del = self.job.delete_job(self.job_config_name)
+        assert ret_del.status_code == 204, ret_del.text
+        assert result["flag"], "delete job_config result is {}".format(result)
+
+        # delete job_config
         ret_del = self.job.delete_job_config(self.job_config_name)
         assert ret_del.status_code == 204, ret_del.text
         assert result["flag"], "delete job_config result is {}".format(result)

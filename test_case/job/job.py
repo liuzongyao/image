@@ -28,8 +28,8 @@ class Job(Common):
         url = self.get_job_config_url(config_id)
         return self.send(method="GET", path=url)
 
-    def update_job_config(self, file, data):
-        url = self.get_job_config_url()
+    def update_job_config(self, config_id, file, data):
+        url = self.get_job_config_url(config_id)
         data = self.generate_data(file, data)
         return self.send(method="PUT", path=url, data=data)
 
@@ -45,14 +45,19 @@ class Job(Common):
         params = {"namespaces": self.account}
         return self.send(method="POST", path=url, json=data, params=params)
 
+    def get_list_job(self):
+        logger.info("************************** list job history ********************************")
+        url = self.get_job_url("")
+        return self.send(method='get', path=url)
+
     def get_job_status(self, job_id, key, expect_status):
         url = self.get_job_url(job_id=job_id)
         return self.get_status(url, key, expect_status)
 
-    def get_job_log(self, job_id):
+    def get_job_log(self, job_id, expect_value):
         logger.info("************************** get job log ********************************")
         url = self.get_job_url(job_id=job_id) + '/logs'
-        return self.get_logs(url, "hello")
+        return self.get_logs(url, expect_value)
 
     def delete_job(self, job_name):
         job_id = self.get_job_id(job_name)
