@@ -155,7 +155,7 @@ class SetUp(AlaudaRequest):
 
     def prepare(self):
         # create project
-        response = self.project_client.get_project()
+        response = self.project_client.get_project(settings.PROJECT_NAME)
         if response.status_code != 200:
             response = self.project_client.create_project('./test_data/project/project.yml',
                                                           {"$project": settings.PROJECT_NAME})
@@ -221,7 +221,7 @@ class TearDown(AlaudaRequest):
             self.space_client.delete_space(settings.SPACE_NAME)
 
         if "CREATE_PROJECT" in self.global_info:
-            self.project_client.delete_project_role()
+            self.project_client.delete_project_role(settings.PROJECT_NAME)
             self.project_client.delete_project(settings.PROJECT_NAME)
 
         noti_id = self.global_info.get("$NOTI_UUID")
