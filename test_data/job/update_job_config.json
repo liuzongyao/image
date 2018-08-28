@@ -4,7 +4,7 @@
     "image_tag": "$image_tag",
     "config_name": "$CONFIG_NAME",
     "command_type": "CUSTOM_COMMAND",
-    "command": "env",
+    "command": "echo command",
     "cpu": 0.25,
     "memory": 64,
     "envfiles": [],
@@ -18,5 +18,5 @@
     "region_uuid": "$REGION_ID",
     "space_name": "$SPACE_NAME",
     "space_uuid": "$SPACE_UUID",
-    "timeout": 23
+    "timeout": 20
 }

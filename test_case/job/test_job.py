@@ -35,11 +35,11 @@ class TestJobSuit(object):
         config_id = ret_create.json()["config_uuid"]
 
         # get create job_config event
-        event_cratejob = self.job.get_events(config_id, "creat", self.job.global_info['$NAMESPACE'])
+        event_cratejob = self.job.get_job_events(config_id, "create", "job_config")
         result = self.job.update_result(result, event_cratejob, '操作事件：获取创建任务事件出错')
 
         # list job_config
-        ret_list = self.job.get_job_config()
+        ret_list = self.job.get_list_jobconfig()
         result = self.job.update_result(result, ret_list.status_code == 200, '获取job_config列表出错')
         result = self.job.update_result(result, self.job_config_name in ret_list.text, '获取任务配置列表：新建job_config不在列表中')
 
@@ -58,8 +58,8 @@ class TestJobSuit(object):
         assert ret_status, "验证job状态出错： job: {} is not runnning，".format(job_id)
 
         # get trigger job event
-        event_triggerjob = self.job.get_events(config_id, "trigger", self.job.global_info['$NAMESPACE'])
-        result = self.job.update_result(result, event_triggerjob, '操作事件：获取触发任务事件出错')
+        # event_triggerjob = self.job.get_job_events(config_id, "trigger", "job_config")
+        # result = self.job.update_result(result, event_triggerjob, '操作事件：获取触发任务事件出错')
 
         # get job history list
         ret_jobhisttory_list = self.job.get_list_job()
@@ -74,10 +74,10 @@ class TestJobSuit(object):
         # update job_config
         ret_update = self.job.update_job_config(config_id, './test_data/job/update_job_config.json',
                                                 {"$CONFIG_NAME": self.job_config_name})
-        assert ret_update.status_code == 200, "更新任务配置失败:{}".format(ret_update.text)
+        assert ret_update.status_code == 204, "更新任务配置失败:{}".format(ret_update.text)
 
         # get update job_config event
-        event_updatejob = self.job.get_events(config_id, "update", self.job.global_info['$NAMESPACE'])
+        event_updatejob = self.job.get_job_events(config_id, "update", "job_config")
         result = self.job.update_result(result, event_updatejob, '操作事件:获取更新任务配置事件出错')
 
         # get job history list
@@ -95,17 +95,18 @@ class TestJobSuit(object):
         assert ret_status, "验证job状态出错： job: {} is not runnning，".format(job_id)
 
         # get trigger job event
-        event_triggerjob = self.job.get_events(config_id, "trigger", self.job.global_info['$NAMESPACE'])
-        result = self.job.update_result(result, event_triggerjob, '操作事件：获取触发任务事件出错')
+        # event_triggerjob = self.job.get_job_events(config_id, "trigger", "job_config")
+        # result = self.job.update_result(result, event_triggerjob, '操作事件：获取触发任务事件出错')
 
-        # get job log
+        # get update job log
         ret_log = self.job.get_job_log(job_id, 'command')
         result = self.job.update_result(result, ret_log, "获取任务历史日志失败，期望存在关键字command，")
 
-        # delete job
-        ret_del = self.job.delete_job(self.job_config_name)
+        # delete job histrory
+        job_uuid = ret_trigger.json()["job_uuid"]
+        ret_del = self.job.delete_job(job_uuid)
         assert ret_del.status_code == 204, ret_del.text
-        assert result["flag"], "delete job_config result is {}".format(result)
+        assert result["flag"], "delete job_history result is {}".format(result)
 
         # delete job_config
         ret_del = self.job.delete_job_config(self.job_config_name)
