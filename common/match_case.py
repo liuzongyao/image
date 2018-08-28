@@ -26,5 +26,6 @@ def casename():
         "test_pvc_use_defaultscs": "持久卷声明使用默认存储类测试:制造默认存储类-创建pvc-获取pvc详情",
         "test_scs": "存储类测试:创建sc-获取sc列表-设为默认-获取sc详情-删除sc",
         "test_configmap": "配置管理测试:创建cm-获取cm列表-更新cm-获取cm详情-删除cm",
+        "test_project": "创建项目-获取项目列表-更新项目-获取项目详情-删除项目"
     }
     return casename_dict
