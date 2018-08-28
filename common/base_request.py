@@ -102,17 +102,21 @@ class Common(AlaudaRequest):
         :return: true or false
         """
         cnt = 0
+        fail_cnt = 0
         flag = False
         while cnt < 60 and not flag:
             cnt += 1
             response = self.send(method="GET", path=url)
             assert response.status_code == 200, "get status failed"
             value = self.get_value(response.json(), key, delimiter)
+            logger.info(value)
             if value == expect_value:
                 flag = True
                 break
             if value in self.final_status:
-                break
+                fail_cnt += 1
+                if fail_cnt > 2:
+                    break
             sleep(5)
         return flag
 

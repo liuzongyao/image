@@ -59,9 +59,10 @@ class TestApplicationSuite(object):
     @pytest.mark.BAT
     def test_newk8s_app(self):
         """
-        创建应用-验证应用状态-获取应用详情-获取应用列表-获取应用yaml-操作事件-应用监控-日志-exec-组件监控-访问组件地址
-        -获取组件实例数-重构实例-更新组件-验证组件更新-获取组件yaml-获取文件日志源-停止组件-启动组件-回滚到指定版本-回滚版本-停止应用-启动应用
-        -删除服务-更新应用-验证亲和反亲和-删除应用
+        "创建应用-验证应用状态-服务名称校验-获取应用详情-获取应用列表-获取应用yaml-操作事件-应用监控-日志-exec-"
+        "服务监控-访问组件地址-获取容器组列表-获取资源事件-获取组件实例数-重构实例-更新组件-验证组件更新-"
+        "获取文件日志源-停止组件-启动组件-获取版本-回滚到指定版本-回滚版本-停止应用-启动应用-删除服务-"
+        "更新应用-验证多容器-验证亲和反亲和-验证指定主机-删除应用"
         :return:
         """
         result = {"flag": True}
@@ -73,15 +74,20 @@ class TestApplicationSuite(object):
         app_uuid = self.application.get_value(content, 'resource.uuid')
         service_uuid = self.application.get_value(content, 'services.0.resource.uuid')
 
+        # check service name
+        checkname_result = self.application.check_svcname(self.app_name, self.application.global_info['$K8S_NS_UUID'])
+        result = self.application.update_result(result, checkname_result.status_code == 400, '重名校验失败')
+
         # get app status
         app_status = self.application.get_app_status(app_uuid, 'resource.status', 'Running')
-        assert app_status, "验证应用状态出错：app: {} is not running".format(self.app_name)
+        assert app_status, "创建应用后，验证应用状态出错：app: {} is not running".format(self.app_name)
 
         # get app detail
         detail_result = self.application.get_app_detail(app_uuid)
         result = self.application.update_result(result, detail_result.status_code == 200, '获取应用详情出错')
         app_describe = self.application.get_app_status(app_uuid, 'resource.description', "$description")
         result = self.application.update_result(result, app_describe, '校验应用详情出错')
+        result = self.application.update_result(result, 'servicelabel' in detail_result.text, '校验组件标签出错')
 
         # list app
         list_result = self.application.list_app()
@@ -104,7 +110,7 @@ class TestApplicationSuite(object):
 
         # get app monitor
         monitor_result = self.application.get_app_monitor(app_uuid)
-        result = self.application.update_result(result, monitor_result, "获取集群监控失败")
+        result = self.application.update_result(result, monitor_result, "获取应用监控失败")
 
         # exec
         pod_instance = self.application.get_service_instance(service_uuid)
@@ -119,6 +125,16 @@ class TestApplicationSuite(object):
         service_url = self.application.get_service_url(service_uuid)
         access_result = self.application.access_service(service_url, "Hello")
         result = self.application.update_result(result, access_result, "访问服务地址失败")
+
+        # get pod list
+        podlist_result = self.application.list_pod()
+        result = self.application.update_result(result, podlist_result.status_code == 200, "获取容器组列表失败")
+        result = self.application.update_result(result, pod_instance in podlist_result.text, "容器组列表失败:容器不在列表中")
+
+        # get kevent
+        kevent_result = self.application.get_kevents(namespace=self.application.global_info["$K8S_NAMESPACE"])
+        result = self.application.update_result(result, kevent_result.status_code == 200, "获取资源事件失败")
+        result = self.application.update_result(result, len(kevent_result.json()) > 0, "获取资源事件为空")
 
         # get service instances
         svcinstance_result = self.application.get_service_instances(service_uuid)
@@ -170,6 +186,11 @@ class TestApplicationSuite(object):
         app_status = self.application.get_app_status(app_uuid, 'resource.status', 'Running')
         assert app_status, "启动组件失败: app: {} start failed".format(self.app_name)
 
+        # get revisions
+        revision_result = self.application.get_service_revisions(service_uuid)
+        result = self.application.update_result(result, revision_result.status_code == 200, '获取服务版本失败')
+        result = self.application.update_result(result, len(revision_result.json()) > 1, '获取服务版本个数不正确')
+
         # rollbackto1
         roll1_result = self.application.rollback_service_toversion(service_uuid)
         assert roll1_result.status_code == 204, "回滚到指定版本失败:{}".format(roll1_result.text)
@@ -200,18 +221,22 @@ class TestApplicationSuite(object):
         app_status = self.application.get_app_status(app_uuid, 'resource.status', 'Running')
         assert app_status, "启动应用失败:app: {} start failed".format(self.app_name)
 
-        # # update app
-        # update_result = self.application.update_app(app_uuid, './test_data/application/update_app.yml',
-        #                                             {"$app_name": self.app_name,
-        #                                              "$description": self.app_describe})
-        # # update action success or not
-        # assert update_result.status_code == 200, update_result.text
-        # # app is running or not
-        # app_status = self.application.get_app_status(app_uuid, 'resource.status', 'Running')
-        # assert app_status, "app: {} is not running".format(self.app_name)
-        # # update result
-        # app_describe = self.application.get_app_status(app_uuid, 'resource.description', self.app_describe)
-        # assert app_describe, "update app {} failed".format(self.app_name)
+        # update app
+        update_result = self.application.update_app(app_uuid, './test_data/application/update_app.yml',
+                                                    {"$app_name": self.app_name,
+                                                     "$description": self.app_describe})
+        # update action success or not
+        assert update_result.status_code == 200, "更新应用失败 {}".format(update_result.text)
+        # app is running or not
+        app_status = self.application.get_app_status(app_uuid, 'resource.status', 'Running')
+        assert app_status, "更新应用失败app: {} is not running".format(self.app_name)
+        # update result
+        app_describe = self.application.get_app_status(app_uuid, 'resource.description', self.app_describe)
+        assert app_describe, "更新应用失败,description未更新 update app {} failed".format(self.app_name)
+
+        detail = self.application.get_app_detail(app_uuid)
+        containers = self.application.get_value(detail.json(), 'kubernetes.0.spec.template.spec.containers')
+        assert len(containers) == 2, "验证多容器失败，期望是2，实际是{}".format(len(containers))
 
         # delete service
         deletesvc_result = self.application.delete_service(service_uuid)
@@ -222,22 +247,32 @@ class TestApplicationSuite(object):
         # antiaffinity
         slaveips = self.application.global_info["$SLAVEIPS"].split(",")
         if len(slaveips) > 1:
+            slaveip = slaveips[0]
             update_result = self.application.update_app(app_uuid, './test_data/application/update_app_affinity.yml',
-                                                        {"$app_name": self.app_name, "$description": self.app_describe})
+                                                        {"$app_name": self.app_name, "$description": self.app_describe,
+                                                         "$slaveip": slaveip})
             assert update_result.status_code == 200, "更新应用失败:{}".format(update_result.text)
             app_status = self.application.get_app_status(app_uuid, 'resource.status', 'Running')
             assert app_status, "更新应用失败app: {} is not running".format(self.app_name)
 
-            svc1_id = self.application.get_service_uuid(app_uuid)
+            detail = self.application.get_app_detail(app_uuid)
+            if self.application.get_value(detail.json(), 'services.0.resource.name') == self.app_name + '1':
+                svc1_id = self.application.get_value(detail.json(), 'services.0.resource.uuid')
+                svc2_id = self.application.get_value(detail.json(), 'services.1.resource.uuid')
+            else:
+                svc2_id = self.application.get_value(detail.json(), 'services.0.resource.uuid')
+                svc1_id = self.application.get_value(detail.json(), 'services.1.resource.uuid')
+
             svc1instance_result = self.application.get_service_instances(svc1_id)
             assert svc1instance_result.status_code == 200, "验证亲和反亲和失败：{}".format(svc1instance_result.text)
             svc1_ip = svc1instance_result.json()[0].get("status").get("hostIP")
 
-            svc2_id = self.application.get_service_uuid(app_uuid, key='services.1.resource.uuid')
             svc2instance_result = self.application.get_service_instances(svc2_id)
             assert svc2instance_result.status_code == 200, "验证亲和反亲和失败：{}".format(svc2instance_result.text)
             svc2_ip = svc2instance_result.json()[0].get("status").get("hostIP")
+
             assert svc1_ip != svc2_ip, "验证亲和反亲和失败"
+            assert svc1_ip == slaveip, "验证指定主机失败,期望部署在{} 实际部署在{}".format(slaveip, svc1_ip)
         else:
             result = self.application.update_result(result, False, "当前集群主机数小于2，无法测试亲和反亲和")
 

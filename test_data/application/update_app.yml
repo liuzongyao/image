@@ -33,6 +33,16 @@ kubernetes:
               requests:
                 cpu: 20m
                 memory: 50M
+          - image: $IMAGE
+            imagePullPolicy: Always
+            name: $app_name-many
+            resources:
+              limits:
+                cpu: 20m
+                memory: 50M
+              requests:
+                cpu: 20m
+                memory: 50M
   - apiVersion: autoscaling/v1
     firstTimestamp: null
     kind: HorizontalPodAutoscaler
