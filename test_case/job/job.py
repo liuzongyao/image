@@ -1,4 +1,3 @@
-from common import settings
 from common.base_request import Common
 from common.log import logger
 
