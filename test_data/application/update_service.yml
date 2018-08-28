@@ -56,7 +56,7 @@ kubernetes:
       name: $app_name
       namespace: $K8S_NAMESPACE
     spec:
-      maxReplicas: 20
+      maxReplicas: 5
       minReplicas: 1
       scaleTargetRef:
         apiVersion: extensions/v1beta1
