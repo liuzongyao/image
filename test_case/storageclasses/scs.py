@@ -1,6 +1,7 @@
 import sys
 
 from common.base_request import Common
+from common.exceptions import ParseResponseError
 from common.log import logger
 
 
@@ -47,6 +48,6 @@ class Scs(Common):
                                          "#")
                 if default == "true":
                     default_size += 1
-            except (KeyError, ValueError, IndexError):
+            except (KeyError, ValueError, IndexError, ParseResponseError):
                 continue
         return default_size
