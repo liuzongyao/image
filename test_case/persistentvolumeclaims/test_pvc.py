@@ -71,6 +71,8 @@ class TestPvcSuite(object):
         list_result = self.pvc.list_pvc()
         result = self.pvc.update_result(result, list_result.status_code == 200, list_result.text)
         result = self.pvc.update_result(result, self.pvc_name in list_result.text, "获取持久卷声明列表：新建pvc不在列表中")
+        self.pvc.get_status(self.pvc.get_common_pvc_url(self.pvc.global_info["$K8S_NAMESPACE"], self.pvc_name),
+                            "status.phase", "Bound")
         # get pvc detail
         detail_result = self.pvc.get_pvc_detail(self.pvc.global_info["$K8S_NAMESPACE"], self.pvc_name)
         result = self.pvc.update_result(result, detail_result.status_code == 200, detail_result.text)
@@ -79,6 +81,15 @@ class TestPvcSuite(object):
         result = self.pvc.update_result(result, self.pvc.get_value(detail_result.json(),
                                                                    "kubernetes.spec.volumeName") == self.pv_name,
                                         "pvc详情关联持久卷不是e2e创建的{}".format(detail_result.text))
+        # get pv detail
+        detail_pv = self.pv.get_pv_detail(self.pv_name)
+        result = self.pvc.update_result(result,
+                                        self.pv.get_value(detail_pv.json(), "kubernetes.status.phase") == "Bound",
+                                        "pv详情状态不是绑定{}".format(detail_pv.text))
+        result = self.pvc.update_result(result, self.pv.get_value(detail_pv.json(),
+                                                                  "kubernetes.spec.claimRef.name") == self.pvc_name,
+                                        "pv详情关联持久卷声明不是e2e创建的{}".format(detail_pv.text))
+
         # delete pvc
         delete_result = self.pvc.delete_pvc(self.pvc.global_info["$K8S_NAMESPACE"], self.pvc_name)
         assert delete_result.status_code == 204, "删除pvc失败 {}".format(delete_result.text)

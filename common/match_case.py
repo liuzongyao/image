@@ -15,10 +15,10 @@ def casename():
         "test_pvc_app": "应用使用pvc测试:创建存储卷-创建pv-创建pvc-创建应用-验证应用状态",
         "test_gfs_volume": "存储卷gfs测试:获取驱动类型-创建gfs-获取存储卷列表-获取gfs详情-删除gfs",
         "test_ebs_volume": "存储卷ebs测试:获取驱动类型-创建ebs-获取存储卷列表-获取ebs详情-删除ebs",
-        "test_pv": "持久卷测试:创建存储卷-创建pv-获取pv列表-更新pv-获取pv详情-删除pv",
+        "test_pv": "持久卷测试:创建存储卷-创建pv-获取pv列表-更新pv-获取pv详情-获取存储卷详情-删除pv",
         "test_ci_cd": "创建集成中心实例-获取实例状态-停用实例-获取实例状态-更新实例-获取实例状态-删除实例",
         "test_noti": "通知增删改查测试",
-        "test_pvc": "持久卷声明测试:创建存储卷-创建pv-创建pvc-获取pvc列表-获取pvc详情-删除pvc",
+        "test_pvc": "持久卷声明测试:创建存储卷-创建pv-创建pvc-获取pvc列表-获取pvc详情-获取pv详情-删除pvc",
         "test_jenkins_buildimage_updateservice": "获取模板-创建集成中心实例-创建svn凭证-创建镜像仓库凭证-获取镜像地址-创建应用-"
                                                  "获取应用状态-创建Jenkins流水线项目-执行流水线-获取流水线执行状态-检查应用的"
                                                  "镜像版本是否更新成功-删除应用-删除Jenkins流水线-删除集成中心实例-删除镜像版本",
