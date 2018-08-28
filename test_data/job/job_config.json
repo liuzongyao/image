@@ -18,5 +18,6 @@
     "region_uuid": "$REGION_ID",
     "space_name": "$SPACE_NAME",
     "space_uuid": "$SPACE_UUID",
+    "schedule_rule": "1/* * * * *",
     "timeout": 20
 }

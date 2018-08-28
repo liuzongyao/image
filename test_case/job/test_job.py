@@ -1,3 +1,5 @@
+from time import sleep
+
 import pytest
 from test_case.job.job import Job
 
@@ -70,6 +72,10 @@ class TestJobSuit(object):
         # get job log
         ret_log = self.job.get_job_log(job_id, 'create')
         result = self.job.update_result(result, ret_log, "获取任务历史日志失败，期望存在关键字create")
+
+        # schedule_rule
+        ret_job_list = self.job.get_job_list(config_id, "count", 2)
+        assert ret_job_list, "验证定时任务错误，错误信息{}".format(ret_job_list.text)
 
         # update job_config
         ret_update = self.job.update_job_config(config_id, './test_data/job/update_job_config.json',
