@@ -47,7 +47,7 @@ class AlaudaRequest(object):
         #     content["json"] = content["data"]
         #     content.pop("data")
         if "params" in content:
-            content["params"].update(self.params)
+            pass
         else:
             content["params"] = self.params
 

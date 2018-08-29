@@ -3,12 +3,15 @@ import json
 import os
 
 from common import settings
+from common.log import logger
 from common.api_requests import AlaudaRequest
 from common.utils import retry
 from test_case.namespace.namespace import Namespace
 from test_case.space.space import Space
 from test_case.project.project import Project
 from test_case.notification.notification import Notification
+from test_case.image.image import Image
+from test_case.application.app import Application
 from common.loadfile import FileUtils
 
 
@@ -19,6 +22,7 @@ class SetUp(AlaudaRequest):
 
     def __init__(self):
         super(SetUp, self).__init__()
+        self.app_name = "alauda-global-app"
         self.common = {
             "$NAMESPACE": settings.ACCOUNT,
             "$PASSWORD": settings.PASSWORD,
@@ -49,7 +53,10 @@ class SetUp(AlaudaRequest):
         self.space_client = Space()
         self.project_client = Project()
         self.noti_client = Notification()
+        self.image_client = Image()
+        self.app_client = Application()
         self.prepare()
+        self.create_global_app()
         self.input_file(self.common)
 
     @retry()
@@ -198,6 +205,41 @@ class SetUp(AlaudaRequest):
         assert response.status_code == 201, "创建全局通知失败了，原因是：{}".format(response.text)
         self.common.update({"$NOTI_NAME": response.json().get("name"), "$NOTI_UUID": response.json().get("uuid")})
 
+    def create_global_app(self):
+        # get image info
+        registry_endpoint = self.common['PRIVATE_REGISTRY'][0]['endpoint']
+
+        ret = self.image_client.get_repo_detail(settings.REPO_NAME)
+        assert ret.status_code == 200, "获取镜像仓库详情失败"
+        repo_id = self.image_client.get_value(ret.json(), 'uuid')
+
+        get_repo_tag_ret = self.image_client.get_repo_tag(settings.REPO_NAME)
+        assert get_repo_tag_ret.status_code == 200, "获取镜像版本列表失败"
+        assert len(get_repo_tag_ret.json()['results']) > 0, "镜像版本为空"
+
+        repo_tag = self.image_client.get_value(get_repo_tag_ret.json(), 'results.0.tag_name')
+        logger.info("repo tag: {}".format(repo_tag))
+
+        image = "{}/{}:{}".format(registry_endpoint, settings.REPO_NAME, repo_tag)
+
+        # create service
+        ret = self.app_client.create_app('./test_data/application/create_app.yml',
+                                         {"$app_name": self.app_name, "$description": self.app_name, "$IMAGE": image,
+                                          "$K8S_NS_UUID": self.common["$K8S_NS_UUID"]})
+
+        assert ret.status_code == 201, "创建应用失败"
+
+        # get service status
+        content = ret.json()
+        app_id = self.app_client.get_value(content, 'resource.uuid')
+        service_uuid = self.app_client.get_value(content, 'services.0.resource.uuid')
+
+        app_status = self.app_client.get_app_status(app_id, 'resource.status', 'Running')
+        assert app_status, "应用运行失败"
+
+        self.common.update({"$GLOBAL_APP_NAME": self.app_name, "$GLOBAL_APP_ID": app_id,
+                            "$GLOBAL_SERVICE_ID": service_uuid, "$REPO_ID": repo_id})
+
 
 class TearDown(AlaudaRequest):
     """
@@ -211,6 +253,7 @@ class TearDown(AlaudaRequest):
         self.space_client = Space()
         self.project_client = Project()
         self.noti_client = Notification()
+        self.app_client = Application()
         self.delete()
 
     def delete(self):
@@ -226,3 +269,5 @@ class TearDown(AlaudaRequest):
 
         noti_id = self.global_info.get("$NOTI_UUID")
         self.noti_client.delete_noti(noti_id)
+
+        self.app_client.delete_app(self.global_info['$GLOBAL_APP_NAME'])

@@ -13,7 +13,7 @@ class Common(AlaudaRequest):
     def __init__(self):
         super(Common, self).__init__()
         self.global_info = FileUtils.load_file(self.global_info_path)
-        self.final_status = ["S", "F", "Running", "Error", "FAILURE"]
+        self.final_status = ["S", "F", "Running", "Error", "FAILURE", "failed"]
         self.region_id = self.global_info["$REGION_ID"]
 
     def generate_data(self, file_path, data):
@@ -121,8 +121,10 @@ class Common(AlaudaRequest):
         while cnt < 30 and not flag:
             cnt += 1
             params = Common.generate_time_params()
+            params.update(self.params)
             response = self.send(method="GET", path=url, params=params)
             assert response.status_code == 200, "get log failed"
+            logger.info("pipeline log: {}".format(response.text))
             if expect_value in response.text:
                 flag = True
                 break
