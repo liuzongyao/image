@@ -35,6 +35,7 @@ class Dashboard(Common):
 
     def get_dashboard_list(self):
         params = {"page": 1, "page_size": 100}
+        params.update({"project_name": self.project_name})
         path = self.get_dashboard_url()
         return self.send("GET", path, params=params)
 
@@ -56,6 +57,7 @@ class Dashboard(Common):
     def get_chart(self, params):
         time = self.generate_time_params()
         params.update(time)
+        params.update({"project_name": self.project_name})
         path = self.get_chart_monitor_url()
         return self.send("GET", path, params=params)
 

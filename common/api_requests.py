@@ -18,6 +18,7 @@ class AlaudaRequest(object):
         self.password = settings.PASSWORD
         self.registry_name = settings.REGISTRY_NAME
         self.global_info_path = settings.GLOBAL_INFO_FILE
+        self.project_name = settings.PROJECT_NAME
         if self.sub_account:
             self.auth = ("{}/{}".format(self.account, self.sub_account), self.password)
         else:
@@ -38,16 +39,13 @@ class AlaudaRequest(object):
         else:
             content["auth"] = self.auth
 
-        if "headers" in content:
-            self.headers.update(content["headers"])
-        content["headers"] = self.headers
+        if "headers" not in content:
+            content["headers"] = self.headers
 
         # if content.get("data") is not None and content["headers"]["Content-Type"] == "application/json":
         #     content["json"] = content["data"]
         #     content.pop("data")
-        if "params" in content:
-            pass
-        else:
+        if "params" not in content:
             content["params"] = self.params
 
         logger.info("Requesting url={}, method={}, args={}".format(url, method, content))
