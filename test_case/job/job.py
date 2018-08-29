@@ -11,17 +11,32 @@ class Job(Common):
         return job_id and "v1/jobs/{}/{}".format(self.account, job_id) or \
                "v1/jobs/{}".format(self.account)
 
+    def get_job_list_url(self, config_id):
+        return config_id and "v1/jobs/{}?config_name={}&page=1&page_size=20".format(self.account, config_id)
+
+    def get_job_event_url(self, resource_type, resource_id):
+        return "v1/events/{}/{}/{}?pageno=1&size=20".format(self.account, resource_type, resource_id)
+
+    def get_job_events(self, job_id, operation, resource_type):
+        url = self.get_job_event_url(resource_type, job_id)
+        return self.get_events(url, job_id, operation)
+
     def create_job_config(self, file, data):
         url = self.get_job_config_url()
         data = self.generate_data(file, data)
         return self.send(method="POST", path=url, data=data)
 
+    def get_list_jobconfig(self):
+        url = self.get_job_config_url("")
+        return self.send(method='get', path=url)
+
     def get_job_config(self, config_id):
         url = self.get_job_config_url(config_id)
         return self.send(method="GET", path=url)
 
-    def update_job_config(self, file, data):
-        url = self.get_job_config_url()
+    def update_job_config(self, config_id, file, data):
+        logger.info("************************** update job_config ********************************")
+        url = self.get_job_config_url(config_id)
         data = self.generate_data(file, data)
         return self.send(method="PUT", path=url, data=data)
 
@@ -37,26 +52,28 @@ class Job(Common):
         params = {"namespaces": self.account}
         return self.send(method="POST", path=url, json=data, params=params)
 
-    def get_job_status(self, job_id):
-        url = self.get_job_url(job_id=job_id)
-        return self.get_status(url, 'status', 'SUCCEEDED')
+    def get_list_job(self):
+        logger.info("************************** list job history ********************************")
+        url = self.get_job_url("")
+        return self.send(method='get', path=url)
 
-    def get_job_log(self, job_id):
+    def get_job_status(self, job_id, key, expect_status):
+        url = self.get_job_url(job_id=job_id)
+        return self.get_status(url, key, expect_status)
+
+    def get_job_log(self, job_id, expect_value):
         logger.info("************************** get job log ********************************")
         url = self.get_job_url(job_id=job_id) + '/logs'
-        return self.get_logs(url, "hello")
+        return self.get_logs(url, expect_value)
 
-    def delete_job(self, job_name):
-        job_id = self.get_job_id(job_name)
+    def delete_job(self, job_id):
         url = self.get_job_url(job_id)
         return self.send(method="DELETE", path=url)
 
-    def get_job_id(self, job_name):
-        url = self.get_job_url()
-        params = {"page": 1, "page_size": 20}
-        response = self.send(method="GET", path=url, params=params)
-        assert response.status_code == 200, "get job list fail"
-        return self.get_uuid_accord_name(response.json().get("results"), {"name": job_name}, "config_uuid")
+    def get_job_list(self, config_id, key, expect_value):
+        logger.info("************************** get job list ********************************")
+        url = self.get_job_list_url(config_id)
+        return self.get_status(url, key, expect_value)
 
     def get_config_id(self, job_name):
         url = self.get_job_config_url()

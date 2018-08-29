@@ -1,6 +1,7 @@
 import sys
 
 from common.base_request import Common
+from common.exceptions import ParseResponseError
 from common.log import logger
 
 
@@ -38,11 +39,15 @@ class Scs(Common):
     def get_default_size(self):
         default_size = 0
         list_result = self.list_scs()
-        assert list_result.status_code == 200, list_result.text
-        logger.info(list_result.json())
+        if list_result.status_code != 200:
+            return default_size
         for detail in list_result.json():
-            default = self.get_value(detail,
-                                     "kubernetes#metadata#annotations#storageclass.kubernetes.io/is-default-class", "#")
-            if default == "true":
-                default_size += 1
+            try:
+                default = self.get_value(detail,
+                                         "kubernetes#metadata#annotations#storageclass.kubernetes.io/is-default-class",
+                                         "#")
+                if default == "true":
+                    default_size += 1
+            except (KeyError, ValueError, IndexError, ParseResponseError):
+                continue
         return default_size

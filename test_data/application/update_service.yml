@@ -24,15 +24,23 @@ kubernetes:
             resources:
               limits:
                 cpu: 30m
-                memory: 50M
+                memory: 40M
               requests:
                 cpu: 30m
-                memory: 50M
+                memory: 40M
             env:
               - name: updateservice
                 value: updateservice
               - name: __ALAUDA_FILE_LOG_PATH__
                 value: /var/*.txt
+              - name: cm
+                valueFrom:
+                  configMapKeyRef:
+                    name: $cm_name
+                    key: $cm_key
+            envFrom:
+              - configMapRef:
+                  name: $cm_name
             livenessProbe:
               failureThreshold: 5
               httpGet:
@@ -43,6 +51,33 @@ kubernetes:
               periodSeconds: 60
               successThreshold: 1
               timeoutSeconds: 30
+            readinessProbe:
+              initialDelaySeconds: 120
+              periodSeconds: 60
+              timeoutSeconds: 30
+              successThreshold: 1
+              failureThreshold: 5
+              exec:
+                command:
+                  - env
+            args:
+            - -c
+            - while true; do sleep 3; echo 123; done
+            command:
+            - /bin/sh
+            volumeMounts:
+              - mountPath: /configmap/test/
+                name: configmappath
+              - name: configmapsubpath
+                mountPath: /test/configmap2/subpath
+                subPath: $cm_key
+          volumes:
+            - name: configmappath
+              configMap:
+                name: $cm_name
+            - name: configmapsubpath
+              configMap:
+                name: $cm_name
   - apiVersion: autoscaling/v1
     firstTimestamp: null
     kind: HorizontalPodAutoscaler
@@ -51,7 +86,7 @@ kubernetes:
       name: $app_name
       namespace: $K8S_NAMESPACE
     spec:
-      maxReplicas: 20
+      maxReplicas: 5
       minReplicas: 1
       scaleTargetRef:
         apiVersion: extensions/v1beta1

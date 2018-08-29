@@ -68,7 +68,7 @@ class Common(AlaudaRequest):
         return json_content
 
     @staticmethod
-    def get_value_list(data, keys):
+    def get_value_list(data, query, delimiter='.'):
         """
         get value from dict or list
         :param data: 需要被解析的数据
@@ -76,8 +76,9 @@ class Common(AlaudaRequest):
         :example data = {"key1":{"key2":[{"key3":"key4"},{"key3":"key5"}]}}
         期望获取到key4的值 keys = ["key1","key2", 0, "key3"]
         """
+        keys = query.split(delimiter)
         if len(keys) > 1:
-            flag, value = Common.get_value(data, keys[0:-1])
+            flag, value = Common.get_value(data, delimiter.join(keys[0:-1]))
             assert flag, value
             list_data = value
         else:
@@ -101,17 +102,21 @@ class Common(AlaudaRequest):
         :return: true or false
         """
         cnt = 0
+        fail_cnt = 0
         flag = False
         while cnt < 60 and not flag:
             cnt += 1
             response = self.send(method="GET", path=url)
             assert response.status_code == 200, "get status failed"
             value = self.get_value(response.json(), key, delimiter)
+            logger.info(value)
             if value == expect_value:
                 flag = True
                 break
             if value in self.final_status:
-                break
+                fail_cnt += 1
+                if fail_cnt > 2:
+                    break
             sleep(5)
         return flag
 

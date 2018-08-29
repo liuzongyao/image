@@ -32,7 +32,9 @@ class Application(Common):
         return "/v2/apps/{}/stop".format(uuid)
 
     def get_app_log_url(self, service_id):
-        return "/v1/logs/{}/search?&services={}&namespace={}".format(settings.ACCOUNT, service_id, settings.ACCOUNT)
+        return "/v1/logs/{}/search?services={}&namespace={}&paths=stdout&pageno=1&size=500".format(settings.ACCOUNT,
+                                                                                                   service_id,
+                                                                                                   settings.ACCOUNT)
 
     def get_app_cpu_monitor_url(self, app_id):
         return "/v2/monitor/{}/metrics/query?q=avg:service.cpu.utilization{}by{}".format(settings.ACCOUNT,
@@ -78,6 +80,18 @@ class Application(Common):
     def get_pod_rebuild_url(self, region_id, namespace, podname):
         return "/v2/kubernetes/clusters/{}/pods/{}/{}".format(region_id, namespace, podname)
 
+    def get_pod_list_url(self):
+        return "v2/pods/?cluster={}".format(self.region_name)
+
+    def get_servicename_check_url(self, name, ns_id):
+        return "/v2/services/{}/check??namespace_uuid={}".format(name, ns_id)
+
+    def get_service_revisions_url(self, uuid):
+        return "/v2/services/{}/revisions".format(uuid)
+
+    def get_kevents_url(self, name='', kind='', namespace=''):
+        return "v2/kevents/?cluster={}&name={}&kind={}&namespace={}".format(self.region_name, name, kind, namespace)
+
     def get_app_uuid(self, app_name):
         url = self.get_app_list_url(app_name)
         response = self.send(method='get', path=url)
@@ -95,22 +109,25 @@ class Application(Common):
 
     def get_service_url(self, service_uuid):
         url = self.get_service_loadbalance_url(service_uuid)
+        self.check_value_in_response(url, 'address')
         response = self.send(method='get', path=url)
         if response.status_code == 200:
             content = response.json()
-            address = self.get_value(content, '0.address')
-            protocol = self.get_value(content, '0.listeners.0.protocol')
-            port = self.get_value(content, '0.listeners.0.listener_port')
-            service_name = self.get_value(content, '0.frontends.0.rules.0.services.0.service_name')
-            service_namespace = self.get_value(content, '0.frontends.0.rules.0.services.0.service_namespace')
-            domain_info = self.get_value(content, '0.domain_info')
-            for con in domain_info:
-                if con['type'] == "default-domain":
-                    domain = con['domain']
-                    disable = con['disabled']
-                    if not disable:
-                        return "{}://{}.{}.{}:{}".format(protocol, service_name, service_namespace, domain, port)
-            return "{}://{}:{}".format(protocol, address, port)
+            if len(content) > 0:
+                address = self.get_value(content, '0.address')
+                protocol = self.get_value(content, '0.listeners.0.protocol')
+                port = self.get_value(content, '0.listeners.0.listener_port')
+                service_name = self.get_value(content, '0.frontends.0.rules.0.services.0.service_name')
+                service_namespace = self.get_value(content, '0.frontends.0.rules.0.services.0.service_namespace')
+                domain_info = self.get_value(content, '0.domain_info')
+                for con in domain_info:
+                    if con['type'] == "default-domain":
+                        domain = con['domain']
+                        disable = con['disabled']
+                        if not disable:
+                            return "{}://{}.{}.{}:{}".format(protocol, service_name, service_namespace, domain, port)
+                return "{}://{}:{}".format(protocol, address, port)
+        return 'service_url_not_found'
 
     def create_app(self, file, data):
         logger.info("************************** create app ********************************")
@@ -245,12 +262,12 @@ class Application(Common):
         url = self.get_service_instance_url(service_id)
         return self.send(method='get', path=url)
 
-    def rollback_service(self, service_id):
+    def rollback_service_toversion(self, service_id):
         logger.info(sys._getframe().f_code.co_name.center(50, '*'))
         url = self.get_rollbackto_service_url(service_id)
         return self.send(method='put', path=url)
 
-    def rollback_service_toversion(self, service_id):
+    def rollback_service(self, service_id):
         logger.info(sys._getframe().f_code.co_name.center(50, '*'))
         url = self.get_rollback_service_url(service_id)
         return self.send(method='put', path=url)
@@ -259,3 +276,24 @@ class Application(Common):
         logger.info(sys._getframe().f_code.co_name.center(50, '*'))
         url = self.get_pod_rebuild_url(region_id, namespace, podname)
         return self.send(method='delete', path=url)
+
+    def list_pod(self):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        url = self.get_pod_list_url()
+        return self.send(method='get', path=url)
+
+    def check_svcname(self, name, namespace_id):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        url = self.get_servicename_check_url(name, namespace_id)
+        return self.send(method='get', path=url)
+
+    def get_service_revisions(self, service_id):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        url = self.get_service_revisions_url(service_id)
+        return self.send(method='get', path=url)
+
+    def get_kevents(self, name='', kind='', namespace=''):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        url = self.get_kevents_url(name, kind, namespace)
+        params = Common.generate_time_params()
+        return self.send(method='get', path=url, params=params)
