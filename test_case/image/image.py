@@ -59,6 +59,16 @@ class Image(Common):
             path = "/v1/registries/{}/{}/repositories?page=1&page_size=20&".format(self.account, self.registry_name)
         return path
 
+    def get_artifacts_url(self, repo_name, repo_tag, reg_project=None):
+        if reg_project:
+            path = "/v1/registries/{}/{}/projects/{}/repositories/{}/tags/{}/artifacts" \
+                .format(self.account, self.registry_name, reg_project, repo_name, repo_tag)
+        else:
+            path = "/v1/registries/{}/{}/repositories/{}/tags/{}/artifacts" \
+                .format(self.account, self.registry_name, repo_name, repo_tag)
+
+        return path
+
     def create_reg_project(self, file, data):
         logger.info("************************** create registry project ********************************")
         path = self.create_reg_project_url()
@@ -118,3 +128,7 @@ class Image(Common):
             logger.error("Get registry project list failed, Error code: {}, Response: {}".format(response.status_code,
                                                                                                  response.text))
             return False
+
+    def get_artifacts(self, repo_name, repo_tag, reg_project=None):
+        path = self.get_artifacts_url(repo_name, repo_tag, reg_project=reg_project)
+        return self.send(method='get', path=path)

@@ -9,6 +9,8 @@ from test_case.namespace.namespace import Namespace
 from test_case.space.space import Space
 from test_case.project.project import Project
 from test_case.notification.notification import Notification
+from test_case.image.image import Image
+from test_case.application.app import Application
 from common.loadfile import FileUtils
 
 
@@ -19,6 +21,7 @@ class SetUp(AlaudaRequest):
 
     def __init__(self):
         super(SetUp, self).__init__()
+        self.app_name = "alauda-global-app"
         self.common = {
             "$NAMESPACE": settings.ACCOUNT,
             "$PASSWORD": settings.PASSWORD,
@@ -49,7 +52,10 @@ class SetUp(AlaudaRequest):
         self.space_client = Space()
         self.project_client = Project()
         self.noti_client = Notification()
+        self.image_client = Image()
+        self.app_client = Application()
         self.prepare()
+        self.create_global_app()
         self.input_file(self.common)
 
     @retry()
@@ -198,6 +204,25 @@ class SetUp(AlaudaRequest):
         assert response.status_code == 201, "创建全局通知失败了，原因是：{}".format(response.text)
         self.common.update({"$NOTI_NAME": response.json().get("name"), "$NOTI_UUID": response.json().get("uuid")})
 
+    def create_global_app(self):
+        # create service
+        ret = self.app_client.create_app('./test_data/application/create_app.yml',
+                                         {"$app_name": self.app_name, "$description": self.app_name,
+                                          "$K8S_NS_UUID": self.common["$K8S_NS_UUID"]})
+
+        assert ret.status_code == 201, "创建应用失败"
+
+        # get service status
+        content = ret.json()
+        app_id = self.app_client.get_value(content, 'resource.uuid')
+        service_uuid = self.app_client.get_value(content, 'services.0.resource.uuid')
+
+        app_status = self.app_client.get_app_status(app_id, 'resource.status', 'Running')
+        assert app_status, "应用运行失败"
+
+        self.common.update({"$GLOBAL_APP_NAME": self.app_name, "$GLOBAL_APP_ID": app_id,
+                            "$GLOBAL_SERVICE_ID": service_uuid})
+
 
 class TearDown(AlaudaRequest):
     """
@@ -211,6 +236,7 @@ class TearDown(AlaudaRequest):
         self.space_client = Space()
         self.project_client = Project()
         self.noti_client = Notification()
+        self.app_client = Application()
         self.delete()
 
     def delete(self):
@@ -226,3 +252,5 @@ class TearDown(AlaudaRequest):
 
         noti_id = self.global_info.get("$NOTI_UUID")
         self.noti_client.delete_noti(noti_id)
+
+        self.app_client.delete_app(self.global_info['$GLOBAL_APP_NAME'])

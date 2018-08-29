@@ -1,0 +1,13 @@
+pipeline: $pipeline_id
+trigger: repository
+data:
+  type: repository
+  registry: $REGISTRY
+  repository: $REPO_NAME
+  registry_uuid: $registry_uuid
+  repository_uuid: $repo_id
+  schedule_rule: ""
+  image_tag: $image_tag
+  auto_trigger_enabled: false
+  active: true
+namespace: $NAMESPACE

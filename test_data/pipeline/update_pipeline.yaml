@@ -1,0 +1,78 @@
+triggers:
+  repository:
+    type: repository
+    active: true
+    auto_trigger_enabled: true
+    registry: $REGISTRY
+    registry_uuid: $registry_id
+    repository: $REPO_NAME
+    repository_uuid: $repo_id
+    schedule_rule: ""
+    image_tag: ""
+stages:
+- uuid: $stages_id
+  order: 1
+  name: first-stage
+  tasks:
+  - uuid: $task_1_id
+    order: 1
+    name: task-1
+    type: update-service-new
+    timeout: $timeout
+    region_uuid: $REGION_ID
+    data:
+      automatic_rollback: true
+      service:
+        name: $GLOBAL_APP_NAME
+        type: application-service
+        uuid: $GLOBAL_SERVICE_ID
+        parent: $GLOBAL_APP_NAME
+        parent_uuid: $GLOBAL_APP_ID
+        namespace: $K8S_NAMESPACE
+        triggerImage: $triggerImage
+        containers:
+        - name: $GLOBAL_APP_NAME
+          use_image_in_trigger: true
+      env_files: []
+      env_vars: []
+      mount_points: []
+    region: $REGION_NAME
+  - uuid: $task_2_id
+    order: 2
+    name: task-2
+    type: artifact-upload
+    timeout: $timeout
+    region_uuid: ""
+    data:
+      share_path: $share_path
+  - uuid: $task_3_id
+    order: 3
+    name: task-3
+    type: artifact-download
+    timeout: $timeout
+    region_uuid: ""
+    data:
+      share_path: $share_path
+  - uuid: $task_4_id
+    order: 4
+    name: task-4
+    type: notification
+    timeout: $timeout
+    region_uuid: ""
+    data:
+      notification: $NOTI_NAME
+      notification_uuid: $NOTI_UUID
+on_end: []
+name: $pipeline_name
+description: $description
+uuid: $pipeline_id
+resource_actions:
+- pipeline_config:create
+- pipeline_config:delete
+- pipeline_config:trigger
+- pipeline_config:update
+- pipeline_config:view
+space_name: $SPACE_NAME
+artifact_enabled: true
+shared_dir_enabled: false
+namespace: $NAMESPACE
