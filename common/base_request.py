@@ -16,7 +16,7 @@ class Common(AlaudaRequest):
         self.final_status = ["S", "F", "Running", "Error", "FAILURE"]
         self.region_id = self.global_info["$REGION_ID"]
 
-    def generate_data(self, file_path, data):
+    def generate_data(self, file_path, data={}):
         """
         对指定文件替换数据，生成最终测试数据
         :param file_path: 指定测试文件路径
@@ -78,8 +78,7 @@ class Common(AlaudaRequest):
         """
         keys = query.split(delimiter)
         if len(keys) > 1:
-            flag, value = Common.get_value(data, delimiter.join(keys[0:-1]))
-            assert flag, value
+            value = Common.get_value(data, delimiter.join(keys[0:-1]))
             list_data = value
         else:
             list_data = data
@@ -126,6 +125,7 @@ class Common(AlaudaRequest):
         while cnt < 30 and not flag:
             cnt += 1
             params = Common.generate_time_params()
+            params.update({"project_name": self.project_name})
             response = self.send(method="GET", path=url, params=params)
             assert response.status_code == 200, "get log failed"
             if expect_value in response.text:
@@ -164,11 +164,12 @@ class Common(AlaudaRequest):
     def get_events(self, url, resource_id, operation):
         for i in range(0, 40):
             params = Common.generate_time_params()
+            params.update({"project_name": self.project_name, "size": 20, "pageno": 1})
             repsponse = self.send(method='get', path=url, params=params)
             if repsponse.status_code != 200:
                 return False
             content = repsponse.json().get("results", [])
-            # logger.debug("Requesting the api of events, got content{}".format(content))
+            # logger.error("Requesting the api of events, got content{}".format(content))
 
             for j in range(0, len(content)):
                 if content[j].get("resource_id") == resource_id and content[j].get("detail", {}).get(
@@ -182,6 +183,7 @@ class Common(AlaudaRequest):
         while count < 40:
             count += 1
             params = Common.generate_time_params()
+            params.update({"project_name": self.project_name})
             response = self.send(method='get', path=url, params=params)
             code = response.status_code
             content = response.json()

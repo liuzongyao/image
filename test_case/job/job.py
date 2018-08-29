@@ -50,6 +50,7 @@ class Job(Common):
         url = self.get_job_url()
         data = {"config_name": config_id}
         params = {"namespaces": self.account}
+        params.update({"project_name": self.project_name})
         return self.send(method="POST", path=url, json=data, params=params)
 
     def get_list_job(self):
@@ -78,6 +79,7 @@ class Job(Common):
     def get_config_id(self, job_name):
         url = self.get_job_config_url()
         params = {"page": 1, "page_size": 20}
+        params.update({"project_name": self.project_name})
         response = self.send(method="GET", path=url, params=params)
         assert response.status_code == 200, "get job_config list failed"
         return self.get_uuid_accord_name(response.json().get("results"), {"config_name": job_name}, "config_uuid")
