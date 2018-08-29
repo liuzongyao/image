@@ -141,19 +141,19 @@ class TestPipelineSuite(object):
         # get pipeline logs
         ret = self.pipeline_tool.get_pipeline_logs(pipeline_id, history_id)
 
-        result = self.pipeline_tool.update_result(result, ret is True, "获取构建基本信息的日志失败")
+        result = self.pipeline_tool.update_result(result, ret is True, "获取流水线运行历史基本信息的日志失败")
 
         ret = self.pipeline_tool.get_pipeline_task_logs(pipeline_id, history_id, task_1_id, "logglogloglog")
 
-        result = self.pipeline_tool.update_result(result, ret is True, "获取构建task 1的日志失败")
+        result = self.pipeline_tool.update_result(result, ret is True, "获取流水线运行历史task 1的日志失败")
 
         ret = self.pipeline_tool.get_pipeline_task_logs(pipeline_id, history_id, task_2_id, "Upload successfully")
 
-        result = self.pipeline_tool.update_result(result, ret is True, "获取构建task 2的日志失败")
+        result = self.pipeline_tool.update_result(result, ret is True, "获取流水线运行历史task 2的日志失败")
 
         ret = self.pipeline_tool.get_pipeline_task_logs(pipeline_id, history_id, task_3_id, "Download successfully")
 
-        result = self.pipeline_tool.update_result(result, ret is True, "获取构建task 3的日志失败")
+        result = self.pipeline_tool.update_result(result, ret is True, "获取流水线运行历史task 3的日志失败")
 
         # get service image tag
         ret = self.app_tool.get_app_detail(self.app_id)
@@ -177,7 +177,7 @@ class TestPipelineSuite(object):
         # get image artifacts
         ret = self.image_tool.get_artifacts(self.repo_name, repo_tag)
 
-        assert ret.status_code == 200, "获取镜像版本的传出物操作失败"
+        assert ret.status_code == 200, "获取镜像版本的产出物操作失败"
 
         contents = ret.json()
 
@@ -197,7 +197,7 @@ class TestPipelineSuite(object):
 
             assert ret.status_code == 200, "获取下载产出物失败"
 
-            assert artifact in ret.text, "下载传出物失败"
+            assert artifact in ret.text, "下载产出物失败"
 
         # delete pipeline history
         ret = self.pipeline_tool.delete_pipeline_history(pipeline_id, history_id)
