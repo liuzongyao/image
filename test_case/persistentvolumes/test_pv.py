@@ -70,6 +70,14 @@ class TestPvSuite(object):
                                        self.pv.get_value(detail_result.json(),
                                                          "kubernetes.spec.persistentVolumeReclaimPolicy") == "Retain",
                                        "获取持久卷详情失败：回收策略不是Retain")
+        # get volume detail
+        detail_volume = self.volume.get_volume_detail(volume_id)
+        result = self.pv.update_result(result, self.pv.get_value(detail_volume.json(), "state") == "in-use",
+                                       "获取存储卷详情失败：状态不是使用中")
+        result = self.pv.update_result(result, self.pv.get_value(detail_volume.json(), "pv_name") == self.pv_name,
+                                       "获取存储卷详情失败：关联持久卷不是e2e创建的 {}".format(
+                                           self.pv.get_value(detail_volume.json(), "pv_name")))
+
         # delete pv
         delete_result = self.pv.delete_pv(self.pv_name)
         assert delete_result.status_code == 204, "删除pv失败{}".format(delete_result.text)
