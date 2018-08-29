@@ -13,7 +13,11 @@ from common.utils import read_result, send_email
 
 def main():
     # 获取集群的全部固定资源
-    SetUp()
+    try:
+        SetUp()
+    except Exception as e:
+        logger.error(e)
+        TearDown()
 
     # 执行case
     run_command = ['-s', settings.TESTCASES, "--html=./report/pytest.html"]

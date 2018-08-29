@@ -20,7 +20,8 @@ class TestJenkinsBuildImageUpdateService(object):
         self.registry_credential_name = self.app_tool.global_info.get('$REG_CREDENTIAL')
         self.registry_name = self.app_tool.global_info.get("$REGISTRY")
         self.integration_name = "alauda-integration-instance-name-svn"
-        self.app_name = "alauda-jenkins-pipeline-app"
+        self.app_name = self.app_tool.global_info.get("$GLOBAL_APP_NAME")
+        self.app_id = self.app_tool.global_info.get("$GLOBAL_APP_ID")
         self.repo_tag = "alauda-e2e"
         self.repo_additional_tag = "alauda-e2e-additional"
         self.template_name = "alaudaBuildImageAndDeployService"
@@ -33,8 +34,6 @@ class TestJenkinsBuildImageUpdateService(object):
         pipeline_id = self.jenkins_tool.get_pipeline_id(self.pipeline_name)
         self.jenkins_tool.delete_pipeline(pipeline_id)
 
-        self.app_tool.delete_app(self.app_name)
-
         integration_id = self.integration_tool.get_integration_id(self.integration_name)
         self.integration_tool.delete_integration(integration_id)
 
@@ -42,6 +41,10 @@ class TestJenkinsBuildImageUpdateService(object):
         self.image_tool.delete_repo_tag(self.repo, self.repo_additional_tag)
 
     def test_jenkins_buildimage_updateservice(self):
+        # access jenkins
+        ret = self.jenkins_tool.access_jenkins()
+        assert ret, "访问Jenkins失败, 请确认Jenkins是否正常"
+
         # get template id
         template_id = self.jenkins_tool.get_sys_template_id(self.template_name, 'uuid')
         assert template_id, "获取模板失败"
@@ -73,31 +76,6 @@ class TestJenkinsBuildImageUpdateService(object):
                                                                {"name": self.app_tool.global_info.get("$REGISTRY")},
                                                                "endpoint")
 
-        get_repo_tag_ret = self.image_tool.get_repo_tag(self.repo)
-
-        assert get_repo_tag_ret.status_code == 200, "获取镜像版本列表失败"
-
-        assert len(get_repo_tag_ret.json()['results']) > 0, "镜像版本为空"
-
-        repo_tag = self.app_tool.get_value(get_repo_tag_ret.json(), 'results.0.tag_name')
-
-        logger.info("repo tag: {}".format(repo_tag))
-
-        image = "{}/{}:{}".format(registry_endpoint, self.repo, repo_tag)
-
-        # create service
-        ret = self.app_tool.create_app('./test_data/application/create_app.yml',
-                                       {"$app_name": self.app_name, "$IMAGE": image})
-
-        assert ret.status_code == 201, "创建应用失败"
-
-        # get service status
-        content = ret.json()
-        app_id = self.app_tool.get_value(content, 'resource.uuid')
-
-        app_status = self.app_tool.get_app_status(app_id, 'resource.status', 'Running')
-        assert app_status, "应用运行失败"
-
         # create jenkins pipeline
         ret = self.jenkins_tool.create_pipeline('./test_data/jenkins/create_buildimage_updateservice_pipeline_svn.yaml',
                                                 {"$pipeline_name": self.pipeline_name,
@@ -125,7 +103,7 @@ class TestJenkinsBuildImageUpdateService(object):
         assert ret, "流水线项目执行失败"
 
         # get the service image tag
-        ret = self.app_tool.get_app_detail(app_id)
+        ret = self.app_tool.get_app_detail(self.app_id)
 
         assert ret.status_code == 200, "获取应用的镜像版本失败"
 
@@ -136,14 +114,6 @@ class TestJenkinsBuildImageUpdateService(object):
             self.app_tool.get_value(ret.json(), 'kubernetes.0.spec.template.spec.containers.0.image')))
 
         assert image_tag == self.repo_additional_tag, "流水线更新应用失败"
-
-        # delete service
-        ret = self.app_tool.delete_app(self.app_name)
-        assert ret.status_code == 204, "删除应用操作失败"
-
-        ret = self.app_tool.check_app_exist(app_id, 404)
-
-        assert ret, "应用没有被成功删除掉"
 
         # delete jenkins pipeline
         ret = self.jenkins_tool.delete_pipeline(pipeline_id)
