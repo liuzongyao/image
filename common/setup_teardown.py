@@ -205,6 +205,8 @@ class SetUp(AlaudaRequest):
         self.common.update({"$NOTI_NAME": response.json().get("name"), "$NOTI_UUID": response.json().get("uuid")})
 
     def create_global_app(self):
+        # 先删除已经存在的应用
+        self.app_client.delete_app(self.app_name)
         # create service
         ret = self.app_client.create_app('./test_data/application/create_app.yml',
                                          {"$app_name": self.app_name, "$description": self.app_name,

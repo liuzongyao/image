@@ -1,0 +1,33 @@
+{
+  "metric_name": "service.containers.running",
+  "statistic": "max",
+  "comparison_operator": "!=",
+  "threshold": 1111,
+  "exclude_tags": [],
+  "group_by": "",
+  "notify_interval": 0,
+  "period": 60,
+  "tags": [],
+  "description": "$description",
+  "name": "$alarm_name",
+  "severity_level": "major",
+  "space_name": "$SPACE_NAME",
+  "alarm_actions": {
+    "notifications": [],
+    "services": [
+      {
+        "type": "scaling_in",
+        "uuid": "$GLOBAL_SERVICE_ID"
+      }
+    ]
+  },
+  "insufficient_actions": {
+    "notifications": [],
+    "services": []
+  },
+  "ok_actions": {
+    "notifications": [],
+    "services": []
+  },
+  "namespace": "$NAMESPACE"
+}

@@ -1,0 +1,35 @@
+{
+  "metric_name": "node.cpu.percent",
+  "statistic": "max",
+  "comparison_operator": "!=",
+  "threshold": 11.11,
+  "exclude_tags": [],
+  "group_by": "host",
+  "notify_interval": 60,
+  "period": 60,
+  "tags": [
+    "region_name:$REGION_NAME"
+  ],
+  "description": "",
+  "name": "$alarm_name",
+  "severity_level": "minor",
+  "space_name": "$SPACE_NAME",
+  "alarm_actions": {
+    "notifications": [],
+    "services": [
+      {
+        "type": "scaling_out",
+        "uuid": "$GLOBAL_SERVICE_ID"
+      }
+    ]
+  },
+  "insufficient_actions": {
+    "notifications": [],
+    "services": []
+  },
+  "ok_actions": {
+    "notifications": [],
+    "services": []
+  },
+  "namespace": "$NAMESPACE"
+}
