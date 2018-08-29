@@ -1,5 +1,3 @@
-from time import sleep
-
 import pytest
 from test_case.job.job import Job
 
