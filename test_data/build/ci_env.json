@@ -1,0 +1,13 @@
+{
+  "ci_envs": {
+    "language": "golang",
+    "runtimes": [
+      {
+        "name": "1.6"
+      }
+    ]
+  },
+  "ci_steps": [
+    "date"
+  ]
+}

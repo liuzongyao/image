@@ -28,9 +28,9 @@ def main():
     logger.info("********* print result over*********")
     with tarfile.open("./report.tar", "w:gz") as tar:
         tar.add("./report", arcname=os.path.basename("./report"))
-    send_email(
-        "[{}] ({}) ({}) API E2E Test".format(resultflag, settings.ENV, settings.REGION_NAME),
-        html, settings.RECIPIENTS, "./report.tar")
+    # send_email(
+    #     "[{}] ({}) ({}) API E2E Test".format(resultflag, settings.ENV, settings.REGION_NAME),
+    #     html, settings.RECIPIENTS, "./report.tar")
 
     # 清理数据
     TearDown()

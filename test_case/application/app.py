@@ -296,4 +296,5 @@ class Application(Common):
         logger.info(sys._getframe().f_code.co_name.center(50, '*'))
         url = self.get_kevents_url(name, kind, namespace)
         params = Common.generate_time_params()
+        params.update({"project_name": self.project_name})
         return self.send(method='get', path=url, params=params)
