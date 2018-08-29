@@ -11,6 +11,9 @@ class Job(Common):
         return job_id and "v1/jobs/{}/{}".format(self.account, job_id) or \
                "v1/jobs/{}".format(self.account)
 
+    def get_job_list_url(self, config_id):
+        return config_id and "v1/jobs/{}?config_name={}&page=1&page_size=20".format(self.account, config_id)
+
     def get_job_event_url(self, resource_type, resource_id):
         return "v1/events/{}/{}/{}?pageno=1&size=20".format(self.account, resource_type, resource_id)
 
@@ -67,12 +70,10 @@ class Job(Common):
         url = self.get_job_url(job_id)
         return self.send(method="DELETE", path=url)
 
-    def get_job_id(self, job_name):
-        url = self.get_job_url()
-        params = {"page": 1, "page_size": 20}
-        response = self.send(method="GET", path=url, params=params)
-        assert response.status_code == 200, "get job list fail"
-        return self.get_uuid_accord_name(response.json().get("results"), {"name": job_name}, "config_uuid")
+    def get_job_list(self, config_id, key, expect_value):
+        logger.info("************************** get job list ********************************")
+        url = self.get_job_list_url(config_id)
+        return self.get_status(url, key, expect_value)
 
     def get_config_id(self, job_name):
         url = self.get_job_config_url()
