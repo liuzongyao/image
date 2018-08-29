@@ -5,7 +5,7 @@ data:
   registry: $REGISTRY
   repository: $REPO_NAME
   registry_uuid: $registry_uuid
-  repository_uuid: $REPO_ID
+  repository_uuid: $repo_id
   schedule_rule: ""
   image_tag: $image_tag
   auto_trigger_enabled: false

@@ -37,11 +37,16 @@ class TestPipelineSuite(object):
 
         share_path = "/images/{}/{}/{}".format(self.organization, self.organization, self.repo_name)
 
+        # get repo id
+        ret = self.image_tool.get_repo_detail(self.repo_name)
+        assert ret.status_code == 200, "获取镜像仓库详情失败"
+        repo_id = self.image_tool.get_value(ret.json(), 'uuid')
+
         # create pipeline config
         ret = self.pipeline_tool.create_pipeline('./test_data/pipeline/create_pipeline.yaml',
                                                  {"$registry_id": self.registry_id, "$triggerImage": triggerImage,
                                                   '"$timeout"': self.time_out, "$share_path": share_path,
-                                                  "$pipeline_name": self.pipeline_name})
+                                                  "$pipeline_name": self.pipeline_name, "$repo_id": repo_id})
 
         assert ret.status_code == 201, "创建流水线操作失败"
 
@@ -75,7 +80,7 @@ class TestPipelineSuite(object):
                                                   "$triggerImage": triggerImage, "$task_2_id": task_2_id,
                                                   "$share_path": share_path, "$task_3_id": task_3_id,
                                                   "$task_4_id": task_4_id, "$pipeline_name": self.pipeline_name,
-                                                  "$description": self.description,
+                                                  "$description": self.description, "$repo_id": repo_id,
                                                   "$pipeline_id": pipeline_id})
 
         assert ret.status_code == 204, "更新流水线操作失败"
@@ -103,20 +108,16 @@ class TestPipelineSuite(object):
 
         contents = ret.json()['results']
 
-        assert len(contents) > 1, "镜像版本数量少于两个"
+        assert len(contents) > 0, "镜像版本为空"
 
-        repo_tag = ''
-
-        for content in contents:
-            if content['tag_name'] != image_tag:
-                repo_tag = content['tag_name']
+        repo_tag = contents[0]['tag_name']
 
         logger.info("choice repo tag: {}".format(repo_tag))
 
         # start pipeline
         ret = self.pipeline_tool.start_pipeline(pipeline_id, './test_data/pipeline/start_pipeline.yaml',
                                                 {"$pipeline_id": pipeline_id, "$registry_uuid": self.registry_id,
-                                                 "$image_tag": repo_tag})
+                                                 "$image_tag": repo_tag, "$repo_id": repo_id})
 
         assert ret.status_code == 200, "启动流水线失败"
 
@@ -127,10 +128,32 @@ class TestPipelineSuite(object):
 
         assert ret, "流水线运行失败"
 
+        # get pipeline task id
+        ret = self.pipeline_tool.get_pipeline_task_id(pipeline_id, history_id)
+        assert ret.status_code == 200, "获取流水线子任务信息失败"
+
+        contents = ret.json()['stages'][0]['tasks']
+
+        task_1_id = self.pipeline_tool.get_uuid_accord_name(contents, {"name": "task-1"}, "uuid")
+        task_2_id = self.pipeline_tool.get_uuid_accord_name(contents, {"name": "task-2"}, "uuid")
+        task_3_id = self.pipeline_tool.get_uuid_accord_name(contents, {"name": "task-3"}, "uuid")
+
         # get pipeline logs
         ret = self.pipeline_tool.get_pipeline_logs(pipeline_id, history_id)
 
-        result = self.pipeline_tool.update_result(result, ret is True, "获取构建日志失败")
+        result = self.pipeline_tool.update_result(result, ret is True, "获取构建基本信息的日志失败")
+
+        ret = self.pipeline_tool.get_pipeline_task_logs(pipeline_id, history_id, task_1_id, "logglogloglog")
+
+        result = self.pipeline_tool.update_result(result, ret is True, "获取构建task 1的日志失败")
+
+        ret = self.pipeline_tool.get_pipeline_task_logs(pipeline_id, history_id, task_2_id, "Upload successfully")
+
+        result = self.pipeline_tool.update_result(result, ret is True, "获取构建task 2的日志失败")
+
+        ret = self.pipeline_tool.get_pipeline_task_logs(pipeline_id, history_id, task_3_id, "Download successfully")
+
+        result = self.pipeline_tool.update_result(result, ret is True, "获取构建task 3的日志失败")
 
         # get service image tag
         ret = self.app_tool.get_app_detail(self.app_id)
@@ -158,8 +181,7 @@ class TestPipelineSuite(object):
 
         contents = ret.json()
 
-        if contents['build_id']:
-            assert len(contents['artifacts']) > 0, "镜像版本的长处物为空"
+        if contents['build_id'] and len(contents['artifacts']) > 0:
             # get upload artifacts result
             ret = self.pipeline_tool.get_upload_artifacts_result(contents['build_id'])
 

@@ -3,7 +3,6 @@ import json
 import os
 
 from common import settings
-from common.log import logger
 from common.api_requests import AlaudaRequest
 from common.utils import retry
 from test_case.namespace.namespace import Namespace
@@ -206,25 +205,9 @@ class SetUp(AlaudaRequest):
         self.common.update({"$NOTI_NAME": response.json().get("name"), "$NOTI_UUID": response.json().get("uuid")})
 
     def create_global_app(self):
-        # get image info
-        registry_endpoint = self.common['PRIVATE_REGISTRY'][0]['endpoint']
-
-        ret = self.image_client.get_repo_detail(settings.REPO_NAME)
-        assert ret.status_code == 200, "获取镜像仓库详情失败"
-        repo_id = self.image_client.get_value(ret.json(), 'uuid')
-
-        get_repo_tag_ret = self.image_client.get_repo_tag(settings.REPO_NAME)
-        assert get_repo_tag_ret.status_code == 200, "获取镜像版本列表失败"
-        assert len(get_repo_tag_ret.json()['results']) > 0, "镜像版本为空"
-
-        repo_tag = self.image_client.get_value(get_repo_tag_ret.json(), 'results.0.tag_name')
-        logger.info("repo tag: {}".format(repo_tag))
-
-        image = "{}/{}:{}".format(registry_endpoint, settings.REPO_NAME, repo_tag)
-
         # create service
         ret = self.app_client.create_app('./test_data/application/create_app.yml',
-                                         {"$app_name": self.app_name, "$description": self.app_name, "$IMAGE": image,
+                                         {"$app_name": self.app_name, "$description": self.app_name,
                                           "$K8S_NS_UUID": self.common["$K8S_NS_UUID"]})
 
         assert ret.status_code == 201, "创建应用失败"
@@ -238,7 +221,7 @@ class SetUp(AlaudaRequest):
         assert app_status, "应用运行失败"
 
         self.common.update({"$GLOBAL_APP_NAME": self.app_name, "$GLOBAL_APP_ID": app_id,
-                            "$GLOBAL_SERVICE_ID": service_uuid, "$REPO_ID": repo_id})
+                            "$GLOBAL_SERVICE_ID": service_uuid})
 
 
 class TearDown(AlaudaRequest):

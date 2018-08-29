@@ -28,6 +28,12 @@ class Pipeline(Common):
     def download_artifacts_url(self, pipeline_id, history_id):
         return "/v1/oss/{}/?prefix=pipeline/{}/{}".format(self.account, pipeline_id, history_id)
 
+    def get_pipeline_task_log_url(self, pipeline_id, history_id, task_id):
+        return "/v1/pipelines/{}/history/{}/{}/tasks/{}/logs".format(self.account, pipeline_id, history_id, task_id)
+
+    def get_pipeline_task_id_url(self, pipeline_id, history_id):
+        return "/v1/pipelines/{}/history/{}/{}/tasks".format(self.account, pipeline_id, history_id)
+
     def create_pipeline(self, file, data):
         path = self.pipeline_common_url()
         data = self.generate_data(file, data)
@@ -101,3 +107,11 @@ class Pipeline(Common):
     def get_download_artifacts_result(self, pipeline_id, history_id, params=''):
         path = self.download_artifacts_url(pipeline_id, history_id)
         return self.send(method='get', path=path, params=params)
+
+    def get_pipeline_task_logs(self, pipeline_id, history_id, task_id, expect_value=""):
+        path = self.get_pipeline_task_log_url(pipeline_id, history_id, task_id)
+        return self.get_logs(path, expect_value)
+
+    def get_pipeline_task_id(self, pipeline_id, history_id):
+        path = self.get_pipeline_task_id_url(pipeline_id, history_id)
+        return self.send(method='get', path=path)

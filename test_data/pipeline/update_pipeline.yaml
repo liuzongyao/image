@@ -6,7 +6,7 @@ triggers:
     registry: $REGISTRY
     registry_uuid: $registry_id
     repository: $REPO_NAME
-    repository_uuid: $REPO_ID
+    repository_uuid: $repo_id
     schedule_rule: ""
     image_tag: ""
 stages:
