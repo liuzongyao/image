@@ -1,4 +1,6 @@
+import requests
 from common.base_request import Common
+from common.log import logger
 
 
 class Jenkins(Common):
@@ -125,3 +127,16 @@ class Jenkins(Common):
             contents = response.json()['results']
             return self.get_uuid_accord_name(contents, {"name": name}, uuid_key=uuid_key)
         return ''
+
+    def access_jenkins(self):
+        jenkins_address = self.global_info.get("$JENKINS_ENDPOINT")
+        jenkins_user = self.global_info.get("$JENKINS_USER")
+        jenkins_token = self.global_info.get("$JENKINS_TOKEN")
+        logger.info("Jenkins url: {}".format(jenkins_address))
+        try:
+            response = requests.request(method='get', url=jenkins_address, auth=(jenkins_user, jenkins_token))
+            if response.status_code == 200:
+                return True
+        except requests.exceptions.ConnectionError:
+            return False
+        return False
