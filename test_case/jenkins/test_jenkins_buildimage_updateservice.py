@@ -1,3 +1,4 @@
+import re
 import pytest
 from test_case.jenkins.jenkins import Jenkins
 from test_case.application.app import Application
@@ -27,6 +28,7 @@ class TestJenkinsBuildImageUpdateService(object):
         self.template_name = "alaudaBuildImageAndDeployService"
         self.time_out = '300'
         self.repo = self.app_tool.global_info.get("$REPO_NAME")
+        self.pipeline_description = "alauda jenkins pipeline"
 
         self.teardown_class(self)
 
@@ -88,6 +90,45 @@ class TestJenkinsBuildImageUpdateService(object):
         assert ret.status_code == 201, "创建Jenkins流水线项目失败"
 
         pipeline_id = ret.json()['uuid']
+
+        # get jenkins pipeline detail
+        ret = self.jenkins_tool.get_pipeline_detail(pipeline_id)
+
+        assert ret.status_code == 200, "获取流水线详情失败"
+
+        contents = ret.json()
+
+        script = re.search(r'("script":) "(.*)"(, "namespace": "[a-zA-Z0-9_-]*?",)', ret.text).group(2)
+
+        logger.info("script: {}".format(script))
+
+        pipeline_name = contents['name']
+
+        # update jenkins pipeline
+        ret = self.jenkins_tool.update_pipeline(pipeline_id,
+                                                './test_data/jenkins/update_buildimage_updateservice_pipeline_svn.yaml',
+                                                {"$pipeline_name": pipeline_name,
+                                                 "$display_name": self.pipeline_name,
+                                                 "$jenkins_integration_id": integration_id,
+                                                 "$pipeline_description": self.pipeline_description,
+                                                 "$pipeline_script": script,
+                                                 "$jenkins_integration_name": self.integration_name,
+                                                 "$template_uuid": template_id,
+                                                 "$REG_URL": registry_endpoint,
+                                                 "$imageTag": self.repo_tag,
+                                                 "$imageExtraTag": self.repo_additional_tag,
+                                                 "$service_name": self.app_name,
+                                                 "$time_out": self.time_out
+                                                 })
+
+        assert ret.status_code == 204, "更新流水线操作失败"
+
+        # get jenkins pipeline detail
+        ret = self.jenkins_tool.get_pipeline_detail(pipeline_id)
+
+        assert ret.status_code == 200, "获取流水线详情失败"
+
+        assert ret.json()['description'] == self.pipeline_description, "更新流水线失败"
 
         # execute pipeline
         ret = self.jenkins_tool.execute_pipeline('./test_data/jenkins/execute_pipeline.yaml',

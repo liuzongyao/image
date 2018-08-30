@@ -1,10 +1,10 @@
 name: $pipeline_name
-display_name: $pipeline_name
+display_name: $display_name
 space_name: $SPACE_NAME
 jenkins_integration_id: $jenkins_integration_id
 description: $pipeline_description
 icon: ""
-type: FROM_SCM
+type: INLINE
 script: $pipeline_script
 script_path: Jenkinsfile
 jenkins_integration_name: $jenkins_integration_name
@@ -18,27 +18,18 @@ template:
   uuid: $template_uuid
   arguments_values:
     contextDir: "./"
-    ciEnabled: true
-    useYaml: false
-    ciImageRegistryCredentialsId: $REGISTRY_CREDENTIAL
-    ciImage:
-      registry: $REGISTRY_URL
-      registryUUID: ""
-      repository: $REPO_NAME
-      repositoryUUID: ""
-    ciImageTag: $repo_tag
-    ciCommands: ls
+    ciEnabled: false
     buildImageEnabled: true
     dockerfilePath: "./"
     dockerfileFromImageRegistryCredentialsId: ""
     image:
-      registry: $REGISTRY_URL
+      registry: $REG_URL
       registryUUID: ""
       repository: $REPO_NAME
       repositoryUUID: ""
-    imageTag: alaudae2e
-    imageExtraTag: ${SVN_REVISION}
-    imageRegistryCredentialsId: $REGISTRY_CREDENTIAL
+    imageTag: $imageTag
+    imageExtraTag: $imageExtraTag
+    imageRegistryCredentialsId: $REG_CREDENTIAL
     useImageCache: true
     useServiceYaml: false
     containerInfo:
