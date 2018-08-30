@@ -73,7 +73,7 @@ class TestJobSuit(object):
 
         # schedule_rule
         ret_job_list = self.job.get_job_list(config_id, "count", 2)
-        assert ret_job_list, "验证定时任务错误，错误信息{}".format(ret_job_list.text)
+        assert ret_job_list, "验证定时任务错误，状态{}".format(ret_job_list)
 
         # update job_config
         ret_update = self.job.update_job_config(config_id, './test_data/job/update_job_config.json',
