@@ -17,9 +17,9 @@ IMAGE = os.getenv("IMAGE", "index.alauda.cn/alaudaorg/qaimages:helloworld")
 # not necessary
 REGISTRY_CREDENTIAL = os.getenv("REGISTRY_CREDENTIAL", "alauda-registry-credential")
 
-JENKINS_ENDPOINT = os.getenv("JENKINS_ENDPOINT", "http://52.80.105.130:8899/")
+JENKINS_ENDPOINT = os.getenv("JENKINS_ENDPOINT", "http://alauda-jenkins.jenkins.nginx-52-81-25-67-testorg001.myalauda.cn/")
 JENKINS_USER = os.getenv("JENKINS_USER", "admin")
-JENKINS_TOKEN = os.getenv("JENKINS_TOKEN", "87d5faf547e7e6216fdc2fa2b0b91405")
+JENKINS_TOKEN = os.getenv("JENKINS_TOKEN", "1323a281573d215c39c573bcd2654e7e")
 
 SVN_REPO = os.getenv("SVN_REPO", "http://svn-password.k8s-st.haproxy-54-223-242-27-alaudacn.myalauda.cn/alauda_test/")
 SVN_CREDENTIAL = os.getenv("SVN_CREDENTIAL", "alauda-svn-credential")
