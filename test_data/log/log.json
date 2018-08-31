@@ -1,0 +1,14 @@
+{
+  "display_name": "$log_name",
+  "end_time": 0,
+  "name": "$log_name",
+  "namespace": "$NAMESPACE",
+  "query_conditions": {
+    "services": "$GLOBAL_SERVICE_ID",
+    "clusters": "$REGION_NAME",
+    "paths": "stdout"
+  },
+  "space_name": "$SPACE_NAME",
+  "start_time": -1800,
+  "uuid": ""
+}
