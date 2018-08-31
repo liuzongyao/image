@@ -17,7 +17,8 @@ IMAGE = os.getenv("IMAGE", "index.alauda.cn/alaudaorg/qaimages:helloworld")
 # not necessary
 REGISTRY_CREDENTIAL = os.getenv("REGISTRY_CREDENTIAL", "alauda-registry-credential")
 
-JENKINS_ENDPOINT = os.getenv("JENKINS_ENDPOINT", "http://alauda-jenkins.jenkins.nginx-52-81-25-67-testorg001.myalauda.cn/")
+JENKINS_ENDPOINT = os.getenv("JENKINS_ENDPOINT",
+                             "http://alauda-jenkins.jenkins.nginx-52-81-25-67-testorg001.myalauda.cn/")
 JENKINS_USER = os.getenv("JENKINS_USER", "admin")
 JENKINS_TOKEN = os.getenv("JENKINS_TOKEN", "1323a281573d215c39c573bcd2654e7e")
 
@@ -25,6 +26,13 @@ SVN_REPO = os.getenv("SVN_REPO", "http://svn-password.k8s-st.haproxy-54-223-242-
 SVN_CREDENTIAL = os.getenv("SVN_CREDENTIAL", "alauda-svn-credential")
 SVN_USERNAME = os.getenv("SVN_USERNAME", "User_Name-01")
 SVN_PASSWORD = os.getenv("SVN_PASSWORD", "alauda_Test-!@#")
+
+GIT_REPO = os.getenv("GIT_REPO",
+                     "http://gitlab.nolimited.haproxy-54-223-242-27-alaudacn.myalauda.cn/alauda/helloci.git")
+GIT_CREDENTIAL = os.getenv("GIT_CREDENTIAL", "alauda-git-credential")
+GIT_USERNAME = os.getenv("GIT_USERNAME", "alauda")
+GIT_PASSWORD = os.getenv("GIT_PASSWORD", "alauda_Test-!@#")
+
 TESTCASES = os.getenv("TESTCASES", "")
 CASE_TYPE = os.getenv("CASE_TYPE")
 PROJECT_NAME = os.getenv("PROJECT_NAME", "default")

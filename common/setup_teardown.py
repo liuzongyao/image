@@ -39,7 +39,11 @@ class SetUp(AlaudaRequest):
             "$PROJECT_NAME": settings.PROJECT_NAME,
             "$JENKINS_ENDPOINT": settings.JENKINS_ENDPOINT,
             "$JENKINS_USER": settings.JENKINS_USER,
-            "$JENKINS_TOKEN": settings.JENKINS_TOKEN
+            "$JENKINS_TOKEN": settings.JENKINS_TOKEN,
+            "$GIT_REPO": settings.GIT_REPO,
+            "$GIT_CREDENTIAL": settings.GIT_CREDENTIAL,
+            "$GIT_USERNAME": settings.GIT_USERNAME,
+            "$GIT_PASSWORD": settings.GIT_PASSWORD
         }
         self.get_region_data()
         self.get_build_endpontid()

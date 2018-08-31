@@ -20,9 +20,6 @@ class Jenkins(Common):
     def get_webhook_url(self, webhook_code):
         return "/v1/jenkins_pipelines/{}/history/auto/{}".format(self.account, webhook_code)
 
-    def get_cancel_pipeline_url(self, history_uuid):
-        return "/v1/jenkins_pipelines/{}/history/{}/cancel".format(self.account, history_uuid)
-
     def get_history_record_url(self, jenkins_integration_id):
         return "/v1/jenkins_pipelines/{}/history?jenkins_integration_id={}".format(self.account, jenkins_integration_id)
 
@@ -55,6 +52,13 @@ class Jenkins(Common):
 
     def get_pipeline_status_url(self, history_id, pipeline_id):
         return "/v1/jenkins_pipelines/{}/history/{}?pipeline_uuid={}".format(self.account, history_id, pipeline_id)
+
+    def get_cancel_pipeline_url(self, pipeline_id, history_id):
+        return "/v1/jenkins_pipelines/{}/history/{}/cancel?pipeline_uuid={}".format(self.account, history_id,
+                                                                                    pipeline_id)
+
+    def get_replay_pipeline_url(self):
+        return "/v1/jenkins_pipelines/{}/history".format(self.account)
 
     def get_credentials_list(self, jenkins_integration_id):
         path = self.common_credentials_url(jenkins_integration_id=jenkins_integration_id)
@@ -140,3 +144,24 @@ class Jenkins(Common):
         except requests.exceptions.ConnectionError:
             return False
         return False
+
+    def pipeline_cancel(self, pipeline_id, history_id):
+        path = self.get_cancel_pipeline_url(pipeline_id, history_id)
+        return self.send(method='put', path=path)
+
+    def pipeline_replay(self, file, data):
+        path = self.get_replay_pipeline_url()
+        data = self.generate_data(file, data)
+        return self.send(method='post', path=path, data=data)
+
+    def check_pipeline_history_exist(self, history_id, pipeline_id, expect_status):
+        path = self.get_pipeline_status_url(history_id, pipeline_id)
+        return self.check_exists(path, expect_status)
+
+    def check_pipeline_exist(self, pipeline_id, expect_status):
+        path = self.common_pipelines_url(pipeline_id)
+        return self.check_exists(path, expect_status)
+
+    def delete_pipeline_history(self, history_id, pipeline_id):
+        path = self.get_pipeline_status_url(history_id, pipeline_id)
+        return self.send(method='delete', path=path)
