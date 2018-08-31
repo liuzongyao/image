@@ -1,32 +1,31 @@
 import sys
 
 from common.base_request import Common
-from common import settings
 from common.log import logger
 
 
 class Log(Common):
     def get_logsource_url(self):
-        return "v1/integrations/{}/?families=LogSource&namespace={}".format(settings.ACCOUNT, settings.ACCOUNT)
+        return "v1/integrations/{}/?families=LogSource&namespace={}".format(self.account, self.account)
 
     def get_type_url(self):
-        return "v2/logs/{}/types?read_log_source_uuid=default&namespace={}".format(settings.ACCOUNT, settings.ACCOUNT)
+        return "v2/logs/{}/types?read_log_source_uuid=default&namespace={}".format(self.account, self.account)
 
     def get_aggregations_url(self):
-        return "v2/logs/{}/aggregations?read_log_source_uuid=default&paths=&namespace={}".format(settings.ACCOUNT,
-                                                                                                 settings.ACCOUNT)
+        return "v2/logs/{}/aggregations?read_log_source_uuid=default&paths=&namespace={}".format(self.account,
+                                                                                                 self.account)
 
     def get_search_url(self, service_id):
-        return "v2/logs/{}/search?services={}&read_log_source_uuid=default&paths=&namespace={}".format(settings.ACCOUNT,
+        return "v2/logs/{}/search?services={}&read_log_source_uuid=default&paths=&namespace={}".format(self.account,
                                                                                                        service_id,
-                                                                                                       settings.ACCOUNT)
+                                                                                                       self.account)
 
     def get_saved_search_url(self, display_name=''):
-        return "v2/logs/{}/saved_search?all=true&display_name={}&namespace={}".format(settings.ACCOUNT, display_name,
-                                                                                      settings.ACCOUNT)
+        return "v2/logs/{}/saved_search?all=true&display_name={}&namespace={}".format(self.account, display_name,
+                                                                                      self.account)
 
     def get_common_saved_search_url(self, uuid=''):
-        return "v2/logs/{}/saved_search/{}?&namespace={}".format(settings.ACCOUNT, uuid, settings.ACCOUNT)
+        return "v2/logs/{}/saved_search/{}?&namespace={}".format(self.account, uuid, self.account)
 
     def list_saved_search(self, display_name=''):
         logger.info(sys._getframe().f_code.co_name.center(50, '*'))
