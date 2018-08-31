@@ -165,4 +165,3 @@ class Jenkins(Common):
     def delete_pipeline_history(self, history_id, pipeline_id):
         path = self.get_pipeline_status_url(history_id, pipeline_id)
         return self.send(method='delete', path=path)
-
