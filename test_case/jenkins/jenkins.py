@@ -121,6 +121,10 @@ class Jenkins(Common):
         path = self.get_history_log_url(history_uuid=history_uuid, pipeline_uuid=pipeline_uuid)
         return self.get_logs(path, expect_value=expect_value)
 
+    def get_pipeline_history_list(self, jenkins_integration_id):
+        path = self.get_history_record_url(jenkins_integration_id)
+        return self.send(method='get', path=path)
+
     def get_sys_template_list(self):
         path = self.get_template_url()
         return self.send(method='get', path=path)
