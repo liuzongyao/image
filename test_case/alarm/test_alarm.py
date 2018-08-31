@@ -3,6 +3,7 @@ import pytest
 from common.log import logger
 from test_case.alarm.alarm import Alarm
 from test_case.application.app import Application
+from test_case.log.log import Log
 
 
 class TestAlarmSuite(object):
@@ -11,11 +12,18 @@ class TestAlarmSuite(object):
         self.metric_alarm_name = 'alauda-metric-alarm-{}'.format(self.alarm.region_name).replace('_', '-')
         self.slaveips = self.alarm.global_info["$SLAVEIPS"].split(",")
         self.application = Application()
+        self.log_name = 'alauda-searchforalarm-{}'.format(self.alarm.region_name).replace('_', '-')
+        self.log_alarm_name = 'alauda-log-alarm-{}'.format(self.alarm.region_name).replace('_', '-')
+        self.log = Log()
         self.teardown_class(self)
 
     def teardown_class(self):
         uuid = self.alarm.get_alarm_uuid(self.metric_alarm_name)
         self.alarm.delete_alarm(uuid)
+        uuid = self.alarm.get_log_alarm_uuid(self.log_alarm_name)
+        self.alarm.delete_log_alarm(uuid)
+        uuid = self.log.get_saved_search_uuid(self.log_name)
+        self.log.delete_saved_search(uuid)
 
     @pytest.mark.BAT
     def test_metric_alarm(self):
@@ -99,4 +107,52 @@ class TestAlarmSuite(object):
         assert delete_result.status_code == 204, "删除指标警报失败 {}".format(delete_result.text)
         delete_flag = self.alarm.check_exists(self.alarm.get_alarm_url(alarm_id), 404)
         assert delete_flag, "删除指标警报失败"
+        assert result['flag'], result
+
+    @pytest.mark.BAT
+    def test_log_alarm(self):
+        '''
+        创建日志警报-获取警报详情-更新日志警报-获取警报列表-删除警报
+        :return:
+        '''
+        result = {"flag": True}
+        # create saved_search
+        create_result = self.log.create_saved_search('./test_data/log/log.json', {'$log_name': self.log_name})
+        assert create_result.status_code == 200, "创建日志查询条件失败 {}".format(create_result.text)
+        saved_search_uuid = self.log.get_value(create_result.json(), 'uuid')
+
+        # create log alarm
+        create_result = self.alarm.create_log_alarm('./test_data/alarm/log_alarm.json',
+                                                    {'$alarm_name': self.log_alarm_name,
+                                                     '$saved_search_uuid': saved_search_uuid})
+        assert create_result.status_code == 200, "创建日志警报失败 {}".format(create_result.text)
+        alarm_id = self.alarm.get_value(create_result.json(), 'uuid')
+        # get alarm detail
+        detail_result = self.alarm.get_log_alarm_detail(alarm_id)
+        result = self.alarm.update_result(result, detail_result.status_code == 200, '获取日志警报详情失败')
+        alarm_status = self.alarm.get_status(self.alarm.get_log_alarm_url(alarm_id), 'status', 'ALARM')
+        result = self.alarm.update_result(result, alarm_status, '获取日志警报详情失败:状态不是alarm')
+        result = self.alarm.update_result(result, len(
+            self.alarm.get_value(detail_result.json(), 'alarm_actions.notifications')) == 1, '获取日志警报详情失败:通知不对')
+        # update alarm
+        update_alarm = self.alarm.update_log_alarm(alarm_id, './test_data/alarm/update_log_alarm.json',
+                                                   {'$alarm_name': self.log_alarm_name,
+                                                    '$description': self.metric_alarm_name,
+                                                    '$saved_search_uuid': saved_search_uuid})
+        assert update_alarm.status_code == 200, "更新日志警报 {}".format(update_alarm.text)
+        alarm_status = self.alarm.get_status(self.alarm.get_log_alarm_url(alarm_id), 'status', 'ALARM')
+        result = self.alarm.update_result(result, alarm_status, '更新日志警报后:状态不是alarm')
+        detail_result = self.alarm.get_log_alarm_detail(alarm_id)
+        result = self.alarm.update_result(result, len(
+            self.alarm.get_value(detail_result.json(), 'alarm_actions.notifications')) == 0, '更新后获取日志警报详情失败:通知不对')
+        # list alarm
+        list_result = self.alarm.list_log_alarm()
+        result = self.alarm.update_result(result, list_result.status_code == 200,
+                                          '获取日志警报列表失败 {}'.format(list_result.text))
+        result = self.alarm.update_result(result, self.log_alarm_name in list_result.text, '获取日志警报列表失败:新建警报不在列表中')
+        # delete alarm
+        delete_result = self.alarm.delete_log_alarm(alarm_id)
+        assert delete_result.status_code == 204, "删除日志警报失败 {}".format(delete_result.text)
+        delete_flag = self.alarm.check_exists(self.alarm.get_log_alarm_url(alarm_id), 404)
+        assert delete_flag, "删除日志警报失败"
         assert result['flag'], result
