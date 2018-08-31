@@ -1,0 +1,30 @@
+{
+  "check_mode": "interval",
+  "check_period_value": 60,
+  "comparison_operator": "!=",
+  "statistic": "count",
+  "space_name": "$SPACE_NAME",
+  "description": "$description",
+  "name": "$alarm_name",
+  "saved_search_uuid": "$saved_search_uuid",
+  "threshold": 111,
+  "alarm_actions": {
+    "notifications": [
+    ],
+    "services": [
+    ]
+  },
+  "insufficient_actions": {
+    "notifications": [
+    ],
+    "services": [
+    ]
+  },
+  "ok_actions": {
+    "notifications": [
+    ],
+    "services": [
+    ]
+  },
+  "namespace": "$NAMESPACE"
+}
