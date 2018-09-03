@@ -319,7 +319,7 @@ class TestJenkinsBuildImageUpdateService(object):
                                             {"$jenkins_integration_id": integration_id})
 
         ret = self.jenkins_tool.get_credential(integration_id, self.registry_credential_name)
-        assert ret, "创建镜像仓库凭证失败"
+        assert ret, "创建镜像仓库凭证失败或获取凭证失败"
 
         # create jenkins pipeline
         ret = self.jenkins_tool.create_pipeline('./test_data/jenkins/create_build_pipeline_no_sonar_svn.yaml',
