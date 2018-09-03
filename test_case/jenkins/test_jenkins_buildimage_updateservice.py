@@ -278,7 +278,6 @@ class TestJenkinsBuildImageUpdateService(object):
         ret = self.jenkins_tool.check_pipeline_exist(pipeline_id, 404)
         assert ret, "流水线没有被成功删除掉"
 
-    @pytest.mark.git_no_sonar
     def test_jenkins_build_with_svn_no_sonar(self):
         # access jenkins
         ret = self.jenkins_tool.access_jenkins()
