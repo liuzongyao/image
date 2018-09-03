@@ -98,7 +98,7 @@ class SetUp(AlaudaRequest):
         assert response.status_code == 200, response.text
         contents = response.json()
         assert len(contents) > 0, "get_load_balance_info is 空列表"
-        for content in contents:
+        for content in reversed(contents):
             if content['type'] == "nginx" or content["type"] == "haproxy":
                 self.common.update({"$HAPROXY_NAME": content['name'], "$HAPROXY_IP": content['address']})
                 break
