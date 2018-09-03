@@ -21,7 +21,7 @@ template:
     ciEnabled: true
     contextDir: "./"
     useYaml: false
-    ciImageRegistryCredentialsId: ""
+    ciImageRegistryCredentialsId: $REG_CREDENTIAL
     ciImage:
       registry: $REG_URL
       registryUUID: ""

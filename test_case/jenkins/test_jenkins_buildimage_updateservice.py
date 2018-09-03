@@ -278,6 +278,7 @@ class TestJenkinsBuildImageUpdateService(object):
         ret = self.jenkins_tool.check_pipeline_exist(pipeline_id, 404)
         assert ret, "流水线没有被成功删除掉"
 
+    @pytest.mark.git_no_sonar
     def test_jenkins_build_with_svn_no_sonar(self):
         # access jenkins
         ret = self.jenkins_tool.access_jenkins()
@@ -312,6 +313,13 @@ class TestJenkinsBuildImageUpdateService(object):
 
         ret = self.jenkins_tool.get_credential(integration_id, self.code_credential_name)
         assert ret, "创建git代码库凭证失败或获取凭证失败"
+
+        # create registry credential
+        self.jenkins_tool.create_credential('./test_data/jenkins/create_registry_credential.yaml',
+                                            {"$jenkins_integration_id": integration_id})
+
+        ret = self.jenkins_tool.get_credential(integration_id, self.registry_credential_name)
+        assert ret, "创建镜像仓库凭证失败"
 
         # create jenkins pipeline
         ret = self.jenkins_tool.create_pipeline('./test_data/jenkins/create_build_pipeline_no_sonar_svn.yaml',
