@@ -376,7 +376,6 @@ class TestJenkinsBuildImageUpdateService(object):
 
         assert ret, "删除流水线项目失败"
 
-    @pytest.mark.update_service_pipeline
     def test_jenkins_update_service(self):
         # access jenkins
         ret = self.jenkins_tool.access_jenkins()
