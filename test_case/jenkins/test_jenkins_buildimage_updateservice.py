@@ -19,6 +19,7 @@ class TestJenkinsBuildImageUpdateService(object):
         self.pipeline_name = "alauda-jenkins-pipeline"
         self.git_buidl_pipeline = "alauda-jenkins-pipeline-git-build"
         self.svn_build_pipeline_no_sonar = "alauda-jenkins-pipeline-svn-build-no-sonar"
+        self.update_service_pipeline = "alauda-jenkins-update-service-pipeline"
 
         self.code_credential_name = self.app_tool.global_info.get('$SVN_CREDENTIAL')
         self.registry_credential_name = self.app_tool.global_info.get('$REG_CREDENTIAL')
@@ -41,6 +42,9 @@ class TestJenkinsBuildImageUpdateService(object):
         self.repo = self.app_tool.global_info.get("$REPO_NAME")
         self.pipeline_description = "alauda jenkins pipeline"
 
+        self.envname = 'alauda-envname'
+        self.envvalue = 'alauda-envvalue'
+
         self.teardown_class(self)
 
         # create jenkins integration instance
@@ -51,10 +55,12 @@ class TestJenkinsBuildImageUpdateService(object):
         pipeline_id = self.jenkins_tool.get_pipeline_id(self.pipeline_name)
         git_build_pipeline_id = self.jenkins_tool.get_pipeline_id(self.git_buidl_pipeline)
         svn_build_pipeline_no_sonar_id = self.jenkins_tool.get_pipeline_id(self.svn_build_pipeline_no_sonar)
+        update_service_pipeline_id = self.jenkins_tool.get_pipeline_id(self.update_service_pipeline)
 
         self.jenkins_tool.delete_pipeline(pipeline_id)
         self.jenkins_tool.delete_pipeline(git_build_pipeline_id)
         self.jenkins_tool.delete_pipeline(svn_build_pipeline_no_sonar_id)
+        self.jenkins_tool.delete_pipeline(update_service_pipeline_id)
 
         integration_id = self.integration_tool.get_integration_id(self.integration_name)
         self.integration_tool.delete_integration(integration_id)
@@ -369,3 +375,89 @@ class TestJenkinsBuildImageUpdateService(object):
         ret = self.jenkins_tool.check_pipeline_exist(pipeline_id, 404)
 
         assert ret, "删除流水线项目失败"
+
+    @pytest.mark.update_service_pipeline
+    def test_jenkins_update_service(self):
+        # access jenkins
+        ret = self.jenkins_tool.access_jenkins()
+        assert ret, "访问Jenkins失败, 请确认Jenkins是否正常"
+
+        # Verify that the integration instance was created successfully
+        assert self.create_integration.status_code == 201, "创建集成中心实例失败"
+        integration_id = self.create_integration.json()['id']
+
+        # get template id
+        template_id = self.jenkins_tool.get_sys_template_id(self.updateservice_template_name, 'uuid')
+        assert template_id, "获取模板失败"
+
+        # get registry url
+        registry_endpoint = self.app_tool.get_uuid_accord_name(self.app_tool.global_info.get("PRIVATE_REGISTRY"),
+                                                               {"name": self.app_tool.global_info.get("$REGISTRY")},
+                                                               "endpoint")
+
+        # get repo tag
+        ret = self.image_tool.get_repo_tag(self.repo)
+        assert ret.status_code == 200, "获取镜像版本失败"
+
+        contents = ret.json()['results']
+
+        assert len(contents) > 0, "镜像版本为空"
+
+        repo_tag = contents[0]['tag_name']
+
+        # create pipeline
+        ret = self.jenkins_tool.create_pipeline('./test_data/jenkins/create_update_service_pipeline.yaml',
+                                                {"$pipeline_name": self.update_service_pipeline,
+                                                 "$jenkins_integration_id": integration_id,
+                                                 "$jenkins_integration_name": self.integration_name,
+                                                 "$template_uuid": template_id, "$service_name": self.app_name,
+                                                 "$REG_URL": registry_endpoint, "$imageTag": repo_tag,
+                                                 "$envname": self.envname, "$envvalue": self.envvalue,
+                                                 "$time_out": self.time_out})
+
+        assert ret.status_code == 201, "创建Jenkins流水线项目失败"
+
+        pipeline_id = ret.json()['uuid']
+
+        # execute pipeline
+        ret = self.jenkins_tool.execute_pipeline('./test_data/jenkins/execute_pipeline.yaml',
+                                                 {"$pipeline_uuid": pipeline_id})
+
+        assert ret.status_code == 200, "执行流水线项目失败"
+
+        history_id = ret.json()['uuid']
+
+        # get pipeline status
+        ret = self.jenkins_tool.get_pipeline_status(history_id, pipeline_id, 'result', 'SUCCESS')
+
+        assert ret, "流水线项目执行失败"
+
+        # get the service info
+        ret = self.app_tool.get_app_detail(self.app_id)
+
+        assert ret.status_code == 200, "获取应用的详情失败"
+
+        envs = self.app_tool.get_value(ret.json(), 'kubernetes.0.spec.template.spec.containers.0.env')
+
+        image_tag = self.app_tool.get_value(ret.json(), 'kubernetes.0.spec.template.spec.containers.0.image'
+                                            ).split(":")[-1]
+
+        logger.info("image tag: {}".format(
+            self.app_tool.get_value(ret.json(), 'kubernetes.0.spec.template.spec.containers.0.image')))
+
+        assert image_tag == repo_tag, "流水线更新应用镜像版本失败"
+
+        ret = self.app_tool.get_uuid_accord_name(envs, {"name": self.envname}, 'value')
+
+        logger.info("get the env value from service: {}".format(ret))
+
+        assert ret == self.envvalue, "更新应用的环境变量失败"
+
+        # delete pipeline
+        ret = self.jenkins_tool.delete_pipeline(pipeline_id)
+
+        assert ret.status_code == 204, "执行删除Jenkins流水线操作失败"
+
+        ret = self.jenkins_tool.check_pipeline_exist(pipeline_id, 404)
+
+        assert ret, "删除Jenkins流水线失败"
