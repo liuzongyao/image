@@ -1,0 +1,33 @@
+name: $pipeline_name
+display_name: $pipeline_name
+space_name: $SPACE_NAME
+jenkins_integration_id: $jenkins_integration_id
+description: ""
+icon: ""
+type: FROM_SCM
+script: ""
+script_path: Jenkinsfile
+jenkins_integration_name: $jenkins_integration_name
+pipeline_scm:
+  source: SVN
+  repository_path: $SVN_REPO
+  branch: ~
+  credential_name: $SVN_CREDENTIAL
+triggers: []
+template:
+  uuid: $template_uuid
+  arguments_values:
+    sonarScanEnabled: true
+    integrationSonarQubeID: $integrationSonarQubeID
+    qualityGate: $quality
+    lang: $lang
+    sonarContextDir: "."
+    propertiesPath: "./sonar-project.properties"
+    waitForQualityGate: false
+    ciEnabled: true
+    contextDir: "./"
+    useYaml: true
+    ciImageRegistryCredentialsId: ""
+    ciYamlFile: "./cjtest/alaudaci.yml"
+    buildImageEnabled: false
+namespace: $NAMESPACE

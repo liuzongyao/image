@@ -19,6 +19,7 @@ class TestJenkinsBuildImageUpdateService(object):
         self.pipeline_name = "alauda-jenkins-pipeline"
         self.git_buidl_pipeline = "alauda-jenkins-pipeline-git-build"
         self.svn_build_pipeline_no_sonar = "alauda-jenkins-pipeline-svn-build-no-sonar"
+        self.svn_build_pipeline_with_sonar = "alauda-jenkins-pipeline-svn-build-with-sonar"
         self.update_service_pipeline = "alauda-jenkins-update-service-pipeline"
 
         self.code_credential_name = self.app_tool.global_info.get('$SVN_CREDENTIAL')
@@ -27,6 +28,7 @@ class TestJenkinsBuildImageUpdateService(object):
 
         self.registry_name = self.app_tool.global_info.get("$REGISTRY")
         self.integration_name = "alauda-integration-instance-name-svn"
+        self.sonar_integration_name = "alauda-sonar-integration-instance-name"
         self.app_name = self.app_tool.global_info.get("$GLOBAL_APP_NAME")
         self.app_id = self.app_tool.global_info.get("$GLOBAL_APP_ID")
         self.repo_tag = "alauda-e2e"
@@ -45,25 +47,37 @@ class TestJenkinsBuildImageUpdateService(object):
         self.envname = 'alauda-envname'
         self.envvalue = 'alauda-envvalue'
 
+        self.qualitygates_name = "SonarQube way"
+        self.language_name = 'Java'
+
         self.teardown_class(self)
 
         # create jenkins integration instance
         self.create_integration = self.integration_tool.create_integration(
             './test_data/integration/ci_cd/create_integration.yaml', {"$INTEGRATION_NAME": self.integration_name})
 
+        # create sonar integration instance
+        self.create_sonar_integration = self.integration_tool.create_integration(
+            './test_data/integration/sonar/create_sonar_integration.yaml',
+            {"$integration_name": self.sonar_integration_name})
+
     def teardown_class(self):
         pipeline_id = self.jenkins_tool.get_pipeline_id(self.pipeline_name)
         git_build_pipeline_id = self.jenkins_tool.get_pipeline_id(self.git_buidl_pipeline)
         svn_build_pipeline_no_sonar_id = self.jenkins_tool.get_pipeline_id(self.svn_build_pipeline_no_sonar)
+        svn_build_pipeline_with_sonar_id = self.jenkins_tool.get_pipeline_id(self.svn_build_pipeline_with_sonar)
         update_service_pipeline_id = self.jenkins_tool.get_pipeline_id(self.update_service_pipeline)
 
         self.jenkins_tool.delete_pipeline(pipeline_id)
         self.jenkins_tool.delete_pipeline(git_build_pipeline_id)
         self.jenkins_tool.delete_pipeline(svn_build_pipeline_no_sonar_id)
+        self.jenkins_tool.delete_pipeline(svn_build_pipeline_with_sonar_id)
         self.jenkins_tool.delete_pipeline(update_service_pipeline_id)
 
         integration_id = self.integration_tool.get_integration_id(self.integration_name)
+        sonar_integration_id = self.integration_tool.get_integration_id(self.sonar_integration_name)
         self.integration_tool.delete_integration(integration_id)
+        self.integration_tool.delete_integration(sonar_integration_id)
 
         self.image_tool.delete_repo_tag(self.repo, self.repo_tag)
         self.image_tool.delete_repo_tag(self.repo, self.repo_additional_tag)
@@ -317,7 +331,7 @@ class TestJenkinsBuildImageUpdateService(object):
                                             {"$jenkins_integration_id": integration_id})
 
         ret = self.jenkins_tool.get_credential(integration_id, self.code_credential_name)
-        assert ret, "创建git代码库凭证失败或获取凭证失败"
+        assert ret, "创建svn代码库凭证失败或获取凭证失败"
 
         # create registry credential
         self.jenkins_tool.create_credential('./test_data/jenkins/create_registry_credential.yaml',
@@ -451,6 +465,96 @@ class TestJenkinsBuildImageUpdateService(object):
         logger.info("get the env value from service: {}".format(ret))
 
         assert ret == self.envvalue, "更新应用的环境变量失败"
+
+        # delete pipeline
+        ret = self.jenkins_tool.delete_pipeline(pipeline_id)
+
+        assert ret.status_code == 204, "执行删除Jenkins流水线操作失败"
+
+        ret = self.jenkins_tool.check_pipeline_exist(pipeline_id, 404)
+
+        assert ret, "删除Jenkins流水线失败"
+
+    @pytest.mark.build_with_sonar
+    def test_jenkins_build_with_svn_sonar(self):
+        # access jenkins
+        ret = self.jenkins_tool.access_jenkins()
+        assert ret, "访问Jenkins失败, 请确认Jenkins是否正常"
+
+        # access sonar
+        ret = self.jenkins_tool.access_sonar()
+        assert ret, "访问sonar失败，请确认sonar是否正常"
+
+        # Verify that the integration instance was created successfully
+        assert self.create_integration.status_code == 201, "创建jenkins集成中心实例失败"
+        integration_id = self.create_integration.json()['id']
+
+        assert self.create_sonar_integration.status_code == 201, "创建sonar集成中心实例失败"
+        sonar_integration_id = self.create_sonar_integration.json()['id']
+
+        # create code credential
+        self.jenkins_tool.create_credential('./test_data/jenkins/create_svn_code_credential.yaml',
+                                            {"$jenkins_integration_id": integration_id})
+
+        ret = self.jenkins_tool.get_credential(integration_id, self.code_credential_name)
+        assert ret, "创建svn代码库凭证失败或获取凭证失败"
+
+        # get template id
+        template_id = self.jenkins_tool.get_sys_template_id(self.build_template_name, 'uuid')
+        assert template_id, "获取模板失败"
+
+        # get qualitygates
+        ret = self.jenkins_tool.get_sonar_qualitygates(sonar_integration_id)
+
+        assert ret.status_code == 200, "获取sonar扫描质量阈值失败"
+
+        quality_id = self.jenkins_tool.get_uuid_accord_name(ret.json()['qualitygates'],
+                                                                 {"name": self.qualitygates_name}, 'id')
+
+        logger.info("qualitygates id: {}".format(quality_id))
+
+        # get languages
+        ret = self.jenkins_tool.get_languages(sonar_integration_id)
+
+        assert ret.status_code == 200, "获取开发语言失败"
+
+        language = self.jenkins_tool.get_uuid_accord_name(ret.json()['languages'], {"name": self.language_name}, 'key')
+
+        logger.info("language: {}".format(language))
+
+        # create pipeline
+        ret = self.jenkins_tool.create_pipeline('./test_data/jenkins/create_build_pipeline_with_sonar_svn.yaml',
+                                                {"$pipeline_name": self.svn_build_pipeline_with_sonar,
+                                                 "$jenkins_integration_id": integration_id,
+                                                 "$jenkins_integration_name": self.integration_name,
+                                                 "$template_uuid": template_id,
+                                                 "$integrationSonarQubeID": sonar_integration_id,
+                                                 "$quality": str(quality_id),
+                                                 "$lang": language})
+
+        assert ret.status_code == 201, "创建Jenkins流水线失败"
+
+        pipeline_id = ret.json()['uuid']
+
+        # execute pipeline
+        ret = self.jenkins_tool.execute_pipeline('./test_data/jenkins/execute_pipeline.yaml',
+                                                 {"$pipeline_uuid": pipeline_id})
+
+        assert ret.status_code == 200, "执行流水线项目失败"
+
+        history_id = ret.json()['uuid']
+
+        # get pipeline status
+        ret = self.jenkins_tool.get_pipeline_status(history_id, pipeline_id, 'result', 'SUCCESS')
+
+        assert ret, "流水线项目执行失败"
+
+        # get pipeline history detail
+        ret = self.jenkins_tool.get_pipeline_history_detail(history_id, pipeline_id)
+
+        assert ret.status_code == 200, "获取流水线运行历史详情失败"
+
+        assert "SonarQube" in ret.text, "流水线运行历史中没有代码扫描的结果"
 
         # delete pipeline
         ret = self.jenkins_tool.delete_pipeline(pipeline_id)

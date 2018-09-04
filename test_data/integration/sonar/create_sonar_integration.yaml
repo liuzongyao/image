@@ -1,0 +1,9 @@
+space_name: $SPACE_NAME
+name: $integration_name
+description: ""
+enabled: true
+fields:
+  endpoint: $SONAR_ENDPOINT
+  token: $SONAR_TOKEN
+type: SonarQube
+namespace: $NAMESPACE
