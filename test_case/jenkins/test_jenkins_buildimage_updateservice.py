@@ -509,7 +509,7 @@ class TestJenkinsBuildImageUpdateService(object):
         assert ret.status_code == 200, "获取sonar扫描质量阈值失败"
 
         quality_id = self.jenkins_tool.get_uuid_accord_name(ret.json()['qualitygates'],
-                                                                 {"name": self.qualitygates_name}, 'id')
+                                                            {"name": self.qualitygates_name}, 'id')
 
         logger.info("qualitygates id: {}".format(quality_id))
 
