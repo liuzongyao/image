@@ -1,0 +1,15 @@
+{
+  "apiVersion": "v1",
+  "kind": "ResourceQuota",
+  "metadata": {
+    "name": "$resourcequota_name",
+    "namespace": "$namespace_name"
+  },
+  "spec": {
+    "hard": {
+      "requests.cpu": "$pod_size",
+      "pods": "$pod_size",
+      "persistentvolumeclaims": "$pod_size"
+    }
+  }
+}
