@@ -37,6 +37,7 @@ class TestJenkinsBuildImageUpdateService(object):
         self.app_id = self.app_tool.global_info.get("$GLOBAL_APP_ID")
         self.repo_tag = "alauda-e2e"
         self.repo_additional_tag = "alauda-e2e-additional"
+        self.sync_repo_tag = "alauda-e2e-sync"
         self.branch = "master"
 
         self.template_name = "alaudaBuildImageAndDeployService"
@@ -87,6 +88,7 @@ class TestJenkinsBuildImageUpdateService(object):
 
         self.image_tool.delete_repo_tag(self.repo, self.repo_tag)
         self.image_tool.delete_repo_tag(self.repo, self.repo_additional_tag)
+        self.image_tool.delete_repo_tag(self.repo, self.sync_repo_tag)
 
     def test_jenkins_buildimage_updateservice(self):
         # access jenkins
@@ -615,7 +617,7 @@ class TestJenkinsBuildImageUpdateService(object):
                                                  "$jenkins_integration_name": self.integration_name,
                                                  "$template_uuid": template_id, "$source_reg_url": source_reg_url,
                                                  "$source_repo": source_repo, "$source_tag": source_tag,
-                                                 "$reg_url": reg_url, "$tag": self.repo_tag})
+                                                 "$reg_url": reg_url, "$tag": self.sync_repo_tag})
 
         assert ret.status_code == 201, "创建Jenkins流水线项目失败"
 
@@ -638,16 +640,16 @@ class TestJenkinsBuildImageUpdateService(object):
         ret = self.image_tool.get_repo_tag(self.repo)
         assert ret.status_code == 200, "获取镜像版本失败"
 
-        assert self.repo_tag in ret.text, "同步镜像仓库失败"
+        assert self.sync_repo_tag in ret.text, "同步镜像仓库失败"
 
         # delete image tag
-        ret = self.image_tool.delete_repo_tag(self.repo, self.repo_tag)
+        ret = self.image_tool.delete_repo_tag(self.repo, self.sync_repo_tag)
         assert ret.status_code == 204, "删除镜像版本操作失败"
 
         ret = self.image_tool.get_repo_tag(self.repo)
         assert ret.status_code == 200, "获取镜像版本失败"
 
-        assert self.repo_tag not in ret.text, "镜像版本没有被成功删除掉"
+        assert self.sync_repo_tag not in ret.text, "镜像版本没有被成功删除掉"
 
         # delete pipeline
         ret = self.jenkins_tool.delete_pipeline(pipeline_id)
