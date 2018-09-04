@@ -22,6 +22,10 @@ JENKINS_ENDPOINT = os.getenv("JENKINS_ENDPOINT",
 JENKINS_USER = os.getenv("JENKINS_USER", "admin")
 JENKINS_TOKEN = os.getenv("JENKINS_TOKEN", "1323a281573d215c39c573bcd2654e7e")
 
+SONAR_ENDPOINT = os.getenv("SONAR_ENDPOINT",
+                           "http://sonarqube-donotdelete.nolimited.haproxy-54-223-242-27-alaudacn.myalauda.cn/")
+SONAR_TOKEN = os.getenv("SONAR_TOKEN", "318983ce89e6f48c6d1bc3235119841dbff12a2b")
+
 SVN_REPO = os.getenv("SVN_REPO", "http://svn-password.k8s-st.haproxy-54-223-242-27-alaudacn.myalauda.cn/alauda_test/")
 SVN_CREDENTIAL = os.getenv("SVN_CREDENTIAL", "alauda-svn-credential")
 SVN_USERNAME = os.getenv("SVN_USERNAME", "User_Name-01")

@@ -1,6 +1,4 @@
-import requests
 from common.base_request import Common
-from common.log import logger
 
 
 class Jenkins(Common):
@@ -59,6 +57,14 @@ class Jenkins(Common):
 
     def get_replay_pipeline_url(self):
         return "/v1/jenkins_pipelines/{}/history".format(self.account)
+
+    def get_qualitygates_url(self, sonar_integration_id):
+        return "/v1/jenkins_pipelines_integrations/{}/sonar_integration/{}/qualitygates" \
+            .format(self.account, sonar_integration_id)
+
+    def get_languages_url(self, sonar_integration_id):
+        return "/v1/jenkins_pipelines_integrations/{}/sonar_integration/{}/languages" \
+            .format(self.account, sonar_integration_id)
 
     def get_credentials_list(self, jenkins_integration_id):
         path = self.common_credentials_url(jenkins_integration_id=jenkins_integration_id)
@@ -125,6 +131,10 @@ class Jenkins(Common):
         path = self.get_history_record_url(jenkins_integration_id)
         return self.send(method='get', path=path)
 
+    def get_pipeline_history_detail(self, history_id, pipeline_id):
+        path = self.get_pipeline_status_url(history_id, pipeline_id)
+        return self.send(method='get', path=path)
+
     def get_sys_template_list(self):
         path = self.get_template_url()
         return self.send(method='get', path=path)
@@ -135,19 +145,6 @@ class Jenkins(Common):
             contents = response.json()['results']
             return self.get_uuid_accord_name(contents, {"name": name}, uuid_key=uuid_key)
         return ''
-
-    def access_jenkins(self):
-        jenkins_address = self.global_info.get("$JENKINS_ENDPOINT")
-        jenkins_user = self.global_info.get("$JENKINS_USER")
-        jenkins_token = self.global_info.get("$JENKINS_TOKEN")
-        logger.info("Jenkins url: {}".format(jenkins_address))
-        try:
-            response = requests.request(method='get', url=jenkins_address, auth=(jenkins_user, jenkins_token))
-            if response.status_code == 200:
-                return True
-        except requests.exceptions.ConnectionError:
-            return False
-        return False
 
     def pipeline_cancel(self, pipeline_id, history_id):
         path = self.get_cancel_pipeline_url(pipeline_id, history_id)
@@ -169,3 +166,11 @@ class Jenkins(Common):
     def delete_pipeline_history(self, history_id, pipeline_id):
         path = self.get_pipeline_status_url(history_id, pipeline_id)
         return self.send(method='delete', path=path)
+
+    def get_sonar_qualitygates(self, sonar_integration_id):
+        path = self.get_qualitygates_url(sonar_integration_id)
+        return self.send(method='get', path=path)
+
+    def get_languages(self, sonar_integration_id):
+        path = self.get_languages_url(sonar_integration_id)
+        return self.send(method='get', path=path)

@@ -43,7 +43,9 @@ class SetUp(AlaudaRequest):
             "$GIT_REPO": settings.GIT_REPO,
             "$GIT_CREDENTIAL": settings.GIT_CREDENTIAL,
             "$GIT_USERNAME": settings.GIT_USERNAME,
-            "$GIT_PASSWORD": settings.GIT_PASSWORD
+            "$GIT_PASSWORD": settings.GIT_PASSWORD,
+            "$SONAR_ENDPOINT": settings.SONAR_ENDPOINT,
+            "$SONAR_TOKEN": settings.SONAR_TOKEN
         }
         self.get_region_data()
         self.get_build_endpontid()

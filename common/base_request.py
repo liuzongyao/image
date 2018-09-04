@@ -3,6 +3,7 @@ import json
 import sys
 from time import sleep, time
 import pexpect
+import requests
 from common.api_requests import AlaudaRequest
 from common.exceptions import ResponseError, ParseResponseError
 from common.loadfile import FileUtils
@@ -290,3 +291,28 @@ class Common(AlaudaRequest):
                 break
             sleep(1)
         return flag
+
+    def access_jenkins(self):
+        jenkins_address = self.global_info.get("$JENKINS_ENDPOINT")
+        jenkins_user = self.global_info.get("$JENKINS_USER")
+        jenkins_token = self.global_info.get("$JENKINS_TOKEN")
+        logger.info("Jenkins url: {}".format(jenkins_address))
+        try:
+            response = requests.request(method='get', url=jenkins_address, auth=(jenkins_user, jenkins_token))
+            if response.status_code == 200:
+                return True
+        except requests.exceptions.ConnectionError:
+            return False
+        return False
+
+    def access_sonar(self):
+        sonar_address = self.global_info.get("$SONAR_ENDPOINT")
+        logger.info("sonar address: {}".format(sonar_address))
+
+        try:
+            response = requests.get(sonar_address)
+            if response.status_code == 200:
+                return True
+        except requests.exceptions.ConnectionError:
+            return False
+        return False
