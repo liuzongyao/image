@@ -475,7 +475,6 @@ class TestJenkinsBuildImageUpdateService(object):
 
         assert ret, "删除Jenkins流水线失败"
 
-    @pytest.mark.build_with_sonar
     def test_jenkins_build_with_svn_sonar(self):
         # access jenkins
         ret = self.jenkins_tool.access_jenkins()
