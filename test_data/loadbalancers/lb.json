@@ -1,0 +1,9 @@
+{
+  "region_name": "$REGION_NAME",
+  "create_type": "$create_type",
+  "type": "$type",
+  "iaas_id": "",
+  "name": "$LB_NAME",
+  "address": "22.33.44.55",
+  "address_type": "$address_type"
+}

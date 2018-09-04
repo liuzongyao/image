@@ -1,0 +1,7 @@
+{
+	"action": "set_domain_suffix",
+	"disable_default_suffix": false,
+	"domain_info": [{
+		"domain": "$dns_name"
+	}]
+}
