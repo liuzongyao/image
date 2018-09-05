@@ -659,3 +659,70 @@ class TestJenkinsBuildImageUpdateService(object):
         ret = self.jenkins_tool.check_pipeline_exist(pipeline_id, 404)
 
         assert ret, "删除Jenkins流水线失败"
+
+    def test_jenkins_template(self):
+        # access jenkins
+        ret = self.jenkins_tool.access_jenkins()
+        assert ret, "访问Jenkins失败, 请确认Jenkins是否正常"
+
+        # get system template list
+        ret = self.jenkins_tool.get_template_list()
+
+        assert ret.status_code == 200, "获取模板列表失败"
+
+        assert len(ret.json()['results']) > 0, "模板列表为空"
+
+        # get template source
+        ret = self.jenkins_tool.get_template_source_list()
+
+        assert ret.status_code == 200, "获取模板仓库列表失败"
+
+        content = ret.json()['result']
+
+        assert len(content) > 0, "模板仓库列表为空"
+
+        template_source_id = self.jenkins_tool.get_uuid_accord_name(content, {"provider": "user"}, 'uuid')
+
+        logger.info("template source id: {}".format(template_source_id))
+
+        if not template_source_id:
+            assert True, "用户未添加模板仓库，不需要进行后面的同步模板仓库操作"
+            return
+
+        # refresh template source
+        ret = self.jenkins_tool.refresh_template_source(template_source_id)
+
+        assert ret.status_code == 204, "同步模板仓库操作失败"
+
+        # get refresh status
+        ret = self.jenkins_tool.get_refresh_template_source_status(template_source_id, 'last_job.status', 'SUCCESS')
+
+        assert ret, "同步模板仓库执行失败"
+
+        # get template source detail
+        ret = self.jenkins_tool.get_template_source_detail(template_source_id)
+
+        assert ret.status_code == 200, "获取模板详情失败"
+
+        report = ret.json()['last_job']['report']['items']
+
+        # get user template list
+        ret = self.jenkins_tool.get_template_list(template_resource_id=template_source_id, official=False)
+
+        assert ret.status_code == 200, "获取用户定义的模板列表失败"
+
+        if not report:
+            assert len(ret.json()['results']) == 0, "同步模板仓库失败"
+        else:
+            add = self.jenkins_tool.get_uuid_accord_name(report, {"action": "ADD"}, "name")
+            delete = self.jenkins_tool.get_uuid_accord_name(report, {"action": "DELETE"}, "name")
+            skip = self.jenkins_tool.get_uuid_accord_name(report, {"action": "SKIP"}, "name")
+
+            if add:
+                assert add in ret.text, "同步模板仓库失败"
+
+            if delete:
+                assert delete not in ret.text, "同步模板仓库失败"
+
+            if skip:
+                assert add in ret.text, "同步模板仓库失败"

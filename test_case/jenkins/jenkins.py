@@ -66,6 +66,18 @@ class Jenkins(Common):
         return "/v1/jenkins_pipelines_integrations/{}/sonar_integration/{}/languages" \
             .format(self.account, sonar_integration_id)
 
+    def common_template_source_url(self, template_source_id=''):
+        return template_source_id and "/v1/jenkins_pipelines/{}/template_sources/{}" \
+            .format(self.account, template_source_id) or "/v1/jenkins_pipelines/{}/template_sources" \
+            .format(self.account)
+
+    def get_template_list_url(self, template_resource_id='', official=True):
+        return '/v1/jenkins_pipelines/{}/templates?official={}&source_uuids={}' \
+            .format(self.account, official, template_resource_id)
+
+    def get_refresh_template_source_url(self, template_source_id):
+        return "/v1/jenkins_pipelines/{}/template_sources/{}/refresh".format(self.account, template_source_id)
+
     def get_credentials_list(self, jenkins_integration_id):
         path = self.common_credentials_url(jenkins_integration_id=jenkins_integration_id)
         return self.send(method='get', path=path)
@@ -174,3 +186,23 @@ class Jenkins(Common):
     def get_languages(self, sonar_integration_id):
         path = self.get_languages_url(sonar_integration_id)
         return self.send(method='get', path=path)
+
+    def get_template_list(self, template_resource_id='', official=True):
+        path = self.get_template_list_url(template_resource_id=template_resource_id, official=official)
+        return self.send(method='get', path=path)
+
+    def get_template_source_list(self):
+        path = self.common_template_source_url()
+        return self.send(method='get', path=path)
+
+    def refresh_template_source(self, template_source_id):
+        path = self.get_refresh_template_source_url(template_source_id)
+        return self.send(method='put', path=path)
+
+    def get_template_source_detail(self, template_source_id):
+        path = self.common_template_source_url(template_source_id)
+        return self.send(method='get', path=path)
+
+    def get_refresh_template_source_status(self, template_source_id, key, expect_value):
+        path = self.common_template_source_url(template_source_id)
+        return self.get_status(path, key, expect_value)
