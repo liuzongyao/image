@@ -1,0 +1,25 @@
+resource_actions:
+- integration:update
+- integration:view
+- integration:create
+- integration:delete
+space_uuid: $SPACE_UUID
+project_name: $PROJECT_NAME
+description: ""
+project_uuid: $PROJECT_UUID
+fields:
+  endpoint: $CLAIR_ENDPOINT
+  service_port: $CLAIR_SERVICE_PORT
+  health_port: $CLAIR_HEALTH_PORT
+  database_addr: $DATABASE_ADDR
+  database_name: $DATABASE_NAME
+  user_name: $DATABASE_USER_NAME
+  password: $DATABASE_PASSWORD
+enabled: false
+space_name: $SPACE_NAME
+namespace: $NAMESPACE
+type: Clair
+id: $integration_id
+name: $integration_name
+integration_family: 镜像扫描
+logo: https://s3.cn-north-1.amazonaws.com.cn/alauda-cn-integrations/assets/clair-logo.png

@@ -18,6 +18,8 @@ def casename():
         "test_ebs_volume": "存储卷ebs测试:获取驱动类型-创建ebs-获取存储卷列表-获取ebs详情-删除ebs",
         "test_pv": "持久卷测试:创建存储卷-创建pv-获取pv列表-更新pv-获取pv详情-获取存储卷详情-删除pv",
         "test_ci_cd": "创建集成中心实例-获取实例状态-停用实例-获取实例状态-更新实例-获取实例状态-删除实例",
+        "test_sonar_integration": "创建集成中心实例-获取实例状态-停用实例-获取实例状态-更新实例-获取实例状态-删除实例",
+        "test_clair_integration": "创建集成中心实例-获取实例状态-停用实例-获取实例状态-更新实例-获取实例状态-删除实例",
         "test_noti": "通知增删改查测试",
         "test_pvc": "持久卷声明测试:创建存储卷-创建pv-创建pvc-获取pvc列表-获取pvc详情-获取pv详情-删除pvc",
         "test_jenkins_buildimage_updateservice": "检查Jenkins是否能访问-判断集成中心实例是否创建成功-获取模板-创建svn凭证-创建镜像仓库凭证-获取镜像地址-"

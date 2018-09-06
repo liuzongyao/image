@@ -45,7 +45,14 @@ class SetUp(AlaudaRequest):
             "$GIT_USERNAME": settings.GIT_USERNAME,
             "$GIT_PASSWORD": settings.GIT_PASSWORD,
             "$SONAR_ENDPOINT": settings.SONAR_ENDPOINT,
-            "$SONAR_TOKEN": settings.SONAR_TOKEN
+            "$SONAR_TOKEN": settings.SONAR_TOKEN,
+            "$CLAIR_ENDPOINT": settings.CLAIR_ENDPOINT,
+            "$CLAIR_SERVICE_PORT": settings.CLAIR_SERVICE_PORT,
+            "$CLAIR_HEALTH_PORT": settings.CLAIR_HEALTH_PORT,
+            "$DATABASE_ADDR": settings.DATABASE_ADDR,
+            "$DATABASE_NAME": settings.DATABASE_NAME,
+            "$DATABASE_USER_NAME": settings.DATABASE_USER_NAME,
+            "$DATABASE_PASSWORD": settings.DATABASE_PASSWORD
         }
         self.get_region_data()
         self.get_build_endpontid()

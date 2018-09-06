@@ -26,6 +26,14 @@ SONAR_ENDPOINT = os.getenv("SONAR_ENDPOINT",
                            "http://sonarqube-donotdelete.nolimited.haproxy-54-223-242-27-alaudacn.myalauda.cn/")
 SONAR_TOKEN = os.getenv("SONAR_TOKEN", "318983ce89e6f48c6d1bc3235119841dbff12a2b")
 
+CLAIR_ENDPOINT = os.getenv("CLAIR_ENDPOINT", "zhang-clair.default.haproxy-52-80-107-116-testorg001.myalauda.cn")
+CLAIR_SERVICE_PORT = os.getenv("CLAIR_SERVICE_PORT", "6060")
+CLAIR_HEALTH_PORT = os.getenv("CLAIR_HEALTH_PORT", "6061")
+DATABASE_ADDR = os.getenv("DATABASE_ADDR", "52.80.107.116:5432")
+DATABASE_NAME = os.getenv("DATABASE_NAME", "alauda")
+DATABASE_USER_NAME = os.getenv("DATABASE_USER_NAME", "alauda")
+DATABASE_PASSWORD = os.getenv("DATABASE_PASSWORD", "alauda")
+
 SVN_REPO = os.getenv("SVN_REPO", "http://svn-password.k8s-st.haproxy-54-223-242-27-alaudacn.myalauda.cn/alauda_test/")
 SVN_CREDENTIAL = os.getenv("SVN_CREDENTIAL", "alauda-svn-credential")
 SVN_USERNAME = os.getenv("SVN_USERNAME", "User_Name-01")
