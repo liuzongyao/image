@@ -1,3 +1,4 @@
+import time
 import re
 import pytest
 from test_case.jenkins.jenkins import Jenkins
@@ -264,6 +265,9 @@ class TestJenkinsBuildImageUpdateService(object):
         ret = self.jenkins_tool.get_pipeline_status(history_id, pipeline_id, 'status', 'RUNNING')
 
         assert ret, "流水线项目未处于运行状态"
+
+        # 由于执行流水线后立即取消执行会导致取消执行失败，添加2秒的等待时间
+        time.sleep(2)
 
         # stop pipeline
         ret = self.jenkins_tool.pipeline_cancel(pipeline_id, history_id)
