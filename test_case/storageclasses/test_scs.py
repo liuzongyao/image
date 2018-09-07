@@ -25,7 +25,7 @@ class Teststorageclass():
                                             {"$scs_name": self.scs_name, "$is_default": "false",
                                              "$master_ip": masterip})
         assert create_result.status_code == 201, "创建sc失败{}".format(create_result.text)
-        self.scs.check_value_in_response(self.scs.get_common_scs_url(), self.scs_name)
+        self.scs.check_value_in_response(self.scs.get_common_scs_url(), self.scs_name, params={})
         # list scs
         list_result = self.scs.list_scs()
         result = self.scs.update_result(result, list_result.status_code == 200, list_result.text)
@@ -37,7 +37,7 @@ class Teststorageclass():
         assert update_result.status_code == 204, "sc设为默认失败{}".format(update_result.text)
         self.scs.get_status(self.scs.get_common_scs_url(self.scs_name),
                             "kubernetes#metadata#annotations#storageclass.kubernetes.io/is-default-class",
-                            "true", delimiter="#")
+                            "true", delimiter="#", params={})
         # get scs detail
         detail_result = self.scs.get_scs_detail(self.scs_name)
         result = self.scs.update_result(result, detail_result.status_code == 200, detail_result.text)
