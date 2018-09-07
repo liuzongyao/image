@@ -1,0 +1,13 @@
+space_name: $SPACE_NAME
+name: $integration_name
+description: $description
+enabled: true
+fields:
+  endpoint: $CLAIR_ENDPOINT
+  service_port: $CLAIR_SERVICE_PORT
+  health_port: $CLAIR_HEALTH_PORT
+  database_addr: $CLAIR_DATABASE_ADDR
+  database_name: $CLAIR_DATABASE_NAME
+  user_name: $CLAIR_DATABASE_USER_NAME
+  password: $CLAIR_DATABASE_PASSWORD
+namespace: $NAMESPACE

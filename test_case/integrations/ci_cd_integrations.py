@@ -39,3 +39,7 @@ class Integrations(Common):
             contents = response.json()['results']
             return self.get_uuid_accord_name(contents, {"name": integration_name}, 'id')
         return ''
+
+    def check_integration_exist(self, integration_id, expect_status):
+        path = self.common_url(integration_id=integration_id)
+        return self.check_exists(path, expect_status)
