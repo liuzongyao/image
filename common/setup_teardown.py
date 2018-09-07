@@ -49,10 +49,10 @@ class SetUp(AlaudaRequest):
             "$CLAIR_ENDPOINT": settings.CLAIR_ENDPOINT,
             "$CLAIR_SERVICE_PORT": settings.CLAIR_SERVICE_PORT,
             "$CLAIR_HEALTH_PORT": settings.CLAIR_HEALTH_PORT,
-            "$DATABASE_ADDR": settings.DATABASE_ADDR,
-            "$DATABASE_NAME": settings.DATABASE_NAME,
-            "$DATABASE_USER_NAME": settings.DATABASE_USER_NAME,
-            "$DATABASE_PASSWORD": settings.DATABASE_PASSWORD
+            "$CLAIR_DATABASE_ADDR": settings.CLAIR_DATABASE_ADDR,
+            "$CLAIR_DATABASE_NAME": settings.CLAIR_DATABASE_NAME,
+            "$CLAIR_DATABASE_USER_NAME": settings.CLAIR_DATABASE_USER_NAME,
+            "$CLAIR_DATABASE_PASSWORD": settings.CLAIR_DATABASE_PASSWORD
         }
         self.get_region_data()
         self.get_build_endpontid()

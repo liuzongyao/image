@@ -11,10 +11,10 @@ fields:
   endpoint: $CLAIR_ENDPOINT
   service_port: $CLAIR_SERVICE_PORT
   health_port: $CLAIR_HEALTH_PORT
-  database_addr: $DATABASE_ADDR
-  database_name: $DATABASE_NAME
-  user_name: $DATABASE_USER_NAME
-  password: $DATABASE_PASSWORD
+  database_addr: $CLAIR_DATABASE_ADDR
+  database_name: $CLAIR_DATABASE_NAME
+  user_name: $CLAIR_DATABASE_USER_NAME
+  password: $CLAIR_DATABASE_PASSWORD
 enabled: false
 space_name: $SPACE_NAME
 namespace: $NAMESPACE

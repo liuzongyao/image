@@ -130,6 +130,7 @@ class TestCICDSuite(object):
         get_ret = self.integration_tool.check_integration_exist(integration_id, 404)
         assert get_ret, "实例没有被成功删除掉"
 
+    @pytest.mark.clair_integration
     def test_clair_integration(self):
         # create integration instance
         create_ret = self.integration_tool.create_integration(
