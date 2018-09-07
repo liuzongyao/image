@@ -11,26 +11,26 @@ class Pv(Common):
     def list_pv(self):
         logger.info(sys._getframe().f_code.co_name.center(50, '*'))
         url = self.get_common_pv_url()
-        return self.send(method='get', path=url)
+        return self.send(method='get', path=url, params={})
 
     def create_pv(self, file, data):
         logger.info(sys._getframe().f_code.co_name.center(50, '*'))
         url = self.get_common_pv_url()
         data = self.generate_data(file, data)
-        return self.send(method='post', path=url, data=data)
+        return self.send(method='post', path=url, data=data, params={})
 
     def update_pv(self, pv_name, file, data):
         logger.info(sys._getframe().f_code.co_name.center(50, '*'))
         url = self.get_common_pv_url(pv_name)
         data = self.generate_data(file, data)
-        return self.send(method='put', path=url, data=data)
+        return self.send(method='put', path=url, data=data, params={})
 
     def get_pv_detail(self, pv_name):
         logger.info(sys._getframe().f_code.co_name.center(50, '*'))
         url = self.get_common_pv_url(pv_name)
-        return self.send(method='get', path=url)
+        return self.send(method='get', path=url, params={})
 
     def delete_pv(self, pv_name):
         logger.info(sys._getframe().f_code.co_name.center(50, '*'))
         url = self.get_common_pv_url(pv_name)
-        return self.send(method='delete', path=url)
+        return self.send(method='delete', path=url, params={})

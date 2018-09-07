@@ -4,6 +4,8 @@ import sys
 from time import sleep, time
 import pexpect
 import requests
+
+from common import settings
 from common.api_requests import AlaudaRequest
 from common.exceptions import ResponseError, ParseResponseError
 from common.loadfile import FileUtils
@@ -94,7 +96,7 @@ class Common(AlaudaRequest):
         current_time = int(time())
         return {"start_time": current_time - 1800, "end_time": current_time}
 
-    def get_status(self, url, key, expect_value, delimiter='.'):
+    def get_status(self, url, key, expect_value, delimiter='.', params={"project_name": settings.PROJECT_NAME}):
         """
         :param url: 获取服务或者构建详情的url
         :param key: 获取状态的key 需要是个string，传入层级的key
@@ -106,7 +108,7 @@ class Common(AlaudaRequest):
         flag = False
         while cnt < 60 and not flag:
             cnt += 1
-            response = self.send(method="GET", path=url)
+            response = self.send(method="GET", path=url, params=params)
             assert response.status_code == 200, "get status failed"
             value = self.get_value(response.json(), key, delimiter)
             logger.info(value)
@@ -272,7 +274,7 @@ class Common(AlaudaRequest):
             sleep(5)
         return flag
 
-    def check_value_in_response(self, url, value):
+    def check_value_in_response(self, url, value, params={"project_name": settings.PROJECT_NAME}):
         '''
         主要用于判断创建后的资源是否在资源列表中，
             个别资源创建后会延时出现在列表中，需要循环获取
@@ -280,11 +282,12 @@ class Common(AlaudaRequest):
         :param value: 资源名称
         :return:
         '''
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
         cnt = 0
         flag = False
         while cnt < 60 and not flag:
             cnt += 1
-            response = self.send(method="GET", path=url)
+            response = self.send(method="GET", path=url, params=params)
             assert response.status_code == 200, "get list failed"
             if value in response.text:
                 flag = True
