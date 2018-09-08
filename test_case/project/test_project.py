@@ -39,11 +39,11 @@ class TestProjectSuite(object):
         ret_role = self.project.get_project_role(self.project_name)
         self.project.update_result(final_result, len(ret_role) == 2, "项目中应该有两个角色，实际：{}".format(len(ret_role)))
 
-        ret_del = self.project.delete_project(self.project_name)
-        self.project.update_result(final_result, ret_del.status_code == 409,
-                                   "期望删除项目返回409，结果：{}".format(ret_del.status_code))
-
-        self.project.delete_project_role(self.project_name)
+        # ret_del = self.project.delete_project(self.project_name)
+        # self.project.update_result(final_result, ret_del.status_code == 409,
+        #                            "期望删除项目返回409，结果：{}".format(ret_del.status_code))
+        #
+        # self.project.delete_project_role(self.project_name)
 
         ret_del = self.project.delete_project(self.project_name)
         self.project.update_result(final_result, ret_del.status_code == 204,

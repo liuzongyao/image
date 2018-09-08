@@ -109,9 +109,9 @@ class Application(Common):
 
     def get_service_url(self, service_uuid):
         url = self.get_service_loadbalance_url(service_uuid)
-        self.check_value_in_response(url, 'address')
+        flag = self.check_value_in_response(url, 'address')
         response = self.send(method='get', path=url)
-        if response.status_code == 200:
+        if response.status_code == 200 and flag:
             content = response.json()
             if len(content) > 0:
                 address = self.get_value(content, '0.address')
