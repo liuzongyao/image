@@ -104,7 +104,7 @@ def read_result():
                 html = html + '\n<tr>\n<td>{}</td>'.format(case_name) + '\n<td style="color:green;">{}</td>'.format(
                     tds[0].text) + '\n<td style="color:green;">{}</td>'.format(tds[2].text) + '\n</tr>'
                 pass_count += 1
-            elif tds[0].text == "Failed":
+            elif tds[0].text == "Failed" or tds[0].text == "Error":
                 error_message = "{},失败请单独执行case:{}".format(tbody.select("span")[0].text, tds[1].text)
                 html = html + '\n<tr>\n<td>{}</td>'.format(case_name) + '\n<td style="color:red;">{}</td>'.format(
                     tds[0].text) + '\n<td style="color:red;">{}</td>'.format(error_message) + '\n</tr>'

@@ -131,7 +131,7 @@ class Common(AlaudaRequest):
             params.update({"project_name": self.project_name})
             response = self.send(method="GET", path=url, params=params)
             assert response.status_code == 200, "get log failed"
-            logger.info("pipeline log: {}".format(response.text))
+            logger.info("log: {}".format(response.text))
             if expect_value in response.text:
                 flag = True
                 break
