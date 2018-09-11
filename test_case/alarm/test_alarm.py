@@ -54,8 +54,10 @@ class TestAlarmSuite(object):
         children = self.alarm.get_value(detail_result.json(), 'children')
         result = self.alarm.update_result(result, len(children) >= len(self.slaveips), '获取指标警报详情失败:子警报个数不正确')
         # get service instance
-        self.application.get_app_status(self.alarm.global_info['$GLOBAL_APP_ID'], 'resource.status', 'Deploying')
-        self.application.get_app_status(self.alarm.global_info['$GLOBAL_APP_ID'], 'resource.status', 'Running')
+        flag = self.application.get_app_status(self.alarm.global_info['$GLOBAL_APP_ID'], 'resource.status', 'Deploying')
+        result = self.alarm.update_result(result, flag, "未触发扩容操作")
+        flag = self.application.get_app_status(self.alarm.global_info['$GLOBAL_APP_ID'], 'resource.status', 'Running')
+        result = self.alarm.update_result(result, flag, "服务扩容失败")
         svcinstance_after = self.application.get_service_instances(self.alarm.global_info['$GLOBAL_SERVICE_ID'])
         after = 0
         for instance in svcinstance_after.json():
@@ -85,8 +87,10 @@ class TestAlarmSuite(object):
                                                                 'major'),
                                           '更新指标警报后:告警级别不是major')
         # get service instance
-        self.application.get_app_status(self.alarm.global_info['$GLOBAL_APP_ID'], 'resource.status', 'Deploying')
-        self.application.get_app_status(self.alarm.global_info['$GLOBAL_APP_ID'], 'resource.status', 'Running')
+        flag = self.application.get_app_status(self.alarm.global_info['$GLOBAL_APP_ID'], 'resource.status', 'Deploying')
+        result = self.alarm.update_result(result, flag, "未触发缩容操作")
+        flag = self.application.get_app_status(self.alarm.global_info['$GLOBAL_APP_ID'], 'resource.status', 'Running')
+        result = self.alarm.update_result(result, flag, "服务缩容操作")
         svcinstance_final = self.application.get_service_instances(self.alarm.global_info['$GLOBAL_SERVICE_ID'])
         final = 0
         for instance in svcinstance_final.json():

@@ -115,7 +115,7 @@ class Common(AlaudaRequest):
             if value == expect_value:
                 flag = True
                 break
-            if value in self.final_status:
+            if value in self.final_status and expect_value in self.final_status:
                 fail_cnt += 1
                 if fail_cnt > 2:
                     break

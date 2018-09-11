@@ -105,7 +105,7 @@ class TestApplicationSuite(object):
         result = self.application.update_result(result, event_result, '操作事件：获取应用创建事件出错')
 
         # get logs
-        log_result = self.application.get_service_log(service_uuid, '/var/hehe.txt')
+        log_result = self.application.get_service_log(service_uuid, 'logglogloglog')
         result = self.application.update_result(result, log_result, "获取服务日志失败")
 
         # get app monitor
