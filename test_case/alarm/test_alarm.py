@@ -90,7 +90,7 @@ class TestAlarmSuite(object):
         flag = self.application.get_app_status(self.alarm.global_info['$GLOBAL_APP_ID'], 'resource.status', 'Deploying')
         result = self.alarm.update_result(result, flag, "未触发缩容操作")
         flag = self.application.get_app_status(self.alarm.global_info['$GLOBAL_APP_ID'], 'resource.status', 'Running')
-        result = self.alarm.update_result(result, flag, "服务缩容操作")
+        result = self.alarm.update_result(result, flag, "服务缩容失败")
         svcinstance_final = self.application.get_service_instances(self.alarm.global_info['$GLOBAL_SERVICE_ID'])
         final = 0
         for instance in svcinstance_final.json():
