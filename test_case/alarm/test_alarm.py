@@ -34,11 +34,6 @@ class TestAlarmSuite(object):
         result = {"flag": True}
         # get service instance
         svcinstance_before = self.application.get_service_instances(self.alarm.global_info['$GLOBAL_SERVICE_ID'])
-        before = 0
-        for instance in svcinstance_before.json():
-            if self.application.get_value(instance, 'status.phase') == 'Running':
-                before += 1
-        logger.info(before)
         # create alarm
         create_result = self.alarm.create_alarm('./test_data/alarm/alarm.json', {'$alarm_name': self.metric_alarm_name})
         assert create_result.status_code == 201, "创建指标警报失败 {}".format(create_result.text)
@@ -54,17 +49,16 @@ class TestAlarmSuite(object):
         children = self.alarm.get_value(detail_result.json(), 'children')
         result = self.alarm.update_result(result, len(children) >= len(self.slaveips), '获取指标警报详情失败:子警报个数不正确')
         # get service instance
-        flag = self.application.get_app_status(self.alarm.global_info['$GLOBAL_APP_ID'], 'resource.status', 'Deploying')
-        result = self.alarm.update_result(result, flag, "未触发扩容操作")
-        flag = self.application.get_app_status(self.alarm.global_info['$GLOBAL_APP_ID'], 'resource.status', 'Running')
-        result = self.alarm.update_result(result, flag, "服务扩容失败")
-        svcinstance_after = self.application.get_service_instances(self.alarm.global_info['$GLOBAL_SERVICE_ID'])
-        after = 0
-        for instance in svcinstance_after.json():
+        before_increase = 0
+        for instance in svcinstance_before.json():
             if self.application.get_value(instance, 'status.phase') == 'Running':
-                after += 1
-        logger.info(after)
-        result = self.alarm.update_result(result, after > before, '服务扩容失败')
+                before_increase += 1
+        logger.info("before service scale up, instance num is {} ".format(before_increase))
+        num_flag = self.application.check_scale_result(self.alarm.global_info['$GLOBAL_SERVICE_ID'], before_increase,
+                                                       increase=True)
+        service_flag = self.application.get_app_status(self.alarm.global_info['$GLOBAL_APP_ID'], 'resource.status',
+                                                       'Running')
+        result = self.alarm.update_result(result, num_flag and service_flag, '服务扩容失败')
         # ack alarm
         data = []
         for c in children:
@@ -75,6 +69,8 @@ class TestAlarmSuite(object):
         result = self.alarm.update_result(result,
                                           self.alarm.get_value(detail_result.json(),
                                                                'children.0.actions.ack.status'), '子警报未确认')
+        # get instance num before decrease
+        svcinstance_before = self.application.get_service_instances(self.alarm.global_info['$GLOBAL_SERVICE_ID'])
         # update alarm
         update_alarm = self.alarm.update_alarm(alarm_id, './test_data/alarm/update_alarm.json',
                                                {'$alarm_name': self.metric_alarm_name,
@@ -87,17 +83,16 @@ class TestAlarmSuite(object):
                                                                 'major'),
                                           '更新指标警报后:告警级别不是major')
         # get service instance
-        flag = self.application.get_app_status(self.alarm.global_info['$GLOBAL_APP_ID'], 'resource.status', 'Deploying')
-        result = self.alarm.update_result(result, flag, "未触发缩容操作")
-        flag = self.application.get_app_status(self.alarm.global_info['$GLOBAL_APP_ID'], 'resource.status', 'Running')
-        result = self.alarm.update_result(result, flag, "服务缩容失败")
-        svcinstance_final = self.application.get_service_instances(self.alarm.global_info['$GLOBAL_SERVICE_ID'])
-        final = 0
-        for instance in svcinstance_final.json():
+        before_decrease = 0
+        for instance in svcinstance_before.json():
             if self.application.get_value(instance, 'status.phase') == 'Running':
-                final += 1
-        logger.info(final)
-        result = self.alarm.update_result(result, after > final, '服务缩容失败')
+                before_decrease += 1
+        logger.info("before service scale down ,instance num is {}".format(before_decrease))
+        num_flag = self.application.check_scale_result(self.alarm.global_info['$GLOBAL_SERVICE_ID'], before_decrease,
+                                                       increase=False)
+        service_flag = self.application.get_app_status(self.alarm.global_info['$GLOBAL_APP_ID'], 'resource.status',
+                                                       'Running')
+        result = self.alarm.update_result(result, num_flag and service_flag, '服务缩容失败')
         auto_ack = self.alarm.get_status(self.alarm.get_alarm_url(alarm_id), 'children.0.actions.ack.status', True)
         result = self.alarm.update_result(result, auto_ack, '无报警间隔，自动确认失败')
         # list alarm

@@ -1,8 +1,7 @@
 import sys
-
+from time import sleep
 import requests
 from requests.exceptions import ConnectionError
-
 from common import settings
 from common.base_request import Common
 from common.log import logger
@@ -266,6 +265,22 @@ class Application(Common):
         logger.info(sys._getframe().f_code.co_name.center(50, '*'))
         url = self.get_rollbackto_service_url(service_id)
         return self.send(method='put', path=url)
+
+    def check_scale_result(self, service_id, num, increase=True):
+        cnt = 0
+        while cnt < 60:
+            instance_num = 0
+            service_detail = self.get_service_instances(service_id)
+            instances = service_detail.json()
+            for instance in instances:
+                if self.get_value(instance, "status.phase") == "Running":
+                    instance_num += 1
+            if increase and instance_num > num:
+                return True
+            if not increase and num > instance_num:
+                return True
+            sleep(3)
+        return False
 
     def rollback_service(self, service_id):
         logger.info(sys._getframe().f_code.co_name.center(50, '*'))
