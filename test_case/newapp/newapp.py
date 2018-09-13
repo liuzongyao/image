@@ -98,7 +98,7 @@ class Newapplication(Common):
             for resource in response.json():
                 if self.get_value(resource, 'kubernetes.kind') == 'Application':
                     value = self.get_value(resource, 'kubernetes.spec.assemblyPhase')
-                    logger.info(value)
+                    logger.info("应用状态：{}".format(value))
                     if value == expect_value:
                         flag = True
                         break
@@ -116,7 +116,7 @@ class Newapplication(Common):
             assert response.status_code == 200, "get status failed"
             for resource in response.json():
                 if self.get_value(resource, 'kubernetes.kind') == 'Deployment':
-                    logger.info(self.get_value(resource, 'kubernetes.status'))
+                    logger.info("组件状态：{}".format(self.get_value(resource, 'kubernetes.status')))
                     if expect_value == "start":
                         if 'readyReplicas' in self.get_value(resource, 'kubernetes.status'):
                             flag = True
