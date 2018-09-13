@@ -1,6 +1,5 @@
 import pytest
 
-from common.log import logger
 from test_case.newapp.newapp import Newapplication
 
 
@@ -22,7 +21,6 @@ class TestNewApplicationSuite(object):
         """
         result = {"flag": True}
         create_result = self.newapp.create_newapp('./test_data/newapp/newapp.json', {'$newapp_name': self.newapp_name})
-        logger.info(create_result.text)
         assert create_result.status_code == 201, "新版应用创建失败 {}".format(create_result.text)
         app_status = self.newapp.get_newapp_status(self.namespace, self.newapp_name, 'Succeeded')
         assert app_status, "创建应用后，验证应用状态出错：app: {} is not running".format(self.newapp_name)
@@ -59,8 +57,8 @@ class TestNewApplicationSuite(object):
 
         detail_result = self.newapp.get_newapp_detail(self.namespace, self.newapp_name)
         result = self.newapp.update_result(result, detail_result.status_code == 200, "获取应用详情失败")
-        result = self.newapp.update_result(result, 'Application' in yaml_result.text, "删除应用下的资源详情失败:不存在Application")
-        result = self.newapp.update_result(result, 'Deployment' in yaml_result.text, "删除应用下的资源详情失败:不存在Deployment")
+        result = self.newapp.update_result(result, 'Application' in detail_result.text, "删除应用下的资源详情失败:不存在Application")
+        result = self.newapp.update_result(result, 'Deployment' in detail_result.text, "删除应用下的资源详情失败:不存在Deployment")
         result = self.newapp.update_result(result, 'Service' not in detail_result.text, "删除应用下的资源详情失败:存在Service")
         result = self.newapp.update_result(result, 'ClusterRole' not in detail_result.text,
                                            "删除应用下的资源详情失败:存在ClusterRole")
@@ -73,8 +71,8 @@ class TestNewApplicationSuite(object):
         assert app_status, "添加资源到应用后，验证应用状态出错：app: {} is not running".format(self.newapp_name)
         detail_result = self.newapp.get_newapp_detail(self.namespace, self.newapp_name)
         result = self.newapp.update_result(result, detail_result.status_code == 200, "获取应用详情失败")
-        result = self.newapp.update_result(result, 'Application' in yaml_result.text, "添加资源到应用详情失败:不存在Application")
-        result = self.newapp.update_result(result, 'Deployment' in yaml_result.text, "添加资源到应用详情失败:不存在Deployment")
+        result = self.newapp.update_result(result, 'Application' in detail_result.text, "添加资源到应用详情失败:不存在Application")
+        result = self.newapp.update_result(result, 'Deployment' in detail_result.text, "添加资源到应用详情失败:不存在Deployment")
         result = self.newapp.update_result(result, 'Service' in detail_result.text, "添加资源到应用详情失败:不存在Service")
         result = self.newapp.update_result(result, 'ClusterRole' in detail_result.text,
                                            "添加资源到应用详情失败:不存在ClusterRole")
@@ -88,7 +86,6 @@ class TestNewApplicationSuite(object):
         assert start_result.status_code == 204, "启动应用失败 {}".format(stop_result.text)
         app_status = self.newapp.get_deployment_status(self.namespace, self.newapp_name, "start")
         assert app_status, "启动应用后，验证应用状态出错：app: {} is not running".format(self.newapp_name)
-        self.newapp.get_newapp_status(self.namespace, self.newapp_name, 'Succeeded')
 
         delete_result = self.newapp.delete_newapp(self.namespace, self.newapp_name)
         assert delete_result.status_code == 204, "删除应用失败 {}".format(stop_result.text)
