@@ -1,0 +1,40 @@
+{
+  "resource": {
+    "name": "$newapp_name",
+    "namespace": "$K8S_NAMESPACE"
+  },
+  "kubernetes": [
+    {
+      "apiVersion": "extensions/v1beta1",
+      "kind": "Deployment",
+      "metadata": {
+        "name": "$newapp_name",
+        "namespace": "$K8S_NAMESPACE"
+      },
+      "spec": {
+        "replicas": 1,
+        "template": {
+          "metadata": {
+            "labels": {
+              "app": "$newapp_name"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "image": "$IMAGE",
+                "name": "containersname",
+                "ports": [
+                  {
+                    "containerPort": 80,
+                    "name": "portsname"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}
