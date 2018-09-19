@@ -26,7 +26,7 @@ class TestLogSuite(object):
         # get logsource
         logsource_result = self.log.get_logsource()
         result = self.log.update_result(result, logsource_result.status_code == 200, '获取数据源失败')
-        result = self.log.update_result(result, 'default' in logsource_result.text, '获取数据源失败:default不在列表中')
+        # result = self.log.update_result(result, 'default' in logsource_result.text, '获取数据源失败:default不在列表中')
         # get types
         types_result = self.log.get_type()
         result = self.log.update_result(result, types_result.status_code == 200, '获取查询类型失败')
