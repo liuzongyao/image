@@ -25,4 +25,4 @@ config_name: $CONFIG_NAME
 memory: $MEMORY
 project_name: $PROJECT_NAME
 space_name: $SPACE_NAME
-cpu: 0.5
+cpu: 1
