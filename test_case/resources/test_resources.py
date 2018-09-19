@@ -5,6 +5,7 @@ from test_case.jenkins.jenkins import Jenkins
 
 
 @pytest.mark.space
+@pytest.mark.BAT
 class TestResourcesSuite(object):
     def setup_class(self):
         self.resources_tool = Resources()
