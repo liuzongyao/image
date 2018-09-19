@@ -51,3 +51,9 @@ class Scs(Common):
             except (KeyError, ValueError, IndexError, ParseResponseError):
                 continue
         return default_size
+
+    def get_resturl(self):
+        detail_result = self.get_scs_detail('alauda-system-gfs')
+        if detail_result.status_code != 200:
+            return ''
+        return self.get_value(detail_result.json(), 'kubernetes.parameters.resturl')

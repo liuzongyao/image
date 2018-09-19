@@ -1,6 +1,6 @@
 kind: StorageClass
 parameters:
-  resturl: 'http://$master_ip:62000'
+  resturl: '$resturl'
   volumetype: none
 apiVersion: storage.k8s.io/v1
 reclaimPolicy: Delete

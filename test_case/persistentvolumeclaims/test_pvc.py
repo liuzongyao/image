@@ -104,12 +104,11 @@ class TestPvcSuite(object):
             return
         result = {"flag": True}
         # create scs
-        if len(self.masterips) == 0:
-            assert False, "获取master节点失败，不能创建正常使用的存储类"
-        masterip = self.masterips[0]
+        resturl = self.scs.get_resturl()
+        assert resturl != '', "获取resturl失败，不能创建正常使用的存储类"
         create_result = self.scs.create_scs("./test_data/scs/scs.yml",
                                             {"$scs_name": self.scs_name, "$is_default": "false",
-                                             "$master_ip": masterip})
+                                             "$resturl": resturl})
         assert create_result.status_code == 201, "创建sc失败{}".format(create_result.text)
 
         # create pvc
@@ -140,12 +139,11 @@ class TestPvcSuite(object):
             assert False, "有两个以上的默认存储类，无法测试"
         elif self.default_size == 0:
             # create scs
-            if len(self.masterips) == 0:
-                assert False, "获取master节点失败，不能创建正常使用的存储类"
-            masterip = self.masterips[0]
+            resturl = self.scs.get_resturl()
+            assert resturl != '', "获取resturl失败，不能创建正常使用的存储类"
             create_result = self.scs.create_scs("./test_data/scs/scs.yml",
                                                 {"$scs_name": self.defaultscs_name, "$is_default": "true",
-                                                 "$master_ip": masterip})
+                                                 "$resturl": resturl})
             assert create_result.status_code == 201, "创建sc失败{}".format(create_result.text)
         result = {"flag": True}
         # create pvc
