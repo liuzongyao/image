@@ -15,7 +15,7 @@ class TestNewApplicationSuite(object):
 
     @pytest.mark.BAT
     @pytest.mark.newapp
-    def test_newapp(self):
+    def nottest_newapp(self):
         """
         创建应用-获取全部应用-获取命名空间下的应用-更新应用-获取应用yaml-删除应用下的资源-获取应用详情-添加资源到应用-停止应用-启动应用-删除应用
         """
