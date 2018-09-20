@@ -25,6 +25,19 @@ class LoadBalancer(Common):
     def get_lb_event_url(self):
         return "/v1/events/{}?pageno=1&size=100".format(settings.ACCOUNT)
 
+    def get_lb_name(self):
+        url = self.get_lb_url()
+        params = {"region_name": self.region_name}
+        response = self.send(method="get", path=url, params=params)
+        if response.status_code == 200:
+            contents = response.json()
+            for content in contents:
+                if content['type'] == "haproxy":
+                    lb_name = content['name']
+                    return lb_name
+            return None
+        return "lb_name not found"
+
     def create_lb(self, file, data):
         url = self.get_lb_url()
         data = self.generate_data(file, data)
@@ -60,14 +73,24 @@ class LoadBalancer(Common):
         url = self.get_lb_event_url()
         return self.get_events(url, lb_id, operation)
 
-    def get_url_code(self, ):
-        getting = True
-        cnt = 0
-        time1 = time.time()
-        while cnt < 5 and getting:
-            cnt = cnt + 1
-            time.sleep(1)
+    def get_app_lbdetail(self, app_id):
+        logger.info("************************** get app_lb_detail ********************************")
+        url = self.get_lb_url()
+        params = {"region_name": self.region_name, "service_id": app_id, "frontend": True}
+        params.update({"project_name": self.project_name})
+        return self.send(method='get', path=url, params=params)
 
-    def get_service_loadbalance_url(self, service_id):
-        return "/v1/load_balancers/{}?region_name={}&detail=false&service_id={}" \
-               "&frontend=true".format(settings.ACCOUNT, settings.REGION_NAME, service_id)
+    def access_service(self, service_url, query):
+        logger.info("************************** access service **********************************")
+        try:
+            cnt = 0
+            while cnt < 5 and True:
+                cnt = cnt + 1
+                time.sleep(1)
+                ret = requests.get(service_url)
+                logger.info(ret.text)
+                if ret.status_code == 200 and query in ret.text:
+                    return True
+        except ConnectionError as e:
+            logger.info("access service failed:{}".format(e))
+        return False
