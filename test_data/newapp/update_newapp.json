@@ -1,6 +1,23 @@
 {
   "kubernetes": [
     {
+      "kind": "Application",
+      "apiVersion": "app.k8s.io/v1beta1",
+      "spec": {
+        "descriptor": {
+        },
+        "selector": {
+          "matchLabels": {
+            "app.alauda.io/name": "$newapp_name.$K8S_NAMESPACE"
+          }
+        }
+      },
+      "metadata": {
+        "name": "$newapp_name",
+        "namespace": "$K8S_NAMESPACE"
+      }
+    },
+    {
       "apiVersion": "extensions/v1beta1",
       "kind": "Deployment",
       "metadata": {

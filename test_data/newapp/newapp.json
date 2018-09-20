@@ -1,7 +1,14 @@
 {
   "resource": {
     "name": "$newapp_name",
-    "namespace": "$K8S_NAMESPACE"
+    "namespace": "$K8S_NAMESPACE",
+    "owners": [
+            {
+                "name": "$newapp_name",
+                "phone": "15211111111"
+            }
+        ],
+    "displayName": "$newapp_name"
   },
   "kubernetes": [
     {
