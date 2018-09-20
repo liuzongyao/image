@@ -9,7 +9,7 @@ from test_case.log.log import Log
 class TestAlarmSuite(object):
     def setup_class(self):
         self.alarm = Alarm()
-        self.metric_alarm_name = 'alauda-metric-alarm-{}'.format(self.alarm.region_name).replace('_', '-')
+        self.metric_alarm_name = 'alauda-metric-alarm2-{}'.format(self.alarm.region_name).replace('_', '-')
         self.slaveips = self.alarm.global_info["$SLAVEIPS"].split(",")
         self.application = Application()
         self.log_name = 'alauda-searchforalarm-{}'.format(self.alarm.region_name).replace('_', '-')
