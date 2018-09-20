@@ -106,7 +106,7 @@ class Common(AlaudaRequest):
         cnt = 0
         fail_cnt = 0
         flag = False
-        while cnt < 60 and not flag:
+        while cnt < 120 and not flag:
             cnt += 1
             response = self.send(method="GET", path=url, params=params)
             assert response.status_code == 200, "get status failed"
