@@ -42,7 +42,17 @@
                     "containerPort": 80,
                     "name": "portsname"
                   }
-                ]
+                ],
+                "resources": {
+                  "limits": {
+                    "cpu": "20m",
+                    "memory": "50M"
+                  },
+                  "requests": {
+                    "cpu": "20m",
+                    "memory": "50M"
+                  }
+                }
               }
             ]
           }

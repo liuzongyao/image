@@ -1,0 +1,38 @@
+namespace:
+  apiVersion: v1
+  kind: Namespace
+  metadata:
+    name: $K8S_NAMESPACE
+resourcequota:
+ apiVersion: v1
+ kind: ResourceQuota
+ metadata:
+  name: $K8S_NAMESPACE
+  namespace: $K8S_NAMESPACE
+ spec:
+  hard:
+    limits.cpu: 100
+    requests.cpu: 100
+    limits.memory: 100G
+    requests.memory: 100G
+    requests.storage: 100G
+    persistentvolumeclaims: 100
+    pods: 100
+limitrange:
+ apiVersion: v1
+ kind: LimitRange
+ metadata:
+  name: $K8S_NAMESPACE
+  namespace: $K8S_NAMESPACE
+ spec:
+  limits:
+  - default:
+       memory: 1G
+       cpu: 1
+    defaultRequest:
+       memory: 1G
+       cpu: "0.5"
+    max:
+       cpu: 1
+       memory: 1G
+    type: Container

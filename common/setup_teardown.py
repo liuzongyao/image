@@ -255,6 +255,9 @@ class TearDown(AlaudaRequest):
         self.delete()
 
     def delete(self):
+        self.app_client.delete_app(self.global_info['$GLOBAL_APP_NAME'])
+        self.app_client.check_exists(self.app_client.app_common_url(self.global_info['$GLOBAL_APP_ID']), 404)
+
         if "CREATE_NAMESPACE" in self.global_info:
             self.namespace_client.delete_namespaces(settings.K8S_NAMESPACE)
 
@@ -267,5 +270,3 @@ class TearDown(AlaudaRequest):
 
         noti_id = self.global_info.get("$NOTI_UUID")
         self.noti_client.delete_noti(noti_id)
-
-        self.app_client.delete_app(self.global_info['$GLOBAL_APP_NAME'])

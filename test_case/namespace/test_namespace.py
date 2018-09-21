@@ -8,13 +8,16 @@ from test_case.persistentvolumeclaims.pvc import Pvc
 class TestNamespaceSuite(object):
     def setup_class(self):
         self.namespace = Namespace()
-        self.namespace_name = 'alauda-ns-{}'.format(self.namespace.region_name).replace('_', '-')
+        self.namespace_name = '{}-alauda-ns-{}'.format(self.namespace.project_name,
+                                                       self.namespace.region_name).replace('_', '-')
         self.resourcequota_name = 'alauda-quota-{}'.format(self.namespace.region_name).replace('_', '-')
         self.pvc = Pvc()
         self.pvc_name = 'alauda-pvcforquota-{}'.format(self.namespace.region_name).replace('_', '-')
         self.nsforquota_name = 'alauda-nsforquota-{}'.format(self.namespace.region_name).replace('_', '-')
         self.application = Application()
         self.app_name = 'alauda-appforquota-{}'.format(self.namespace.region_name).replace('_', '-')
+        self.general_namespace_name = "{}-alauda-gens-{}".format(self.namespace.project_name,
+                                                                 self.namespace.region_name).replace('_', '-')
 
         self.teardown_class(self)
 
@@ -143,5 +146,27 @@ class TestNamespaceSuite(object):
         delete_ns_result = self.namespace.delete_namespaces(self.nsforquota_name)
         assert delete_ns_result.status_code == 204, "删除命名空间失败 {}".format(delete_ns_result.text)
         delete_flag = self.namespace.check_exists(self.namespace.get_namespace_url(self.nsforquota_name), 404)
+        assert delete_flag, "删除命名空间失败"
+        assert result['flag'], result
+
+    @pytest.mark.ns
+    def nottest_general_namespaces(self):
+        result = {"flag": True}
+        create_ns_result = self.namespace.create_general_namespaces('./test_data/namespace/newnamespace.yml',
+                                                                    {'$K8S_NAMESPACE': self.general_namespace_name})
+        assert create_ns_result.status_code == 201, "创建新命名空间失败 {}".format(create_ns_result.text)
+        resourcequota_flag = self.namespace.check_exists(
+            self.namespace.get_resourcequota_url(self.general_namespace_name, self.general_namespace_name), 200)
+        result = self.namespace.update_result(result, resourcequota_flag, 'resourcequota创建失败')
+        limitrange_flag = self.namespace.check_exists(
+            self.namespace.get_limitrange_url(self.general_namespace_name, self.general_namespace_name), 200)
+        result = self.namespace.update_result(result, limitrange_flag, 'limitrange创建失败')
+        list_ns_result = self.namespace.list_namespaces()
+        result = self.namespace.update_result(result, list_ns_result.status_code == 200, '获取命名空间列表失败')
+        result = self.namespace.update_result(result, self.general_namespace_name in list_ns_result.text,
+                                              '获取命名空间列表失败:新建的不在列表中')
+        delete_ns_result = self.namespace.delete_namespaces(self.general_namespace_name)
+        assert delete_ns_result.status_code == 204, "删除命名空间失败 {}".format(delete_ns_result.text)
+        delete_flag = self.namespace.check_exists(self.namespace.get_namespace_url(self.general_namespace_name), 404)
         assert delete_flag, "删除命名空间失败"
         assert result['flag'], result

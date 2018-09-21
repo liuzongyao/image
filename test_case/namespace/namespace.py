@@ -9,8 +9,14 @@ class Namespace(Common):
         return namespace and "v2/kubernetes/clusters/{}/namespaces/{}".format(self.region_id, namespace) or \
                "v2/kubernetes/clusters/{}/namespaces".format(self.region_id)
 
+    def get_general_namespaces_url(self):
+        return "v2/kubernetes/clusters/{}/general-namespaces".format(self.region_name)
+
     def get_resourcequota_url(self, namespace='', quotaname=''):
         return "v2/kubernetes/clusters/{}/resourcequotas/{}/{}".format(self.region_id, namespace, quotaname)
+
+    def get_limitrange_url(self, namespace='', limitname=''):
+        return "v2/kubernetes/clusters/{}/limitranges/{}/{}".format(self.region_id, namespace, limitname)
 
     def get_resource_url(self, namespace):
         return namespace and "v2/kubernetes/clusters/{}/namespaces/{}/resources".format(self.region_id, namespace)
@@ -18,6 +24,12 @@ class Namespace(Common):
     def create_namespaces(self, file, data):
         logger.info(sys._getframe().f_code.co_name.center(50, '*'))
         path = self.get_namespace_url()
+        data = self.generate_data(file, data)
+        return self.send(method="POST", path=path, data=data)
+
+    def create_general_namespaces(self, file, data):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        path = self.get_general_namespaces_url()
         data = self.generate_data(file, data)
         return self.send(method="POST", path=path, data=data)
 

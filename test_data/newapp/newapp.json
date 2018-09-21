@@ -3,11 +3,11 @@
     "name": "$newapp_name",
     "namespace": "$K8S_NAMESPACE",
     "owners": [
-            {
-                "name": "$newapp_name",
-                "phone": "15211111111"
-            }
-        ],
+      {
+        "name": "$newapp_name",
+        "phone": "15211111111"
+      }
+    ],
     "displayName": "$newapp_name"
   },
   "kubernetes": [
@@ -36,7 +36,17 @@
                     "containerPort": 80,
                     "name": "portsname"
                   }
-                ]
+                ],
+                "resources": {
+                  "limits": {
+                    "cpu": "20m",
+                    "memory": "50M"
+                  },
+                  "requests": {
+                    "cpu": "20m",
+                    "memory": "50M"
+                  }
+                }
               }
             ]
           }

@@ -10,7 +10,7 @@ def get_list_from_str(string, separator=','):
 API_URL = os.getenv("API_URL", "https://api-staging.alauda.cn")
 ACCOUNT = os.getenv("ACCOUNT", "testorg001")
 SUB_ACCOUNT = os.getenv("SUB_ACCOUNT", "")
-PASSWORD = os.getenv("PASSWORD", "alauda_staging")
+PASSWORD = os.getenv("PASSWORD", "Mathilde1861")
 REGION_NAME = os.getenv("REGION_NAME", "aws_newk8s")
 REGISTRY_NAME = os.getenv("REGISTRY_NAME", "aws_newk8s")
 IMAGE = os.getenv("IMAGE", "index.alauda.cn/alaudaorg/qaimages:helloworld")
@@ -50,7 +50,7 @@ CASE_TYPE = os.getenv("CASE_TYPE")
 PROJECT_NAME = os.getenv("PROJECT_NAME", "default")
 ENV = os.getenv("ENV", "Staging")
 RECIPIENTS = get_list_from_str(os.getenv("RECIPIENTS", "testing@alauda.io"))
-K8S_NAMESPACE = os.getenv("K8S_NAMESPACE", "alauda-default2-{}".format(REGION_NAME).replace("_", "-"))
+K8S_NAMESPACE = os.getenv("K8S_NAMESPACE", "{}-alauda-default2-{}".format(PROJECT_NAME, REGION_NAME).replace("_", "-"))
 SPACE_NAME = os.getenv("SPACE_NAME", "alauda-default-{}".format(REGION_NAME).replace("_", "-"))
 
 SMTP = {
