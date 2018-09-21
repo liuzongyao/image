@@ -16,7 +16,8 @@ class Common(AlaudaRequest):
     def __init__(self):
         super(Common, self).__init__()
         self.global_info = FileUtils.load_file(self.global_info_path)
-        self.final_status = ["S", "F", "Running", "Error", "FAILURE", "failed", "FAIL"]
+        self.final_status = ["S", "F", "Running", "Error", "FAILURE", "failed", "FAIL", "Failed",
+                             "CreateError", "StartError"]
         self.region_id = self.global_info["$REGION_ID"]
 
     def generate_data(self, file_path, data={}):
@@ -115,7 +116,7 @@ class Common(AlaudaRequest):
             if value == expect_value:
                 flag = True
                 break
-            if value in self.final_status and expect_value in self.final_status:
+            if value in self.final_status:
                 fail_cnt += 1
                 if fail_cnt > 2:
                     break
