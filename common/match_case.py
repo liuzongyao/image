@@ -57,6 +57,7 @@ def casename():
         "test_newapp": "新应用测试:创建应用-获取全部应用-获取命名空间下的应用-更新应用-获取应用yaml-删除应用下的资源-获取应用详情-添加资源到应用-停止应用-启动应用-删除应用",
         "test_project": "创建项目-获取项目列表-更新项目-获取项目详情-删除项目",
         "test_space": "创建space-更新space-判断Jenkins是否能访问-创建集成中心实例-获取模板-创建代码仓库凭证-创建Jenkins流水线项目"
-                      "-获取space资源详情-删除集成中心实例-删除Jenkins流水线-删除space"
+                      "-获取space资源详情-删除集成中心实例-删除Jenkins流水线-删除space",
+        "test_sonarqube_plugin": "判断集群的网络模式-判断插件的类型-安装插件-获取已安装插件的状态-获取已安装插件的详情-删除应用-删除集成中心实例"
     }
     return casename_dict

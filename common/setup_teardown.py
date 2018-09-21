@@ -81,8 +81,10 @@ class SetUp(AlaudaRequest):
         self.region_data = response.json()
         self.region_id = self.region_data["id"]
         self.region_volume = ",".join(self.region_data.get("features").get("volume").get("features"))
+        self.network_modes = ",".join(self.region_data.get('features').get('network_modes').get('features'))
         self.common.update({"$REGION_ID": self.region_id})
         self.common.update({"$REGION_VOLUME": self.region_volume})
+        self.common.update({"NETWORK_MODES": self.network_modes})
 
     @retry()
     def get_build_endpontid(self):
