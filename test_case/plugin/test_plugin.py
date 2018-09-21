@@ -71,17 +71,17 @@ class TestPluginSuite(object):
 
         plugin_uuid = ret.json().get('uuid')
 
-        # # get app status
-        # ret = self.plugin_tool.get_install_plugin_detail('SonarQube', plugin_uuid, 'pluginapplication.status',
-        #                                                  'Running')
-        #
-        # assert ret, "sonarqube插件部署应用失败"
+        # get app status
+        ret = self.plugin_tool.get_install_plugin_status('SonarQube', plugin_uuid, 'pluginapplication.status',
+                                                         'Running')
 
-        # # get integration instance status
-        # ret = self.plugin_tool.get_install_plugin_detail('SonarQube', plugin_uuid, 'pluginintegration.status',
-        #                                                  'Succeed')
-        #
-        # assert ret, "sonarqube插件创建集成中心实例失败"
+        assert ret, "sonarqube插件部署应用失败"
+
+        # get integration instance status
+        ret = self.plugin_tool.get_install_plugin_status('SonarQube', plugin_uuid, 'pluginintegration.status',
+                                                         'Succeed')
+
+        assert ret, "sonarqube插件创建集成中心实例失败"
 
         # get plugin status
         ret = self.plugin_tool.get_install_plugin_status('SonarQube', plugin_uuid, 'status', 'Succeed')
@@ -95,6 +95,13 @@ class TestPluginSuite(object):
         app_uuid = ret.json()['pluginapplication']['uuid']
 
         integration_id = ret.json()['pluginintegration']['uuid']
+
+        # get running plugin
+        ret = self.plugin_tool.get_running_plugin('SonarQube', self.region_id)
+
+        assert ret.status_code == 200, "获取运行中的插件的操作失败"
+
+        assert app_uuid in ret.text, "已成功安装的插件不在运行中的插件列表中"
 
         # delete app
         ret = self.app_tool.delete_app(self.plugin_instance_name)
