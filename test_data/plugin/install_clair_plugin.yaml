@@ -20,7 +20,7 @@ basic_config:
     size: CUSTOMIZED
 advanced_config:
   sonarqube_volume: $sonarqube_volume
-  sonarqube_port: 9000
+  sonarqube_port: 9009
   db_volume: $db_volume
   db_port: 5433
   db_name: alauda
