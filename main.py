@@ -39,6 +39,9 @@ def main():
     # 清理数据
     TearDown()
 
+    if resultflag == "Failed":
+        exit(1)
+
 
 if __name__ == '__main__':
     main()
