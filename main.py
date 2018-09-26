@@ -39,6 +39,9 @@ def main():
     # 清理数据
     TearDown()
 
+    if not resultflag:
+        exit(1)
+
 
 if __name__ == '__main__':
     main()
