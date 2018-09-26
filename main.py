@@ -39,7 +39,7 @@ def main():
     # 清理数据
     TearDown()
 
-    if not resultflag:
+    if resultflag == "Failed":
         exit(1)
 
 
