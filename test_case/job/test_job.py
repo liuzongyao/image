@@ -77,7 +77,6 @@ class TestJobSuit(object):
         ret_job_list = self.job.get_job_list(config_id)
         result = self.job.update_result(result, ret_job_list.status_code == 200, '验证定时任务错误')
         num = ret_job_list.json().get("count", 0)
-        print(ret_job_list.json())
         result = self.job.update_result(result, num >= 2, '验证定时任务错误')
 
         # update job_config
