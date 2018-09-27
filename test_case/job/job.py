@@ -71,10 +71,10 @@ class Job(Common):
         url = self.get_job_url(job_id)
         return self.send(method="DELETE", path=url)
 
-    def get_job_list(self, config_id, key, expect_value):
+    def get_job_list(self, config_id):
         logger.info("************************** get job list ********************************")
         url = self.get_job_list_url(config_id)
-        return self.get_status(url, key, expect_value)
+        return self.send(method="GET", path=url)
 
     def get_config_id(self, job_name):
         url = self.get_job_config_url()

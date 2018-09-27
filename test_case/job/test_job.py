@@ -1,5 +1,6 @@
 import pytest
 from test_case.job.job import Job
+from time import sleep
 
 
 @pytest.mark.region
@@ -71,9 +72,13 @@ class TestJobSuit(object):
         ret_log = self.job.get_job_log(job_id, 'create')
         result = self.job.update_result(result, ret_log, "获取任务历史日志失败，期望存在关键字create")
 
-        # schedule_rule
-        ret_job_list = self.job.get_job_list(config_id, "count", 2)
-        assert ret_job_list, "验证定时任务错误，状态{}".format(ret_job_list)
+        # schedule_rule, sleep 60s 验证定时任务
+        sleep(60)
+        ret_job_list = self.job.get_job_list(config_id)
+        result = self.job.update_result(result, ret_job_list.status_code == 200, '验证定时任务错误')
+        num = ret_job_list.json().get("count", 0)
+        print(ret_job_list.json())
+        result = self.job.update_result(result, num >= 2, '验证定时任务错误')
 
         # update job_config
         ret_update = self.job.update_job_config(config_id, './test_data/job/update_job_config.json',
