@@ -70,7 +70,7 @@ class TestPrivateBuildTestSuit(object):
         assert ret_trigger.status_code == 201, "触发构建出错{}".format(ret_trigger.text)
         history_id = ret_trigger.json()["build_id"]
         # 检查触发事件
-        event_flag = self.client.get_build_event(history_id, "create")
+        event_flag = self.client.get_build_event(history_id, "trigger")
         self.client.update_result(result, event_flag, "获取构建触发事件出错")
         ret_status = self.client.get_build_status(history_id)
         assert ret_status, "触发构建出错：build failed"
