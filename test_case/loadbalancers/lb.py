@@ -11,7 +11,7 @@ class LoadBalancer(Common):
         super(LoadBalancer, self).__init__()
 
     def get_lb_url(self, lb_id=None):
-        return lb_id and "v1/load_balancers/{}/{}".format(settings.ACCOUNT, lb_id) or "v1/load_balancers/{}/".format(
+        return lb_id and "v1/load_balancers/{}/{}".format(self.account, lb_id) or "v1/load_balancers/{}/".format(
             self.account)
 
     def get_lb_frontends_url(self, lb_id=None):
