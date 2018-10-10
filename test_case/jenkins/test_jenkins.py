@@ -644,6 +644,8 @@ class TestJenkinsBuildImageUpdateService(object):
         ret = self.image_tool.get_repo_tag(self.repo)
         assert ret.status_code == 200, "获取镜像版本失败"
 
+        logger.info("image tags list: {}".format(ret.text))
+
         assert self.sync_repo_tag in ret.text, "同步镜像仓库失败"
 
         # delete image tag
