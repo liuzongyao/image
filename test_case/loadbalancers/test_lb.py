@@ -48,7 +48,7 @@ class TestLoadBalancer(object):
 
         # update lb_dns
         ret_update_dns = self.loadbalancer.update_lb_dns(self.ha_name, './test_data/loadbalancers/update_dns.json',
-                                                         {"$dns_name": self.dns_name, "$true/false": False})
+                                                         {"$dns_name": self.dns_name, "$tf": False})
         assert ret_update_dns.status_code == 204, "更新lb_dns失败：{}".format(ret_update_dns.text)
 
         # check lb detail
