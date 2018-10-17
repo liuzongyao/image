@@ -1,6 +1,6 @@
 {
 	"action": "set_domain_suffix",
-	"disable_default_suffix": "$true/false",
+	"disable_default_suffix": "$tf",
 	"domain_info": [{
 		"domain": "$dns_name"
 	}]
