@@ -16,7 +16,7 @@ class TestLoadBalancer(object):
     def teardown_class(self):
         self.loadbalancer.delete_lb(self.lb_name)
 
-    def test_lb(self):
+    def test_lb_dns(self):
         """
         创建(导入)lb-获取lb列表-删除新创建lb-添加自定义域名后缀-查看lb详情自定义域名-添加挂ha服务-获取服务域名(包括默认域名)-验证服务能够访问
         -不使用默认域名-获取lb域名信息-验证ha地址不能访问-删除域名后缀-域名后缀地址不能访问-#删除域名后地址减少
