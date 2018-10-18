@@ -640,6 +640,9 @@ class TestJenkinsBuildImageUpdateService(object):
 
         assert ret, "流水线项目执行失败"
 
+        # 加2秒的等待时间，以防镜像仓库中的数据还没有更新
+        time.sleep(2)
+
         # get repo tag
         ret = self.image_tool.get_repo_tag(self.repo)
         assert ret.status_code == 200, "获取镜像版本失败"
