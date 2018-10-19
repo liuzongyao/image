@@ -199,7 +199,7 @@ class TestJenkinsBuildImageUpdateService(object):
         logger.info("image tag: {}".format(
             self.app_tool.get_value(ret.json(), 'kubernetes.0.spec.template.spec.containers.0.image')))
 
-        assert image_tag == self.repo_additional_tag, "流水线更新应用失败"
+        assert image_tag == self.repo_tag, "流水线更新应用失败"
 
         # delete jenkins pipeline
         ret = self.jenkins_tool.delete_pipeline(pipeline_id)
