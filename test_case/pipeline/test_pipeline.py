@@ -181,23 +181,23 @@ class TestPipelineSuite(object):
 
         contents = ret.json()
 
-        if contents['build_id'] and len(contents['artifacts']) > 0:
-            # get upload artifacts result
-            ret = self.pipeline_tool.get_upload_artifacts_result(contents['build_id'])
-
-            assert ret.status_code == 200, "获取上传产出物失败"
-
-            artifact = contents['artifacts'][0]['key']
-            logger.info("artifact: {}".format(artifact))
-
-            assert artifact in ret.text, "上传产出物失败"
-
-            # get download artifacts result
-            ret = self.pipeline_tool.get_download_artifacts_result(pipeline_id, history_id)
-
-            assert ret.status_code == 200, "获取下载产出物失败"
-
-            assert artifact in ret.text, "下载产出物失败"
+        # if contents['build_id'] and len(contents['artifacts']) > 0:
+        #     # get upload artifacts result
+        #     ret = self.pipeline_tool.get_upload_artifacts_result(contents['build_id'])
+        #
+        #     assert ret.status_code == 200, "获取上传产出物失败"
+        #
+        #     artifact = contents['artifacts'][0]['key']
+        #     logger.info("artifact: {}".format(artifact))
+        #
+        #     assert artifact in ret.text, "上传产出物失败"
+        #
+        #     # get download artifacts result
+        #     ret = self.pipeline_tool.get_download_artifacts_result(pipeline_id, history_id)
+        #
+        #     assert ret.status_code == 200, "获取下载产出物失败"
+        #
+        #     assert artifact in ret.text, "下载产出物失败"
 
         # delete pipeline history
         ret = self.pipeline_tool.delete_pipeline_history(pipeline_id, history_id)
