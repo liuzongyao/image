@@ -1,15 +1,9 @@
-import requests
-import time
-
 from common import settings
 from common.base_request import Common
 from common.log import logger
 
 
 class LoadBalancer(Common):
-    def __init__(self):
-        super(LoadBalancer, self).__init__()
-
     def get_lb_url(self, lb_id=None):
         return lb_id and "v1/load_balancers/{}/{}".format(self.account, lb_id) or "v1/load_balancers/{}/".format(
             self.account)
@@ -79,18 +73,3 @@ class LoadBalancer(Common):
         params = {"region_name": self.region_name, "service_id": app_id, "frontend": True}
         params.update({"project_name": self.project_name})
         return self.send(method='get', path=url, params=params)
-
-    def access_service(self, service_url, query):
-        logger.info("************************** access service **********************************")
-        try:
-            cnt = 0
-            while cnt < 5 and True:
-                cnt = cnt + 1
-                time.sleep(1)
-                ret = requests.get(service_url)
-                logger.info(ret.text)
-                if ret.status_code == 200 and query in ret.text:
-                    return True
-        except ConnectionError as e:
-            logger.info("access service failed:{}".format(e))
-        return False

@@ -67,7 +67,7 @@ class TestLoadBalancer(object):
             default_domain = self.loadbalancer.get_value(content, '0.frontends.0.rules.0.domain')
             result = self.loadbalancer.update_result(result, self.dns_name in dns_domain, '获取app_lb详情:期望存在自定义域名后缀')
             result = self.loadbalancer.update_result(result, self.loadbalancer in default_domain,
-                                                     '获取app_lb详情:期望存在默认域名后缀怒')
+                                                     '获取app_lb详情:期望存在默认域名后缀')
 
             # check access service
             dns_domain_url = "{}://{}".format(protocol, dns_domain)
@@ -84,7 +84,8 @@ class TestLoadBalancer(object):
             result = self.loadbalancer.update_result(result, False, "获取app_lb_detail为空")
 
         # don't use default and dns domain
-        ret_disable_defaule_dns = self.loadbalancer.update_lb_dns(self.ha_name, './test_data/loadbalancers/update_dns.json',
+        ret_disable_defaule_dns = self.loadbalancer.update_lb_dns(self.ha_name,
+                                                                  './test_data/loadbalancers/update_dns.json',
                                                                   {"\"$bool\"": "true", "\"$dns_name\"": "[]"})
         assert ret_disable_defaule_dns.status_code == 204, "更新lb_dns失败：{}".format(ret_disable_defaule_dns)
 
@@ -92,11 +93,10 @@ class TestLoadBalancer(object):
         ret_lb_detail = self.loadbalancer.get_lb_detail(self.ha_name)
         result = self.loadbalancer.update_result(result, ret_lb_detail.status_code == 200, '获取lb_detail详情出错')
 
-
-        #get app lb detail
-        ret_app_lbdetail=self.loadbalancer.get_app_lbdetail(self.app_id)
-        result=self.loadbalancer.update_result(result,ret_app_lbdetail.status_code==200.,'获取app_lb_detail详情出错')
-        content=ret_app_lbdetail.json()
+        # get app lb detail
+        ret_app_lbdetail = self.loadbalancer.get_app_lbdetail(self.app_id)
+        result = self.loadbalancer.update_result(result, ret_app_lbdetail.status_code == 200., '获取app_lb_detail详情出错')
+        content = ret_app_lbdetail.json()
         if len(content) > 0:
             domin_info = self.loadbalancer.get_uuid_accord_name(ret_lb_detail.json().get("domain_info"),
                                                                 {"type": "default-domain"},
@@ -106,7 +106,7 @@ class TestLoadBalancer(object):
             default_domain = self.loadbalancer.get_value(content, '0.frontends.0.rules.0.domain')
             result = self.loadbalancer.update_result(result, self.dns_name in dns_domain, '获取app_lb详情:期望存在自定义域名后缀')
             result = self.loadbalancer.update_result(result, self.loadbalancer in default_domain,
-                                                     '获取app_lb详情:期望存在默认域名后缀怒')
+                                                     '获取app_lb详情:期望存在默认域名后缀')
             if domin_info is True:
                 # 不使用默认域名后，服务的HA地址不能访问
                 default_domain_url = "{}://{}".format(protocol, default_domain)

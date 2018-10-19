@@ -320,3 +320,14 @@ class Common(AlaudaRequest):
         except requests.exceptions.ConnectionError:
             return False
         return False
+
+    def access_service(self, service_url, query):
+        logger.info("************************** access service ********************************")
+        try:
+            ret = requests.get(service_url)
+            logger.info(ret.text)
+            if ret.status_code == 200 and query in ret.text:
+                return True
+        except ConnectionError as e:
+            logger.error("access service failed: {}".format(e))
+        return False
