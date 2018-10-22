@@ -269,6 +269,7 @@ class Application(Common):
     def check_scale_result(self, service_id, num, increase=True):
         cnt = 0
         while cnt < 60:
+            cnt += 1
             instance_num = 0
             service_detail = self.get_service_instances(service_id)
             instances = service_detail.json()
