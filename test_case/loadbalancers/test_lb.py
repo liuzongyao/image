@@ -119,4 +119,9 @@ class TestLoadBalancer(object):
             else:
                 result = self.loadbalancer.update_result(result, domin_info, "返回体中域名信息数组默认域名没有被禁用")
 
+        # reback default dns
+        ret_update_dns = self.loadbalancer.update_lb_dns(self.ha_name, './test_data/loadbalancers/update_dns.json',
+                                                         {"\"$bool\"": "false"})
+        assert ret_update_dns.status_code == 204, "更新lb_dns失败：{}".format(ret_update_dns.text)
+
         # check num of lb_app
