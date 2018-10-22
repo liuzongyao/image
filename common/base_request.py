@@ -54,8 +54,8 @@ class Common(AlaudaRequest):
             "person.cities.0"         =>  "Guangzhou"
         @return queried result
         """
-        if json_content == "":
-            raise ResponseError("response content is empty!")
+        if json_content == "" or json_content == []:
+            raise ResponseError("response content is {}!".format(json_content))
 
         try:
             for key in query.split(delimiter):
