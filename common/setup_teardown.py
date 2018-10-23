@@ -62,7 +62,7 @@ class SetUp(AlaudaRequest):
         self.input_file(self.common)
         self.get_region_data()
         if not self.is_weblab_open("USER_VIEW_ENABLED"):
-            self.get_build_endpontid()
+            self.get_build_endpointid()
             self.get_load_balance_info()
             self.get_registry_uuid()
         self.get_master_ips()
@@ -81,9 +81,9 @@ class SetUp(AlaudaRequest):
 
     def get_rubick_url(self):
         env = os.environ.get('ENV') or "STAGING"
-        if env == "STAGING":
+        if env.upper() == "STAGING":
             rubick_url = "https://console-staging.alauda.cn"
-        elif env == "CN":
+        elif env.upper() == "CN":
             rubick_url = "https://enterprise.alauda.cn"
         else:
             rubick_url = os.getenv('API_URL').replace('20081', '28090')
@@ -92,8 +92,8 @@ class SetUp(AlaudaRequest):
         return rubick_url
 
     def get_user_weblab(self):
-        FRONEND_URL = self.get_rubick_url()
-        login_url = "{}/ajax/landing/login".format(FRONEND_URL)
+        FRONTEND_URL = self.get_rubick_url()
+        login_url = "{}/ajax/landing/login".format(FRONTEND_URL)
         data = {
             "account": settings.ACCOUNT,
             "password": settings.PASSWORD
@@ -102,7 +102,7 @@ class SetUp(AlaudaRequest):
         resp = session.post(login_url, data=data, verify=False)
         if resp.status_code != 200:
             return False
-        url = "{}/ajax-sp/account/weblabs?namespace={}".format(FRONEND_URL, settings.ACCOUNT)
+        url = "{}/ajax-sp/account/weblabs?namespace={}".format(FRONTEND_URL, settings.ACCOUNT)
         r = session.get(url)
         if r.status_code != 200:
             return False
@@ -139,7 +139,7 @@ class SetUp(AlaudaRequest):
         self.common.update({"NETWORK_MODES": self.network_modes})
 
     @retry()
-    def get_build_endpontid(self):
+    def get_build_endpointid(self):
         """
         :return: 给self.build_endpoint赋值构建的集群ID
         """
@@ -260,21 +260,21 @@ class SetUp(AlaudaRequest):
             self.common.update({"CREATE_PROJECT": True, "$PROJECT_UUID": response.json()['uuid']})
         else:
             self.common.update({"$PROJECT_UUID": response.json()['uuid']})
-
-        # create k8s namespace
-        response = self.namespace_client.get_namespaces(settings.K8S_NAMESPACE)
-        if response.status_code != 200:
-            response = self.namespace_client.create_namespaces("./test_data/namespace/namespace.yml",
-                                                               {"$K8S_NAMESPACE": settings.K8S_NAMESPACE})
-            assert response.status_code == 201, "prepare data failed: create namespace failed {}".format(response.text)
-            self.common.update({"CREATE_NAMESPACE": True})
-        response = self.namespace_client.get_namespaces(settings.K8S_NAMESPACE)
-
-        assert response.status_code == 200, "prepare data failed: get namespace detail failed {}".format(response.text)
-        namespace_uuid = response.json()["kubernetes"]["metadata"]["uid"]
-        self.common.update({"$K8S_NS_UUID": namespace_uuid})
-
         if not self.is_weblab_open("USER_VIEW_ENABLED"):
+            # create k8s namespace
+            response = self.namespace_client.get_namespaces(settings.K8S_NAMESPACE)
+            if response.status_code != 200:
+                response = self.namespace_client.create_namespaces("./test_data/namespace/namespace.yml",
+                                                                   {"$K8S_NAMESPACE": settings.K8S_NAMESPACE})
+                assert response.status_code == 201, "prepare data failed: create namespace failed {}".format(
+                    response.text)
+                self.common.update({"CREATE_NAMESPACE": True})
+            response = self.namespace_client.get_namespaces(settings.K8S_NAMESPACE)
+
+            assert response.status_code == 200, "prepare data failed: get namespace detail failed {}".format(
+                response.text)
+            namespace_uuid = response.json()["kubernetes"]["metadata"]["uid"]
+            self.common.update({"$K8S_NS_UUID": namespace_uuid})
             # create space
             response = self.space_client.get_space(settings.SPACE_NAME)
             if response.status_code != 200:
@@ -295,6 +295,20 @@ class SetUp(AlaudaRequest):
                                                     {"$noti_name": global_noti_name})
             assert response.status_code == 201, "创建全局通知失败了，原因是：{}".format(response.text)
             self.common.update({"$NOTI_NAME": response.json().get("name"), "$NOTI_UUID": response.json().get("uuid")})
+        else:
+            response = self.namespace_client.get_namespaces(settings.K8S_NAMESPACE)
+            if response.status_code != 200:
+                response = self.namespace_client.create_general_namespaces('./test_data/namespace/newnamespace.yml',
+                                                                           {'$K8S_NAMESPACE': settings.K8S_NAMESPACE})
+                assert response.status_code == 201, "prepare data failed: create namespace failed {}".format(
+                    response.text)
+                self.common.update({"CREATE_NAMESPACE": True})
+            response = self.namespace_client.get_namespaces(settings.K8S_NAMESPACE)
+
+            assert response.status_code == 200, "prepare data failed: get namespace detail failed {}".format(
+                response.text)
+            namespace_uuid = response.json()["kubernetes"]["metadata"]["uid"]
+            self.common.update({"$K8S_NS_UUID": namespace_uuid})
 
     def create_global_app(self):
         if not self.is_weblab_open("USER_VIEW_ENABLED"):
@@ -352,7 +366,10 @@ class TearDown(AlaudaRequest):
                 self.newapp.get_newapp_common_url(settings.K8S_NAMESPACE, self.global_info['$GLOBAL_APP_NAME']), 404)
 
         if "CREATE_NAMESPACE" in self.global_info:
-            self.namespace_client.delete_namespaces(settings.K8S_NAMESPACE)
+            if not self.newapp.is_weblab_open("USER_VIEW_ENABLED"):
+                self.namespace_client.delete_namespaces(settings.K8S_NAMESPACE)
+            else:
+                self.namespace_client.delete_general_namespaces(settings.K8S_NAMESPACE)
 
         if "CREATE_SPACE" in self.global_info:
             self.space_client.delete_space(settings.SPACE_NAME)
