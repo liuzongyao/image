@@ -9,8 +9,9 @@ class Namespace(Common):
         return namespace and "v2/kubernetes/clusters/{}/namespaces/{}".format(self.region_id, namespace) or \
                "v2/kubernetes/clusters/{}/namespaces".format(self.region_id)
 
-    def get_general_namespaces_url(self):
-        return "v2/kubernetes/clusters/{}/general-namespaces".format(self.region_name)
+    def get_general_namespaces_url(self, namespace=None):
+        return namespace and "v2/kubernetes/clusters/{}/general-namespaces/{}".format(self.region_name, namespace) or \
+               "v2/kubernetes/clusters/{}/general-namespaces".format(self.region_name)
 
     def get_resourcequota_url(self, namespace='', quotaname=''):
         return "v2/kubernetes/clusters/{}/resourcequotas/{}/{}".format(self.region_id, namespace, quotaname)
@@ -41,6 +42,11 @@ class Namespace(Common):
     def delete_namespaces(self, namespace):
         logger.info(sys._getframe().f_code.co_name.center(50, '*'))
         path = self.get_namespace_url(namespace)
+        return self.send(method="DELETE", path=path)
+
+    def delete_general_namespaces(self, namespace):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        path = self.get_general_namespaces_url(namespace)
         return self.send(method="DELETE", path=path)
 
     def list_namespaces(self):

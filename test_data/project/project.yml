@@ -6,9 +6,9 @@ clusters:
   uuid: $REGION_ID
   service_type: "kubernetes"
   quota:
-    cpu: 0
-    memory: 0
-    pvc_num: 0
-    pods: 0
-    storage: 0
+    cpu: 1111
+    memory: 1111
+    pvc_num: 1111
+    pods: 1111
+    storage: 1111
 template: "empty-template"

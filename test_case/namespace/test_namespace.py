@@ -27,6 +27,7 @@ class TestNamespaceSuite(object):
         self.namespace.delete_namespaces(self.namespace_name)
         self.application.delete_app(self.app_name)
         self.namespace.delete_namespaces(self.nsforquota_name)
+        self.namespace.delete_general_namespaces(self.general_namespace_name)
 
     @pytest.mark.BAT
     def test_namespace(self):
@@ -150,7 +151,9 @@ class TestNamespaceSuite(object):
         assert result['flag'], result
 
     @pytest.mark.ns
-    def nottest_general_namespaces(self):
+    def test_general_namespaces(self):
+        if not self.namespace.is_weblab_open("USER_VIEW_ENABLED"):
+            return True, "用户视角未打开，不需要测试"
         result = {"flag": True}
         create_ns_result = self.namespace.create_general_namespaces('./test_data/namespace/newnamespace.yml',
                                                                     {'$K8S_NAMESPACE': self.general_namespace_name})
@@ -165,7 +168,7 @@ class TestNamespaceSuite(object):
         result = self.namespace.update_result(result, list_ns_result.status_code == 200, '获取命名空间列表失败')
         result = self.namespace.update_result(result, self.general_namespace_name in list_ns_result.text,
                                               '获取命名空间列表失败:新建的不在列表中')
-        delete_ns_result = self.namespace.delete_namespaces(self.general_namespace_name)
+        delete_ns_result = self.namespace.delete_general_namespaces(self.general_namespace_name)
         assert delete_ns_result.status_code == 204, "删除命名空间失败 {}".format(delete_ns_result.text)
         delete_flag = self.namespace.check_exists(self.namespace.get_namespace_url(self.general_namespace_name), 404)
         assert delete_flag, "删除命名空间失败"
