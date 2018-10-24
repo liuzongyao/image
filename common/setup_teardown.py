@@ -85,10 +85,8 @@ class SetUp(AlaudaRequest):
             rubick_url = "https://console-staging.alauda.cn"
         elif env.upper() == "CN":
             rubick_url = "https://enterprise.alauda.cn"
-        elif env.upper().startswith("PRIVATE2"):
-            rubick_url = os.getenv('API_URL').replace('20081', '32005')
         else:
-            rubick_url = os.getenv('API_URL').replace('20081', '28090')
+            rubick_url = os.getenv('API_URL').replace('20081', '32005')
         if not rubick_url.startswith('http'):
             rubick_url = "http://" + rubick_url
         return rubick_url
