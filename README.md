@@ -6,6 +6,7 @@
 # RUN
 本地执行：
 1.首先运行环境需要安装python3+和pytest以及requests包，参考requirement.txt
+解决本地python环境问题文档：https://www.jianshu.com/p/00af447f0005
 
 2.然后设置需要测试对象的环境变量
 
@@ -29,6 +30,8 @@ docker run -t --name vipercd \
 	index.alauda.cn/alaudaorg/api-test:latest
 
 #Writing test cases
+
+# 注意管理视图的api发送请求时需要添加参数params={}
 
 1.新增测试模块时需要添加对应的目录，在目录下添加对应模块的方法类
 

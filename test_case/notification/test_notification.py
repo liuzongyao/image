@@ -13,7 +13,7 @@ class TestNotiSuite(object):
 
     def teardown_class(self):
         noti_id = self.noti.get_noti_id_from_list(self.noti_name)
-        # self.noti.delete_noti(noti_id)
+        self.noti.delete_noti(noti_id)
 
     @pytest.mark.BAT
     def test_noti(self):
@@ -38,8 +38,8 @@ class TestNotiSuite(object):
         self.noti.update_result(final_result, get_detail_result.status_code == 200, get_detail_result.text)
         self.noti.update_result(final_result, new_email in get_detail_result.text, "更新后的通知内容不在通知详情页面")
 
-        # delete_result = self.noti.delete_noti(noti_id)
-        # assert delete_result.status_code == 204, delete_result.text
+        delete_result = self.noti.delete_noti(noti_id)
+        assert delete_result.status_code == 204, delete_result.text
 
         # 验证非block的结果
         assert final_result.get("flag"), final_result
