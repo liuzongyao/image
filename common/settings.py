@@ -7,20 +7,20 @@ def get_list_from_str(string, separator=','):
 
 
 # necessary
-API_URL = os.getenv("API_URL", "https://api-staging.alauda.cn")
-ACCOUNT = os.getenv("ACCOUNT", "testorg001")
+API_URL = os.getenv("API_URL", "https://cloud-staging-api.alauda.cn")
+ACCOUNT = os.getenv("ACCOUNT", "alauda")
 SUB_ACCOUNT = os.getenv("SUB_ACCOUNT", "")
-PASSWORD = os.getenv("PASSWORD", "Mathilde1861")
-REGION_NAME = os.getenv("REGION_NAME", "aws_newk8s")
-REGISTRY_NAME = os.getenv("REGISTRY_NAME", "aws_newk8s")
+PASSWORD = os.getenv("PASSWORD", "Alauda2018!")
+REGION_NAME = os.getenv("REGION_NAME", "high-region-available")
+REGISTRY_NAME = os.getenv("REGISTRY_NAME", "hightest")
 IMAGE = os.getenv("IMAGE", "index.alauda.cn/alaudaorg/qaimages:helloworld")
 # not necessary
 REGISTRY_CREDENTIAL = os.getenv("REGISTRY_CREDENTIAL", "alauda-registry-credential")
 
 JENKINS_ENDPOINT = os.getenv("JENKINS_ENDPOINT",
-                             "http://alauda-jenkins.jenkins.nginx-52-81-25-67-testorg001.myalauda.cn/")
+                             "http://154.8.229.251:8899")
 JENKINS_USER = os.getenv("JENKINS_USER", "admin")
-JENKINS_TOKEN = os.getenv("JENKINS_TOKEN", "1323a281573d215c39c573bcd2654e7e")
+JENKINS_TOKEN = os.getenv("JENKINS_TOKEN", "dccbd8d020b4e461f73f7bbb646477e8")
 
 SONAR_ENDPOINT = os.getenv("SONAR_ENDPOINT",
                            "http://sonarqube-donotdelete.nolimited.haproxy-54-223-242-27-alaudacn.myalauda.cn/")
@@ -34,20 +34,20 @@ CLAIR_DATABASE_NAME = os.getenv("CLAIR_DATABASE_NAME", "alauda")
 CLAIR_DATABASE_USER_NAME = os.getenv("CLAIR_DATABASE_USER_NAME", "alauda")
 CLAIR_DATABASE_PASSWORD = os.getenv("CLAIR_DATABASE_PASSWORD", "alauda")
 
-SVN_REPO = os.getenv("SVN_REPO", "http://svn-password.k8s-st.haproxy-54-223-242-27-alaudacn.myalauda.cn/alauda_test/")
+SVN_REPO = os.getenv("SVN_REPO", "http://10.0.96.19:32660/alauda_test")
 SVN_CREDENTIAL = os.getenv("SVN_CREDENTIAL", "alauda-svn-credential")
 SVN_USERNAME = os.getenv("SVN_USERNAME", "User_Name-01")
 SVN_PASSWORD = os.getenv("SVN_PASSWORD", "alauda_Test-!@#")
 
 GIT_REPO = os.getenv("GIT_REPO",
-                     "http://gitlab.nolimited.haproxy-54-223-242-27-alaudacn.myalauda.cn/alauda/helloci.git")
+                     "http://154.8.229.251:32475/test/alauda.git")
 GIT_CREDENTIAL = os.getenv("GIT_CREDENTIAL", "alauda-git-credential")
 GIT_USERNAME = os.getenv("GIT_USERNAME", "alauda")
 GIT_PASSWORD = os.getenv("GIT_PASSWORD", "alauda_Test-!@#")
 
-TESTCASES = os.getenv("TESTCASES", "")
+TESTCASES = os.getenv("TESTCASES", "test_case/newapp")
 CASE_TYPE = os.getenv("CASE_TYPE")
-PROJECT_NAME = os.getenv("PROJECT_NAME", "default")
+PROJECT_NAME = os.getenv("PROJECT_NAME", "e2etest")
 ENV = os.getenv("ENV", "Staging")
 RECIPIENTS = get_list_from_str(os.getenv("RECIPIENTS", "testing@alauda.io"))
 K8S_NAMESPACE = os.getenv("K8S_NAMESPACE", "{}-alauda-default2-{}".format(PROJECT_NAME, REGION_NAME).replace("_", "-"))

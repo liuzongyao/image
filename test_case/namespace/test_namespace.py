@@ -1,6 +1,6 @@
 import pytest
 
-from test_case.application.app import Application
+from backup.application.app import Application
 from test_case.namespace.namespace import Namespace
 from test_case.persistentvolumeclaims.pvc import Pvc
 
@@ -152,8 +152,8 @@ class TestNamespaceSuite(object):
 
     @pytest.mark.ns
     def test_general_namespaces(self):
-        if not self.namespace.is_weblab_open("USER_VIEW_ENABLED"):
-            return True, "用户视角未打开，不需要测试"
+        # if not self.namespace.is_weblab_open("USER_VIEW_ENABLED"):
+        #     return True, "用户视角未打开，不需要测试"
         result = {"flag": True}
         create_ns_result = self.namespace.create_general_namespaces('./test_data/namespace/newnamespace.yml',
                                                                     {'$K8S_NAMESPACE': self.general_namespace_name})

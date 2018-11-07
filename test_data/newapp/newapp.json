@@ -23,7 +23,7 @@
         "template": {
           "metadata": {
             "labels": {
-              "app": "$newapp_name"
+              "service.alauda.io/name": "$newapp_name"
             }
           },
           "spec": {
