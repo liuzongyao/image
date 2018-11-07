@@ -1,9 +1,6 @@
 import pytest
 
-from backup.application.app import Application
-from common.log import logger
 from test_case.alarm.alarm import Alarm
-from test_case.log.log import Log
 
 
 class TestAlarmSuite(object):
