@@ -2,7 +2,7 @@ from time import sleep
 
 import pytest
 
-from test_case.application.app import Application
+from backup.application.app import Application
 from test_case.configmap.configmap import Configmap
 from test_case.persistentvolumeclaims.pvc import Pvc
 from test_case.persistentvolumes.pv import Pv

@@ -333,9 +333,9 @@ class Common(AlaudaRequest):
             logger.error("access service failed: {}".format(e))
         return False
 
-    def is_weblab_open(self, weblab_name):
-        weblabs = self.global_info.get("$weblabs")
-        if isinstance(weblabs, dict) and weblab_name in weblabs.keys() and weblabs[weblab_name]:
-            return True
-        else:
-            return False
+    # def is_weblab_open(self, weblab_name):
+    #     weblabs = self.global_info.get("$weblabs")
+    #     if isinstance(weblabs, dict) and weblab_name in weblabs.keys() and weblabs[weblab_name]:
+    #         return True
+    #     else:
+    #         return False

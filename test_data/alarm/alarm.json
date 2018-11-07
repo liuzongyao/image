@@ -15,13 +15,7 @@
   "severity_level": "minor",
   "space_name": "$SPACE_NAME",
   "alarm_actions": {
-    "notifications": [],
-    "services": [
-      {
-        "type": "scaling_out",
-        "uuid": "$GLOBAL_SERVICE_ID"
-      }
-    ]
+    "notifications": []
   },
   "insufficient_actions": {
     "notifications": [],

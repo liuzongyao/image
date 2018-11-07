@@ -1,9 +1,9 @@
 import pytest
 
-from test_case.pipeline.pipeline import Pipeline
-from test_case.image.image import Image
-from test_case.application.app import Application
+from backup.application.app import Application
 from common.log import logger
+from test_case.image.image import Image
+from test_case.pipeline.pipeline import Pipeline
 
 
 @pytest.mark.region

@@ -1,8 +1,9 @@
 import pytest
-from test_case.plugin.plugin import Plugin
-from test_case.application.app import Application
-from test_case.integrations.ci_cd_integrations import Integrations
+
+from backup.application.app import Application
 from common.log import logger
+from test_case.integrations.ci_cd_integrations import Integrations
+from test_case.plugin.plugin import Plugin
 
 
 class TestPluginSuite(object):
