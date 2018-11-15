@@ -294,7 +294,7 @@ class Common(AlaudaRequest):
             if value in response.text:
                 flag = True
                 break
-            sleep(1)
+            sleep(5)
         return flag
 
     def access_jenkins(self):

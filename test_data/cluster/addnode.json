@@ -1,0 +1,8 @@
+{
+  "node_list": [
+    "$node_ip"
+  ],
+  "ssh_password": "07Apples",
+  "ssh_port": 22,
+  "ssh_username": "root"
+}

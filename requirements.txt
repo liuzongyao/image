@@ -6,3 +6,4 @@ bs4
 flake8
 pexpect
 pyyaml
+qcloudapi-sdk-python
