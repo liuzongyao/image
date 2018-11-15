@@ -1,27 +1,6 @@
 {
   "kubernetes": [
     {
-      "apiVersion": "v1",
-      "kind": "Service",
-      "metadata": {
-        "name": "$newapp_name",
-        "labels": {
-          "app": "$newapp_name"
-        }
-      },
-      "spec": {
-        "ports": [
-          {
-            "port": 80
-          }
-        ],
-        "selector": {
-          "app": "$newapp_name"
-        },
-        "clusterIP": "None"
-      }
-    },
-    {
       "kind": "ClusterRole",
       "apiVersion": "rbac.authorization.k8s.io/v1",
       "metadata": {

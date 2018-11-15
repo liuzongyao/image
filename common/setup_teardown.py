@@ -132,9 +132,14 @@ class SetUp(AlaudaRequest):
             self.region_volume = ",".join(self.region_data.get("features").get("volume").get("features"))
         if self.region_data.get('features').get('network_modes') is not None:
             self.network_modes = ",".join(self.region_data.get('features').get('network_modes').get('features'))
+        if self.region_data.get('attr').get('kubernetes').get('cni') is not None:
+            self.network_type = self.region_data.get('attr').get('kubernetes').get('cni').get('type')
+            self.network_policy = self.region_data.get('attr').get('kubernetes').get('cni').get('network_policy')
         self.common.update({"$REGION_ID": self.region_id})
         self.common.update({"$REGION_VOLUME": self.region_volume})
         self.common.update({"NETWORK_MODES": self.network_modes})
+        self.common.update({"$NETWORK_TYPE": self.network_type})
+        self.common.update({"$NETWORK_POLICY": self.network_policy})
 
     @retry()
     def get_build_endpointid(self):
@@ -250,6 +255,7 @@ class SetUp(AlaudaRequest):
 
     def prepare(self):
         # create project
+        self.project_client.delete_project(settings.PROJECT_NAME)
         response = self.project_client.get_project(settings.PROJECT_NAME)
         if response.status_code != 200:
             response = self.project_client.create_project('./test_data/project/project.yml',
@@ -294,6 +300,8 @@ class SetUp(AlaudaRequest):
         #     assert response.status_code == 201, "创建全局通知失败了，原因是：{}".format(response.text)
         #     self.common.update({"$NOTI_NAME": response.json().get("name"), "$NOTI_UUID": response.json().get("uuid")})
         # else:
+        self.namespace_client.delete_general_namespaces(settings.K8S_NAMESPACE)
+        self.namespace_client.check_exists(self.namespace_client.get_namespace_url(settings.K8S_NAMESPACE), 404)
         response = self.namespace_client.get_namespaces(settings.K8S_NAMESPACE)
         if response.status_code != 200:
             response = self.namespace_client.create_general_namespaces('./test_data/namespace/newnamespace.yml',
@@ -330,12 +338,17 @@ class SetUp(AlaudaRequest):
         #     self.common.update({"$GLOBAL_APP_NAME": self.app_name, "$GLOBAL_APP_ID": app_id,
         #                         "$GLOBAL_SERVICE_ID": service_uuid})
         # else:
+        self.newapp.delete_newapp(settings.K8S_NAMESPACE, self.app_name)
+        self.newapp.check_exists(
+            self.newapp.get_newapp_common_url(settings.K8S_NAMESPACE, self.app_name), 404)
         create_result = self.newapp.create_newapp('./test_data/newapp/newapp.json',
                                                   {'$newapp_name': self.app_name})
         assert create_result.status_code == 201, "新版应用创建失败 {}".format(create_result.text)
-        app_status = self.newapp.get_newapp_status(settings.K8S_NAMESPACE, self.app_name, 'Succeeded')
+        app_status = self.newapp.get_newapp_status(settings.K8S_NAMESPACE, self.app_name, 'Running')
         assert app_status, "创建应用后，验证应用状态出错：app: {} is not running".format(self.app_name)
+        app_uuid = self.newapp.get_value(create_result.json(), '0.kubernetes.metadata.uid')
         self.common.update({"$GLOBAL_APP_NAME": self.app_name})
+        self.common.update({"$GLOBAL_APP_ID": app_uuid})
 
 
 class TearDown(AlaudaRequest):

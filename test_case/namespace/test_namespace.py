@@ -151,6 +151,7 @@ class TestNamespaceSuite(object):
         assert result['flag'], result
 
     @pytest.mark.ns
+    @pytest.mark.ace
     def test_general_namespaces(self):
         # if not self.namespace.is_weblab_open("USER_VIEW_ENABLED"):
         #     return True, "用户视角未打开，不需要测试"
@@ -159,10 +160,10 @@ class TestNamespaceSuite(object):
                                                                     {'$K8S_NAMESPACE': self.general_namespace_name})
         assert create_ns_result.status_code == 201, "创建新命名空间失败 {}".format(create_ns_result.text)
         resourcequota_flag = self.namespace.check_exists(
-            self.namespace.get_resourcequota_url(self.general_namespace_name, self.general_namespace_name), 200)
+            self.namespace.get_resourcequota_url(self.general_namespace_name, 'default'), 200)
         result = self.namespace.update_result(result, resourcequota_flag, 'resourcequota创建失败')
         limitrange_flag = self.namespace.check_exists(
-            self.namespace.get_limitrange_url(self.general_namespace_name, self.general_namespace_name), 200)
+            self.namespace.get_limitrange_url(self.general_namespace_name, 'default'), 200)
         result = self.namespace.update_result(result, limitrange_flag, 'limitrange创建失败')
         list_ns_result = self.namespace.list_namespaces()
         result = self.namespace.update_result(result, list_ns_result.status_code == 200, '获取命名空间列表失败')
