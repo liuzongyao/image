@@ -127,7 +127,7 @@ class SetUp(AlaudaRequest):
         assert response.status_code == 200, response.json()
         self.region_data = response.json()
         self.region_id = self.region_data["id"]
-        self.region_volume = self.network_modes = ""
+        self.region_volume = self.network_modes = self.network_type = self.network_policy = ""
         if self.region_data.get("features").get("volume") is not None:
             self.region_volume = ",".join(self.region_data.get("features").get("volume").get("features"))
         if self.region_data.get('features').get('network_modes') is not None:

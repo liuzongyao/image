@@ -45,8 +45,8 @@
 
                 ],
                 "livenessProbe": {
-                  "initialDelaySeconds": 120,
-                  "periodSeconds": 60,
+                  "initialDelaySeconds": 30,
+                  "periodSeconds": 30,
                   "timeoutSeconds": 30,
                   "successThreshold": 1,
                   "failureThreshold": 5,
@@ -57,8 +57,8 @@
                   }
                 },
                 "readinessProbe": {
-                  "initialDelaySeconds": 120,
-                  "periodSeconds": 60,
+                  "initialDelaySeconds": 30,
+                  "periodSeconds": 30,
                   "timeoutSeconds": 30,
                   "successThreshold": 1,
                   "failureThreshold": 5,

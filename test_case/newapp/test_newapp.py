@@ -63,12 +63,12 @@ class TestNewApplicationSuite(object):
         # 获取事件
         event_result = self.newapp.get_newapp_event(app_uuid)
         result = self.newapp.update_result(result, event_result.status_code == 200, "获取事件失败")
-        result = self.newapp.update_result(result, event_result.json()['total_items'] != 0, "获取事件为空")
+        result = self.newapp.update_result(result, event_result.json().get('total_items') != 0, "获取事件为空")
 
         # 获取k8s事件
         kevent_result = self.newapp.get_newapp_kevent(self.namespace, self.newapp_name)
         result = self.newapp.update_result(result, kevent_result.status_code == 200, "获取k8s事件失败")
-        result = self.newapp.update_result(result, kevent_result.json()['count'] != 0, "获取k8s事件为空")
+        result = self.newapp.update_result(result, kevent_result.json().get('count') != 0, "获取k8s事件为空")
 
         # exec
         exec_result = self.newapp.exec_newapp(self.namespace, self.newapp_name, container_name)
@@ -113,26 +113,21 @@ class TestNewApplicationSuite(object):
         # 缩容
         scale_down_result = self.newapp.scale_down_newapp(self.namespace, self.newapp_name)
         assert scale_down_result.status_code == 204, "缩容失败 {}".format(scale_down_result.text)
-        time.sleep(10)
         app_status = self.newapp.get_newapp_status(self.namespace, self.newapp_name, 'Running')
         assert app_status, "缩容后，验证应用状态出错：app: {} is not running".format(self.newapp_name)
-        status_result = self.newapp.get_newapp_status_withoutassert(self.namespace, self.newapp_name)
-        assert status_result.status_code == 200, "获取状态失败 {}".format(status_result.text)
-        assert self.newapp.get_value(status_result.json(),
-                                     'workloads.Deployment-{}.desired'.format(
-                                         self.newapp_name)) == 1, "缩容后，预期个数不是1{}".format(status_result.text)
+        flag = self.newapp.get_status(self.newapp.get_newapp_status_url(self.namespace, self.newapp_name),
+                                      'workloads.Deployment-{}.desired'.format(self.newapp_name), 1)
+        assert flag, "缩容后，预期个数不是1"
 
         # 扩容
         scale_up_result = self.newapp.scale_up_newapp(self.namespace, self.newapp_name)
         assert scale_up_result.status_code == 204, "扩容失败 {}".format(scale_up_result.text)
-        time.sleep(10)
+        app_status = self.newapp.get_newapp_status(self.namespace, self.newapp_name, 'Running')
         assert app_status, "扩容后，验证应用状态出错：app: {} is not running".format(self.newapp_name)
-        status_result = self.newapp.get_newapp_status_withoutassert(self.namespace, self.newapp_name)
-        assert status_result.status_code == 200, "获取状态失败 {}".format(status_result.text)
-        assert self.newapp.get_value(status_result.json(),
-                                     'workloads.Deployment-{}.desired'.format(
-                                         self.newapp_name)) == 2, "扩容后，预期个数不是2 {}".format(status_result.text)
-
+        flag = self.newapp.get_status(self.newapp.get_newapp_status_url(self.namespace, self.newapp_name),
+                                      'workloads.Deployment-{}.desired'.format(self.newapp_name), 2)
+        assert flag, "扩容后，预期个数不是2"
+        
         # 删除应用下的资源ClusterRole
         remove_result = self.newapp.remove_resource_newapp(self.namespace, self.newapp_name,
                                                            './test_data/newapp/resource.json',
