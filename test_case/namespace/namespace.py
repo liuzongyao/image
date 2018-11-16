@@ -52,7 +52,7 @@ class Namespace(Common):
     def list_namespaces(self):
         logger.info(sys._getframe().f_code.co_name.center(50, '*'))
         path = self.get_namespace_url()
-        return self.send(method="GET", path=path)
+        return self.send(method="GET", path=path, params={})
 
     def create_resourcequota(self, file, data):
         logger.info(sys._getframe().f_code.co_name.center(50, '*'))

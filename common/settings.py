@@ -10,7 +10,7 @@ def get_list_from_str(string, separator=','):
 API_URL = os.getenv("API_URL", "https://cloud-staging-api.alauda.cn")
 ACCOUNT = os.getenv("ACCOUNT", "alauda")
 SUB_ACCOUNT = os.getenv("SUB_ACCOUNT", "")
-PASSWORD = os.getenv("PASSWORD", "Alauda2018!")
+PASSWORD = os.getenv("PASSWORD", "Alauda2018!@#")
 REGION_NAME = os.getenv("REGION_NAME", "high-region-available")
 REGISTRY_NAME = os.getenv("REGISTRY_NAME", "hightest")
 IMAGE = os.getenv("IMAGE", "index.alauda.cn/alaudaorg/qaimages:helloworld")
@@ -45,13 +45,16 @@ GIT_CREDENTIAL = os.getenv("GIT_CREDENTIAL", "alauda-git-credential")
 GIT_USERNAME = os.getenv("GIT_USERNAME", "alauda")
 GIT_PASSWORD = os.getenv("GIT_PASSWORD", "alauda_Test-!@#")
 
-TESTCASES = os.getenv("TESTCASES", "test_case/newapp")
-CASE_TYPE = os.getenv("CASE_TYPE")
+TESTCASES = os.getenv("TESTCASES", "")
+CASE_TYPE = os.getenv("CASE_TYPE", "not cluster")
 PROJECT_NAME = os.getenv("PROJECT_NAME", "e2etest")
 ENV = os.getenv("ENV", "Staging")
 RECIPIENTS = get_list_from_str(os.getenv("RECIPIENTS", "testing@alauda.io"))
 K8S_NAMESPACE = os.getenv("K8S_NAMESPACE", "{}-alauda-default2-{}".format(PROJECT_NAME, REGION_NAME).replace("_", "-"))
 SPACE_NAME = os.getenv("SPACE_NAME", "alauda-default-{}".format(REGION_NAME).replace("_", "-"))
+
+SECRET_ID = os.getenv("SECRET_ID", "AKID84kBMHwKUP4VggjwBAKFvxlJcgU3frtg")
+SECRET_KEY = os.getenv("SECRET_EKY", "aDlNSjBSZGRPdkxXUjZWZ2JHZnFPaGpXMklJa3d0WjA=")
 
 SMTP = {
     'host': os.getenv('SMTP_HOST', 'smtpdm.aliyun.com'),

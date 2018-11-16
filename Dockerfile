@@ -1,7 +1,7 @@
 FROM bitnami/python:3.6.5-prod
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
-RUN install_packages vim curl ssh
+RUN install_packages vim curl ssh sshpass
 
 COPY requirements.txt .
 RUN pip install --upgrade pip && pip install -r /requirements.txt
