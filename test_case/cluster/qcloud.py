@@ -12,7 +12,7 @@ from common.log import logger
 secret_id = common.settings.SECRET_ID
 secret_key = common.settings.SECRET_KEY
 endpoint = "cvm.tencentcloudapi.com"
-instances_id = ['ins-fgxdlu83', 'ins-lx8sihvl']
+instances_id = []
 lb_name = "aketest{}".format(random.randint(0, 1000))
 
 
@@ -54,6 +54,7 @@ def create_instance(num):
         "TagSpecification.0.ResourceType": "instance",
         "TagSpecification.0.Tags.0.Key": "Group",
         "TagSpecification.0.Tags.0.Value": "QA",
+        # "UserData": "yum install -y sshpass",
         "Timestamp": int(time()),
         "Nonce": random.randint(0, 1000),
         "SecretId": secret_id
@@ -67,7 +68,7 @@ def create_instance(num):
     if not instances_id:
         return {"success": False, "message": "create qcloud vm failed: {}".format(res.text)}
     logger.info("create vm success, but need to sleep 120s")
-    sleep(120)
+    sleep(200)
     return {"success": True, "instances_id": instances_id, "message": "create qcloud vm over"}
 
 

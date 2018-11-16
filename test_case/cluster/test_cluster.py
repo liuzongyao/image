@@ -10,7 +10,7 @@ class TestClusterSuite(object):
     def setup_class(self):
         self.cluster = Cluster()
         self.namespace = Namespace()
-        self.cluster_name = "e2e-cluster-test2"
+        self.cluster_name = "e2e-region-test2"
         self.namespace.region_name = self.cluster_name
         ret_create = create_instance(1)
         assert ret_create["success"], ret_create["message"]
@@ -56,23 +56,33 @@ class TestClusterSuite(object):
 
         ret_namespace = self.namespace.list_namespaces()
         assert ret_namespace.status_code == 200, "获取命名空间出错".format(ret_namespace.text)
-        # 添加节点
-        ret_addnode = self.cluster.add_nodes(self.cluster_name, "test_data/cluster/addnode.json",
-                                             {"$node_ip": self.private_ips[1]})
-        assert ret_addnode.status_code == 204, "添加节点失败:{}".format(ret_addnode.text)
-        is_exist = self.cluster.check_value_in_response(self.cluster.get_node_url(self.cluster_name),
-                                                        self.private_ips[1],
-                                                        params={})
-        assert is_exist, "添加节点超时"
+        # 获取namespace后需要留取时间给krobelus来同步namespace
+        sleep(30)
+        # 添加节点由于添加接点不会改docker deamon 所以暂时注释：http://jira.alaudatech.com/browse/AKE-44
+        # ret_addnode = self.cluster.add_nodes(self.cluster_name, "test_data/cluster/addnode.json",
+        #                                      {"$node_ip": self.private_ips[1]})
+        # assert ret_addnode.status_code == 204, "添加节点失败:{}".format(ret_addnode.text)
+        # is_exist = self.cluster.check_value_in_response(self.cluster.get_node_url(self.cluster_name),
+        #                                                 self.private_ips[1],
+        #                                                 params={})
+        # assert is_exist, "添加节点超时"
 
         ret_log = self.cluster.install_nevermore(self.cluster_name, "test_data/cluster/install_nevermore.json")
-        assert ret_log.status_code == 204, "安装nevermore失败：{}".format(ret_log.text)
+        assert ret_log.status_code == 200, "安装nevermore失败：{}".format(ret_log.text)
 
         ret_registry = self.cluster.install_registry(self.cluster_name, "test_data/cluster/install_registry.json")
-        assert ret_registry.status_code == 204, "安装registry失败：{}".format(ret_registry.text)
+        assert ret_registry.status_code == 200, "安装registry失败：{}".format(ret_registry.text)
 
         ret_result = self.cluster.check_feature_status(self.cluster_name)
-        result = self.cluster.update_result(result, ret_result['success'], "特性安装失败:{}".format(ret_result.text))
+        result = self.cluster.update_result(result, ret_result['success'], "特性安装失败:{}".format(ret_result))
+
+        ret_del_log = self.cluster.uninstall_nevermore(self.cluster_name)
+        result = self.cluster.update_result(result, ret_del_log.status_code == 204,
+                                            "删除日志特性失败:{}".format(ret_del_log.text))
+
+        ret_del_resgitry = self.cluster.uninstall_registry(self.cluster_name)
+        result = self.cluster.update_result(result, ret_del_resgitry.status_code == 204,
+                                            "删除registry特性失败:{}".format(ret_del_resgitry.text))
 
         ret_node = self.cluster.get_node_list(self.cluster_name)
         assert ret_node.status_code == 200, "获取node列表失败:{}".format(ret_node.text)
@@ -91,6 +101,7 @@ class TestClusterSuite(object):
         flag = self.cluster.check_schedulable(self.cluster_name, 0)
         assert not flag, "节点设置为不可调度，但是获取列表还是可以调度"
 
+        # 改成不可调度在马上改成可调度状态会不稳定
         sleep(3)
         ret_cordon = self.cluster.cordon_node(self.cluster_name, node_name)
         assert ret_cordon.status_code == 204, "设置节点为可调度失败:{}".format(ret_cordon.text)

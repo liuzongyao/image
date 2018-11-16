@@ -6,5 +6,5 @@
       "write_log_source": "default"
     }
   },
-  "values_yaml_content": "version: 2.3\\nregistryAddress: '10.0.96.23:60080'\\ntag: v20181106.182131\\nenvironment:\\n  reloadInterval: 600\\n  rotateFileSize: 512M\\n  httpRetryStatuses: '500,403,503,504'\\n  bufferQueueLimits: 128\\n  chunkLimitSize: 64m\\nvolume:\\n  dockerpath: /var/lib/docker\\n"
+  "values_yaml_content": "version: 2.3\nregistryAddress: '10.0.96.23:60080'\ntag: v20181106.182131\nenvironment:\n  reloadInterval: 600\n  rotateFileSize: 512M\n  httpRetryStatuses: '500,403,503,504'\n  bufferQueueLimits: 128\n  chunkLimitSize: 64m\nvolume:\n  dockerpath: /var/lib/docker\n"
 }

@@ -1,4 +1,3 @@
-import json
 import sys
 from common.base_request import Common
 from common.log import logger
@@ -76,8 +75,10 @@ class Cluster(Common):
 
     def excute_script(self, cmd, ip):
         remote_cmd = "sshpass -p {} ssh -o StrictHostKeyChecking=no {}@{} '{}'".format("07Apples", "root", ip, cmd)
-        print(remote_cmd)
-        return getstatusoutput(remote_cmd)
+        logger.info("deploy cluster cmd is :{}".format(remote_cmd))
+        result = getstatusoutput(remote_cmd)
+        logger.info("deploy result is {}".format(result))
+        return result
 
     def cleanup_cluster(self, ips):
         for ip in ips:
@@ -96,7 +97,7 @@ class Cluster(Common):
         data = self.generate_data(file)
         return self.send(method="post", path=url, data=data, params={})
 
-    def uninstall_nevermore(self, region_name, file):
+    def uninstall_nevermore(self, region_name):
         logger.info(sys._getframe().f_code.co_name.center(50, '*'))
         url = "v2/regions/{}/{}/features/log".format(self.account, region_name)
         return self.send(method="delete", path=url, params={})
@@ -118,11 +119,11 @@ class Cluster(Common):
         return self.send(method="get", path=url, params={})
 
     def check_feature_status(self, region_name):
-        result = {"success": False}
-        log_status = self.get_status(self.get_feature_url(region_name), "log.application_info.status", "running",
+        result = {"success": True}
+        log_status = self.get_status(self.get_feature_url(region_name), "log.application_info.status", "Running",
                                      params={})
         result = self.update_result(result, log_status, '日志状态不是Running')
         registry_status = self.get_status(self.get_feature_url(region_name), "registry.application_info.status",
-                                          "running", params={})
+                                          "Running", params={})
         result = self.update_result(result, registry_status, 'registry状态不是Running')
         return result

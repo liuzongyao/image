@@ -1,6 +1,6 @@
 {
   "config": {
-    "type": "official",
+    "type": "official"
   },
-  "values_yaml_content": "version: 1.1\\nregistryAddress: '10.0.96.23:60080'\\ntag: 17567a7f4cab935c6fd69e4249bb8e69350fb8b0\\nlabel: alauda-registry\\nreplicas: 1\\nenvironment:\\n  name: e2e-cluster-test2\\n  storage: local\\n  oss:\\n    accesskey: ''\\n    secretkey: ''\\n    region: ''\\n    bucket: ''\\n    root_directory: ''\\n    internal: true\\n  s3:\\n    accesskey: ''\\n    secretkey: ''\\n    region: ''\\n    bucket: ''\\n    root_directory: ''\\n  local:\\n    host_directory: /data/\\n  key_alive_list: /alauda_alive_list\\n  key_readonly_list: /alauda_readonly_list\\n  key_status: /alauda_status\\n  key_leader: /alauda_leader\\n  etcd_endpoints: ''\\n  ttl_alive: 10\\n  ttl_readonly: 60\\n  ttl_max_clear_time: 21600\\n  channel: ''\\nnetwork: NodePort\\nnodePort: 30500\\n"
+  "values_yaml_content": "version: 1.1\nregistryAddress: '10.0.96.23:60080'\ntag: 17567a7f4cab935c6fd69e4249bb8e69350fb8b0\nlabel: alauda-registry\nreplicas: 1\nenvironment:\n  name: e2e-cluster-test2\n  storage: local\n  oss:\n    accesskey: ''\n    secretkey: ''\n    region: ''\n    bucket: ''\n    root_directory: ''\n    internal: true\n  s3:\n    accesskey: ''\n    secretkey: ''\n    region: ''\n    bucket: ''\n    root_directory: ''\n  local:\n    host_directory: /data/\n  key_alive_list: /alauda_alive_list\n  key_readonly_list: /alauda_readonly_list\n  key_status: /alauda_status\n  key_leader: /alauda_leader\n  etcd_endpoints: ''\n  ttl_alive: 10\n  ttl_readonly: 60\n  ttl_max_clear_time: 21600\n  channel: ''\nnetwork: NodePort\nnodePort: 30500\n"
 }
