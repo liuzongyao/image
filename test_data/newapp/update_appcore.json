@@ -1,0 +1,174 @@
+{
+  "resource": {
+    "name": "$newapp_name",
+    "namespace": "$K8S_NAMESPACE",
+    "owners": [
+      {
+        "name": "$newapp_name",
+        "phone": "15222222222"
+      }
+    ],
+    "displayName": "$newapp_name"
+  },
+  "kubernetes": [
+    {
+      "apiVersion": "extensions/v1beta1",
+      "kind": "Deployment",
+      "metadata": {
+        "name": "$newapp_name",
+        "namespace": "$K8S_NAMESPACE"
+      },
+      "spec": {
+        "replicas": 2,
+        "template": {
+          "spec": {
+            "containers": [
+              {
+                "name": "$newapp_name",
+                "image": "$IMAGE",
+                "resources": {
+                  "requests": {
+                    "cpu": "10m",
+                    "memory": "10M"
+                  }
+                },
+                "env": [
+                  {
+                    "name": "env",
+                    "value": "env"
+                  }
+                ],
+                "envFrom": [
+
+                ],
+                "command": [
+
+                ],
+                "livenessProbe": {
+                  "initialDelaySeconds": 30,
+                  "periodSeconds": 30,
+                  "timeoutSeconds": 30,
+                  "successThreshold": 1,
+                  "failureThreshold": 5,
+                  "httpGet": {
+                    "path": "/",
+                    "scheme": "HTTP",
+                    "port": 80
+                  }
+                },
+                "readinessProbe": {
+                  "initialDelaySeconds": 30,
+                  "periodSeconds": 30,
+                  "timeoutSeconds": 30,
+                  "successThreshold": 1,
+                  "failureThreshold": 5,
+                  "exec": {
+                    "command": [
+                      "env"
+                    ]
+                  }
+                },
+                "volumeMounts": [
+                  {
+                    "name": "hostpath-110f868d2cdd5186043e17fdcc5a9125",
+                    "mountPath": "/test/local"
+                  }
+                ]
+              }
+            ],
+            "volumes": [
+              {
+                "name": "hostpath-110f868d2cdd5186043e17fdcc5a9125",
+                "hostPath": {
+                  "path": "/test/local"
+                }
+              }
+            ],
+            "hostNetwork": false
+          },
+          "metadata": {
+            "labels": {
+              "e2eupdate": "e2eupdate",
+              "service.alauda.io/name": "deployment-$newapp_name"
+            },
+            "annotations": {
+
+            }
+          }
+        },
+        "strategy": {
+          "rollingUpdate": {
+            "maxSurge": 1,
+            "maxUnavailable": 2
+          },
+          "type": "RollingUpdate"
+        }
+      }
+    },
+    {
+      "spec": {
+        "minReplicas": 1,
+        "maxReplicas": 3,
+        "scaleTargetRef": {
+          "apiVersion": "extensions/v1beta1",
+          "kind": "Deployment",
+          "name": "$newapp_name"
+        }
+      },
+      "apiVersion": "autoscaling/v1",
+      "kind": "HorizontalPodAutoscaler",
+      "metadata": {
+        "name": "$newapp_name",
+        "namespace": "$K8S_NAMESPACE"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "name": "$newapp_name",
+        "annotations": {
+          "loadbalancer.alauda.io/bind": "[]"
+        },
+        "namespace": "$K8S_NAMESPACE"
+      },
+      "spec": {
+        "selector": {
+          "service.alauda.io/name": "deployment-$newapp_name",
+          "app.alauda.io/name": "$newapp_name.$K8S_NAMESPACE"
+        },
+        "ports": [
+          {
+            "port": 80,
+            "targetPort": 80,
+            "name": "80-80",
+            "protocol": "TCP"
+          }
+        ],
+        "type": "ClusterIP"
+      }
+    },
+    {
+      "kind": "ClusterRole",
+      "apiVersion": "rbac.authorization.k8s.io/v1",
+      "metadata": {
+        "name": "$newapp_name"
+      },
+      "rules": [
+        {
+          "apiGroups": [
+            ""
+          ],
+          "resources": [
+            "secrets"
+          ],
+          "verbs": [
+            "get",
+            "watch",
+            "list"
+          ]
+        }
+      ]
+    }
+  ]
+}
