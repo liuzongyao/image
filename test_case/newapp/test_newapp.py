@@ -1,5 +1,4 @@
 import pytest
-import time
 
 from test_case.newapp.newapp import Newapplication
 
@@ -127,7 +126,7 @@ class TestNewApplicationSuite(object):
         flag = self.newapp.get_status(self.newapp.get_newapp_status_url(self.namespace, self.newapp_name),
                                       'workloads.Deployment-{}.desired'.format(self.newapp_name), 2)
         assert flag, "扩容后，预期个数不是2"
-        
+
         # 删除应用下的资源ClusterRole
         remove_result = self.newapp.remove_resource_newapp(self.namespace, self.newapp_name,
                                                            './test_data/newapp/resource.json',
