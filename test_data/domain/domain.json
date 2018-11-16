@@ -1,0 +1,6 @@
+{
+  "domain": "$domain_name",
+  "projects": [
+    "*"
+  ]
+}
