@@ -10,7 +10,7 @@ class TestClusterSuite(object):
     def setup_class(self):
         self.cluster = Cluster()
         self.namespace = Namespace()
-        self.cluster_name = "e2e-region-test2"
+        self.cluster_name = "e2e-region-test4"
         self.namespace.region_name = self.cluster_name
         ret_create = create_instance(1)
         assert ret_create["success"], ret_create["message"]
@@ -18,7 +18,7 @@ class TestClusterSuite(object):
         assert ret_get["success"], ret_get["message"]
         self.private_ips = ret_get['private_ips']
         self.public_ips = ret_get['public_ips']
-        print(self.private_ips)
+        self.cluster.restart_sshd(self.public_ips[0])
         self.teardown_class(self)
 
     def teardown_class(self):
@@ -39,7 +39,7 @@ class TestClusterSuite(object):
                                                        {"$cluster_name": self.cluster_name,
                                                         "$node_ip": self.private_ips[0]})
         assert get_script.status_code == 200, "获取创建集群脚本失败:{}".format(get_script.text)
-        cmd = "yum install -y sshpass;hostname node1;{}".format(get_script.json()["commands"]["install"])
+        cmd = get_script.json()["commands"]["install"]
         ret_excute = self.cluster.excute_script(cmd, self.public_ips[0])
         assert "Install successfully!" in ret_excute[1], "执行脚本失败:{}".format(ret_excute[1])
         is_exist = self.cluster.check_value_in_response("v1/regions/{}".format(self.cluster.account),
