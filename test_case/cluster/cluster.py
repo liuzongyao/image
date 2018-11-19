@@ -127,3 +127,8 @@ class Cluster(Common):
                                           "Running", params={})
         result = self.update_result(result, registry_status, 'registry状态不是Running')
         return result
+
+    def restart_sshd(self, ip):
+        cmd = "sudo sed -ir 's/\#MaxSessions/MaxSessions/' /etc/ssh/sshd_config"
+        self.excute_script(cmd, ip)
+        self.excute_script("service sshd restart", ip)

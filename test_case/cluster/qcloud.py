@@ -54,7 +54,7 @@ def create_instance(num):
         "TagSpecification.0.ResourceType": "instance",
         "TagSpecification.0.Tags.0.Key": "Group",
         "TagSpecification.0.Tags.0.Value": "QA",
-        # "UserData": "yum install -y sshpass",
+        "UserData": "IyEvYmluL2Jhc2gKeXVtIGluc3RhbGwgLXkgc3NocGFzcwo=",
         "Timestamp": int(time()),
         "Nonce": random.randint(0, 1000),
         "SecretId": secret_id
@@ -67,7 +67,7 @@ def create_instance(num):
     instances_id += res.json()['Response'].get("InstanceIdSet")
     if not instances_id:
         return {"success": False, "message": "create qcloud vm failed: {}".format(res.text)}
-    logger.info("create vm success, but need to sleep 120s")
+    logger.info("create vm success, but need to sleep 200s")
     sleep(200)
     return {"success": True, "instances_id": instances_id, "message": "create qcloud vm over"}
 
