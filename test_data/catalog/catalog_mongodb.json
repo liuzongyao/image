@@ -1,0 +1,18 @@
+{
+	"cluster": {
+		"name": "$REGION_NAME"
+	},
+	"display_name": "",
+	"name": "$catalog_app_name",
+	"namespace": {
+		"name": "$K8S_NAMESPACE"
+	},
+	"template": {
+		"name": "mongodb",
+		"uuid": "$template_id",
+		"version": {
+			"uuid": "$version_id"
+		}
+	},
+	"values_yaml_content": "image:\n  registry: docker.io\n  repository: bitnami/mongodb\n  tag: 3.7.3\n  pullPolicy: IfNotPresent\nmongodbRootPassword: '123456'\nmongodbUsername: lihuang\nmongodbPassword: '123456'\nmongodbDatabase: testlihuang\nserviceType: ClusterIP\npersistence:\n  enabled: false\n  accessMode: ReadWriteOnce\n  size: 8Gi\nresources:\n  requests:\n    memory: 256Mi\n    cpu: 100m\nnodeSelector: {}\nlivenessProbe:\n  initialDelaySeconds: 30\n  periodSeconds: 10\n  timeoutSeconds: 5\n  failureThreshold: 6\n  successThreshold: 1\nreadinessProbe:\n  initialDelaySeconds: 5\n  periodSeconds: 10\n  timeoutSeconds: 5\n  failureThreshold: 6\n  successThreshold: 1\n"
+}

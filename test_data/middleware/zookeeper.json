@@ -1,0 +1,18 @@
+{
+	"cluster": {
+		"name": "$REGION_NAME"
+	},
+	"display_name": "",
+	"name": "$name",
+	"namespace":{
+		"name": "$K8S_NAMESPACE"
+	},
+	"template": {
+		"name": "zookeeper",
+		"uuid": "$template_id",
+		"version": {
+			"uuid": "$version_id"
+		}
+	},
+    "values_yaml_content":"servers: 1\nresources:\n  requests:\n    cpu: 300m\n    memory: 500Mi\n  limits:\n    cpu: 500m\n    memory: 800Mi\nheap: 2G\nstorage: 5Gi\nserverPort: 2888\nleaderElectionPort: 3888\nclientPort: 2181\nregistryAddress: '10.0.96.23:60080'\nimagePullPolicy: Always\ntickTimeMs: 2000\ninitTicks: 10\nsyncTicks: 5\nclientCnxns: 60\nsnapRetain: 3\npurgeHours: 1\nprobeInitialDelaySeconds: 15\nprobeTimeoutSeconds: 5\nantiAffinity: hard\nlogLevel: INFO\n"
+}

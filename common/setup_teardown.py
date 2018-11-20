@@ -23,7 +23,7 @@ class SetUp(AlaudaRequest):
 
     def __init__(self):
         super(SetUp, self).__init__()
-        self.app_name = "alauda-global-app"
+        self.app_name = "alauda-global-riz"
         self.common = {
             "$NAMESPACE": settings.ACCOUNT,
             "$PASSWORD": settings.PASSWORD,
@@ -46,6 +46,8 @@ class SetUp(AlaudaRequest):
             "$GIT_CREDENTIAL": settings.GIT_CREDENTIAL,
             "$GIT_USERNAME": settings.GIT_USERNAME,
             "$GIT_PASSWORD": settings.GIT_PASSWORD,
+            "$GIT_PATH": settings.GIT_PATH,
+            "$GIT_BRANCH": settings.GIT_BRANCH,
             "$SONAR_ENDPOINT": settings.SONAR_ENDPOINT,
             "$SONAR_TOKEN": settings.SONAR_TOKEN,
             "$CLAIR_ENDPOINT": settings.CLAIR_ENDPOINT,
