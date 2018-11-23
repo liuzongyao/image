@@ -15,7 +15,6 @@ class TestNewApplicationSuite(object):
     def teardown_class(self):
         self.newapp.delete_newapp(self.namespace, self.newapp_name)
 
-    @pytest.mark.BAT
     def test_newapp(self):
         # if not self.newapp.is_weblab_open("USER_VIEW_ENABLED"):
         #     return True, "用户视角未打开，不需要测试"

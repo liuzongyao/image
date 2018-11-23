@@ -5,7 +5,6 @@ from test_case.jenkins.jenkins import Jenkins
 
 
 @pytest.mark.space
-@pytest.mark.BAT
 class TestResourcesSuite(object):
     def setup_class(self):
         self.resources_tool = Resources()
@@ -36,6 +35,7 @@ class TestResourcesSuite(object):
 
         self.resources_tool.delete_space(self.space_name)
 
+    @pytest.mark.BAT
     def test_space(self):
         # create space
         space_ret = self.resources_tool.create_space('./test_data/resources/create_resources.yaml',

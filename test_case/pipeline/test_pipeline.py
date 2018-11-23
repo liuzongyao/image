@@ -29,7 +29,6 @@ class TestPipelineSuite(object):
         pipeline_id = self.pipeline_tool.get_pipeline_id(self.pipeline_name, 'uuid')
         self.pipeline_tool.delete_pipeline(pipeline_id)
 
-    @pytest.mark.BAT
     def test_pipeline(self):
         result = {"flag": True}
 
