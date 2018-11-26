@@ -46,7 +46,7 @@ GIT_USERNAME = os.getenv("GIT_USERNAME", "alauda")
 GIT_PASSWORD = os.getenv("GIT_PASSWORD", "alauda_Test-!@#")
 
 TESTCASES = os.getenv("TESTCASES", "")
-CASE_TYPE = os.getenv("CASE_TYPE", "not cluster")
+CASE_TYPE = os.getenv("CASE_TYPE", "BAT")
 PROJECT_NAME = os.getenv("PROJECT_NAME", "e2etest")
 ENV = os.getenv("ENV", "Staging")
 RECIPIENTS = get_list_from_str(os.getenv("RECIPIENTS", "testing@alauda.io"))

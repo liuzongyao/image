@@ -14,7 +14,6 @@ class TestAlarmSuite(object):
         uuid = self.alarm.get_alarm_uuid(self.metric_alarm_name)
         self.alarm.delete_alarm(uuid)
 
-    @pytest.mark.BAT
     def test_metric_alarm(self):
         '''
         创建指标警报-获取警报详情-验证扩容-发送确认-更新指标警报-验证缩容-获取警报列表-删除警报

@@ -2,7 +2,6 @@ from test_case.dashboard.dashboard import Dashboard
 import pytest
 
 
-@pytest.mark.BAT
 class TestDashboard(object):
     def setup_class(self):
         self.dashboard = Dashboard()

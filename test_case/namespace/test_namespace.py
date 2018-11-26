@@ -88,6 +88,7 @@ class TestNamespaceSuite(object):
 
         assert result['flag'], result
 
+    @pytest.mark.BAT
     def test_resourcequota(self):
         '''
         创建命名空间-创建配额-验证配额pod-更新配额-验证配额pod-查看命名空间下的资源-删除有资源的命名空间-删除配额-删除应用-删除命名空间
@@ -150,8 +151,7 @@ class TestNamespaceSuite(object):
         assert delete_flag, "删除命名空间失败"
         assert result['flag'], result
 
-    @pytest.mark.ns
-    @pytest.mark.ace
+    @pytest.mark.BAT
     def test_general_namespaces(self):
         # if not self.namespace.is_weblab_open("USER_VIEW_ENABLED"):
         #     return True, "用户视角未打开，不需要测试"

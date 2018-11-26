@@ -13,7 +13,6 @@ class Teststorageclass():
     def teardown_class(self):
         self.scs.delete_scs(self.scs_name)
 
-    @pytest.mark.BAT
     def test_scs(self):
         result = {"flag": True}
         # create scs

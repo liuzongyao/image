@@ -671,6 +671,7 @@ class TestJenkinsBuildImageUpdateService(object):
 
         assert ret, "删除Jenkins流水线失败"
 
+    @pytest.mark.BAT
     def test_jenkins_template(self):
         # access jenkins
         ret = self.jenkins_tool.access_jenkins()

@@ -15,7 +15,6 @@ class TestLogSuite(object):
         uuid = self.log.get_saved_search_uuid(self.log_name)
         self.log.delete_saved_search(uuid)
 
-    @pytest.mark.BAT
     def test_log(self):
         '''
         获取日志源-获取查询类型-获取时间统计-日志查询
