@@ -1,5 +1,6 @@
 # What is this repository for?
 
+
 1. 该仓库是用来测试大平台的Jakiro API测试，使用的python pytest测试框架
 2. pytest会自动收集指定目录下所有以test开头的方法作为测试的case，并且最终会在Report下生成测试报告
 
