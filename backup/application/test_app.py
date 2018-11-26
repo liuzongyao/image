@@ -11,7 +11,7 @@ from test_case.volume.volume import Volume
 
 @pytest.mark.region
 @pytest.mark.new_k8s_app
-class TestApplicationSuite(object):
+class notTestApplicationSuite(object):
     def setup_class(self):
         self.application = Application()
         self.app_name = 'alauda-app-{}'.format(self.application.region_name).replace('_', '-')
@@ -56,7 +56,6 @@ class TestApplicationSuite(object):
         self.application.delete_app(self.appwithcm_name)
         self.configmap.delete_configmap(self.pvc.global_info["$K8S_NAMESPACE"], self.configmap_name)
 
-    @pytest.mark.BAT
     def test_newk8s_app(self):
         """
         "创建应用-验证应用状态-服务名称校验-获取应用详情-获取应用列表-获取应用yaml-操作事件-应用监控-日志-exec-"
