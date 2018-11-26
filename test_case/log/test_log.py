@@ -1,5 +1,3 @@
-import pytest
-
 from backup.application.app import Application
 from test_case.log.log import Log
 

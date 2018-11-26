@@ -1,5 +1,3 @@
-import pytest
-
 from test_case.alarm.alarm import Alarm
 
 
