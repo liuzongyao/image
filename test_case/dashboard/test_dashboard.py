@@ -1,5 +1,4 @@
 from test_case.dashboard.dashboard import Dashboard
-import pytest
 
 
 class TestDashboard(object):

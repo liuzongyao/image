@@ -1,5 +1,4 @@
 from test_case.project.project import Project
-import pytest
 
 
 class TestProjectSuite(object):
