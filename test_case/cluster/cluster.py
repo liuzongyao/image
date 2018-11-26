@@ -129,6 +129,6 @@ class Cluster(Common):
         return result
 
     def restart_sshd(self, ip):
-        cmd = "sudo sed -ir 's/\#MaxSessions/MaxSessions/' /etc/ssh/sshd_config"
+        cmd = "sudo sed -ir 's/#MaxSessions/MaxSessions/' /etc/ssh/sshd_config"
         self.excute_script(cmd, ip)
         self.excute_script("service sshd restart", ip)
