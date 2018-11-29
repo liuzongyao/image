@@ -1,4 +1,3 @@
-space_name: $SPACE_NAME
 name: $integration_name
 description: $description
 enabled: true

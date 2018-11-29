@@ -12,15 +12,15 @@ ACCOUNT = os.getenv("ACCOUNT", "alauda")
 SUB_ACCOUNT = os.getenv("SUB_ACCOUNT", "")
 PASSWORD = os.getenv("PASSWORD", "Alauda2018!@#")
 REGION_NAME = os.getenv("REGION_NAME", "high-region-available")
-REGISTRY_NAME = os.getenv("REGISTRY_NAME", "hightest")
+REGISTRY_NAME = os.getenv("REGISTRY_NAME", "high-region-available")
 IMAGE = os.getenv("IMAGE", "index.alauda.cn/alaudaorg/qaimages:helloworld")
 # not necessary
 REGISTRY_CREDENTIAL = os.getenv("REGISTRY_CREDENTIAL", "alauda-registry-credential")
 
 JENKINS_ENDPOINT = os.getenv("JENKINS_ENDPOINT",
-                             "http://154.8.229.251:8899")
+                             "http://118.24.216.33:8899")
 JENKINS_USER = os.getenv("JENKINS_USER", "admin")
-JENKINS_TOKEN = os.getenv("JENKINS_TOKEN", "dccbd8d020b4e461f73f7bbb646477e8")
+JENKINS_TOKEN = os.getenv("JENKINS_TOKEN", "1e4da3b45f3d4fbe7845e0c3a96d4b31")
 
 SONAR_ENDPOINT = os.getenv("SONAR_ENDPOINT",
                            "http://sonarqube-donotdelete.nolimited.haproxy-54-223-242-27-alaudacn.myalauda.cn/")

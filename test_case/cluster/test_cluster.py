@@ -14,7 +14,8 @@ class TestClusterSuite(object):
         self.namespace.region_name = self.cluster_name
         ret_create = create_instance(1)
         assert ret_create["success"], ret_create["message"]
-        ret_get = get_instance()
+        self.instances_id = ret_create['instances_id']
+        ret_get = get_instance(self.instances_id)
         assert ret_get["success"], ret_get["message"]
         self.private_ips = ret_get['private_ips']
         self.public_ips = ret_get['public_ips']
@@ -27,7 +28,7 @@ class TestClusterSuite(object):
         response = self.cluster.delete_cluster(self.cluster_name)
         if response.status_code in (204, 404):
             self.cluster.cleanup_cluster(self.public_ips)
-        destroy_instance()
+        destroy_instance(self.instances_id)
 
     def test_create_xvlan_region(self):
         """
