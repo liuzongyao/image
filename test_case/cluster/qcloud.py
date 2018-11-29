@@ -6,13 +6,12 @@ import hashlib
 import hmac
 import json
 import requests
-import common.settings
+from common import settings
 from common.log import logger
 
-secret_id = common.settings.SECRET_ID
-secret_key = common.settings.SECRET_KEY
+secret_id = settings.SECRET_ID
+secret_key = settings.SECRET_KEY
 endpoint = "cvm.tencentcloudapi.com"
-instances_id = []
 lb_name = "aketest{}".format(random.randint(0, 1000))
 
 
@@ -31,13 +30,13 @@ def sign_str(key, s, method):
 def create_instance(num):
     params = {
         "Action": "RunInstances",
-        "Placement.Zone": "ap-beijing-3",
+        # "Placement.Zone": "ap-beijing-3",
         "Placement.ProjectId": 1126842,
-        "Region": "ap-beijing",
-        "VirtualPrivateCloud.VpcId": "vpc-366ds668",
-        "VirtualPrivateCloud.SubnetId": "subnet-pfdj7bg5",
+        # "Region": "ap-beijing",
+        # "VirtualPrivateCloud.VpcId": "vpc-366ds668",
+        # "VirtualPrivateCloud.SubnetId": "subnet-pfdj7bg5",
         "ImageId": "img-8toqc6s3",  # centos7.4
-        "InstanceType": "S2.LARGE8",
+        # "InstanceType": "S2.LARGE8",
         "InstanceCount": num,
         "SystemDisk.DiskType": "CLOUD_PREMIUM",
         "SystemDisk.DiskSize": 50,
@@ -45,7 +44,7 @@ def create_instance(num):
         "DataDisks.0.DiskSize": 50,
         "InstanceName": "AkePublicDeploy-DT",
         "LoginSettings.Password": "07Apples",
-        "SecurityGroupIds.0": "sg-52hnrp2p",
+        # "SecurityGroupIds.0": "sg-52hnrp2p",
         "Version": "2017-03-12",
         "HostName": "node",
         "InternetAccessible.InternetChargeType": "TRAFFIC_POSTPAID_BY_HOUR",
@@ -59,11 +58,31 @@ def create_instance(num):
         "Nonce": random.randint(0, 1000),
         "SecretId": secret_id
     }
+    if settings.ENV == "Staging":
+        params.update({
+            "Placement.Zone": "ap-beijing-3",
+            "Region": "ap-beijing",
+            "InstanceType": "S2.LARGE8",
+            "VirtualPrivateCloud.VpcId": "vpc-366ds668",
+            "VirtualPrivateCloud.SubnetId": "subnet-pfdj7bg5",
+            "SecurityGroupIds.0": "sg-52hnrp2p"
+        })
+    elif settings.ENV == "private":
+        params.update({
+            "Placement.Zone": "ap-chongqing-1",
+            "Region": "ap-chongqing",
+            "InstanceType": "S3.LARGE8",
+            "VirtualPrivateCloud.VpcId": "vpc-c9el9wfx",
+            "VirtualPrivateCloud.SubnetId": "subnet-6ohk5y8a",
+            "SecurityGroupIds.0": "sg-046r9ija"
+        })
+    else:
+        return {"success": False, "message": "ENV is not Staging or private,can not create vm to deploy region"}
     s = get_string_to_sign("GET", endpoint, params)
     params["Signature"] = sign_str(secret_key, s, hashlib.sha1)
     logger.info("start to create qcloud vm")
     res = requests.get("https://" + endpoint, params=params)
-    global instances_id
+    instances_id = []
     instances_id += res.json()['Response'].get("InstanceIdSet")
     if not instances_id:
         return {"success": False, "message": "create qcloud vm failed: {}".format(res.text)}
@@ -72,15 +91,21 @@ def create_instance(num):
     return {"success": True, "instances_id": instances_id, "message": "create qcloud vm over"}
 
 
-def get_instance():
+def get_instance(instances_id):
     params = {
         "Action": "DescribeInstances",
         "Version": "2017-03-12",
-        "Region": "ap-beijing",
+        # "Region": "ap-beijing",
         "SecretId": secret_id,
         "Timestamp": int(time()),
         "Nonce": random.randint(0, 1000),
     }
+    if settings.ENV == "Staging":
+        params.update({"Region": "ap-beijing"})
+    elif settings.ENV == "private":
+        params.update({"Region": "ap-chongqing"})
+    else:
+        pass
     for i in range(0, len(instances_id)):
         params.update({"InstanceIds." + str(i): str(instances_id[i])})
     s = get_string_to_sign("GET", endpoint, params)
@@ -98,15 +123,21 @@ def get_instance():
     return {"success": False, "message": "get qcloud vm info failed:{}".format(res.text)}
 
 
-def destroy_instance():
+def destroy_instance(instances_id):
     params = {
         "Action": "TerminateInstances",
         "Version": "2017-03-12",
-        "Region": "ap-beijing",
+        # "Region": "ap-beijing",
         "SecretId": secret_id,
         "Timestamp": int(time()),
         "Nonce": random.randint(0, 1000),
     }
+    if settings.ENV == "Staging":
+        params.update({"Region": "ap-beijing"})
+    elif settings.ENV == "private":
+        params.update({"Region": "ap-chongqing"})
+    else:
+        pass
     for i in range(0, len(instances_id)):
         params.update({"InstanceIds." + str(i): str(instances_id[i])})
     s = get_string_to_sign("GET", endpoint, params)
@@ -171,7 +202,7 @@ def create_listener(lb_id):
     return listenerid
 
 
-def bind_lb():
+def bind_lb(instances_id):
     lb_id = describe_lb()
     listenerid = create_listener(lb_id)
     action = 'RegisterInstancesWithForwardLBFourthListener'

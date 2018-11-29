@@ -91,10 +91,27 @@ class Cluster(Common):
         node_info = self.get_value(ret_node.json(), "items.{}".format(index))
         return self.get_value(node_info, "spec.unschedulable")
 
+    def get_feature_template(self, region_name, type):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        url = self.get_feature_url(region_name)
+        response = self.send(method="get", path=url, params={})
+        if response.status_code != 200:
+            return {}
+        templates = self.get_value(response.json(), "{}.template.versions".format(type))
+        for template in templates:
+            if template["is_active"]:
+                content = template["values_yaml_content"]
+                return {
+                    "$values_yaml_content":
+                        "\\n".join([x for x in content.split('\n') if x.find("CH") < 0]).replace('""', '\\"\\"')
+                }
+        return {}
+
     def install_nevermore(self, region_name, file):
         logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        data = self.get_feature_template(region_name, "log")
         url = "v2/regions/{}/{}/features/log".format(self.account, region_name)
-        data = self.generate_data(file)
+        data = self.generate_data(file, data)
         return self.send(method="post", path=url, data=data, params={})
 
     def uninstall_nevermore(self, region_name):
@@ -104,8 +121,9 @@ class Cluster(Common):
 
     def install_registry(self, region_name, file):
         logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        data = self.get_feature_template(region_name, "registry")
         url = "v2/regions/{}/{}/features/registry".format(self.account, region_name)
-        data = self.generate_data(file)
+        data = self.generate_data(file, data)
         return self.send(method="post", path=url, data=data, params={})
 
     def uninstall_registry(self, region_name):

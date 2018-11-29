@@ -3,10 +3,7 @@ resource_actions:
 - integration:view
 - integration:create
 - integration:delete
-space_uuid: $SPACE_UUID
-project_name: $PROJECT_NAME
 description: ""
-project_uuid: $PROJECT_UUID
 fields:
   token: $SONAR_TOKEN
   endpoint: $SONAR_ENDPOINT

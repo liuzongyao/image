@@ -1,8 +1,7 @@
 # coding=utf-8
 import json
 import os
-
-from backup.application.app import Application
+from time import sleep
 from common import settings
 from common.api_requests import AlaudaRequest
 from common.base_request import Common
@@ -13,7 +12,10 @@ from test_case.namespace.namespace import Namespace
 from test_case.newapp.newapp import Newapplication
 from test_case.notification.notification import Notification
 from test_case.project.project import Project
-from test_case.space.space import Space
+from test_case.cluster.cluster import Cluster
+from test_case.cluster.qcloud import create_instance, destroy_instance, get_instance
+
+instances_id = []
 
 
 class SetUp(AlaudaRequest):
@@ -56,72 +58,82 @@ class SetUp(AlaudaRequest):
             "$CLAIR_DATABASE_USER_NAME": settings.CLAIR_DATABASE_USER_NAME,
             "$CLAIR_DATABASE_PASSWORD": settings.CLAIR_DATABASE_PASSWORD
         }
-        # self.get_user_weblab()
         self.input_file(self.common)
+        self.cluster_client = Cluster()
+        self.deploy_region()
         self.get_region_data()
-        # if not self.is_weblab_open("USER_VIEW_ENABLED"):
-        #     self.get_build_endpointid()
-        #     self.get_load_balance_info()
-        #     self.get_registry_uuid()
         self.get_master_ips()
         self.get_slave_ips()
         self.input_file(self.common)
         self.namespace_client = Namespace()
-        self.space_client = Space()
         self.project_client = Project()
         self.noti_client = Notification()
         self.image_client = Image()
-        self.app_client = Application()
         self.newapp = Newapplication()
         self.prepare()
         self.create_global_app()
         self.input_file(self.common)
 
-    # def get_rubick_url(self):
-    #     env = os.environ.get('ENV') or "STAGING"
-    #     if env.upper() == "STAGING":
-    #         rubick_url = "https://console-staging.alauda.cn"
-    #     elif env.upper() == "CN":
-    #         rubick_url = "https://enterprise.alauda.cn"
-    #     else:
-    #         rubick_url = os.getenv('API_URL').replace('20081', '32005')
-    #     if not rubick_url.startswith('http'):
-    #         rubick_url = "http://" + rubick_url
-    #     return rubick_url
-    #
-    # def get_user_weblab(self):
-    #     FRONTEND_URL = self.get_rubick_url()
-    #     login_url = "{}/ajax/landing/login".format(FRONTEND_URL)
-    #     data = {
-    #         "account": settings.ACCOUNT,
-    #         "password": settings.PASSWORD
-    #     }
-    #     session = requests.Session()
-    #     resp = session.post(login_url, data=data, verify=False)
-    #     if resp.status_code != 200:
-    #         return False
-    #     url = "{}/ajax-sp/account/weblabs?namespace={}".format(FRONTEND_URL, settings.ACCOUNT)
-    #     r = session.get(url)
-    #     if r.status_code != 200:
-    #         return False
-    #     content = json.loads(r.text)['feature_flags']
-    #     self.common.update({"$weblabs": content})
-    #
-    # def is_weblab_open(self, weblab_name):
-    #     weblabs = self.common.get("$weblabs")
-    #     if isinstance(weblabs, dict) and weblab_name in weblabs.keys() and weblabs[weblab_name]:
-    #         return True
-    #     else:
-    #         return False
+    def deploy_region(self):
+        if settings.ENV != "private":
+            return
+        if self.cluster_client.get_region_info(settings.REGION_NAME).status_code == 200:
+            return
+        self.common.update({"CREATE_REGION": True})
+        ret_create = create_instance(1)
+        assert ret_create["success"], ret_create["message"]
+        global instances_id
+        instances_id = ret_create['instances_id']
+        # instances_id = ['ins-rw4xyjdm']
+        ret_get = get_instance(instances_id)
+        assert ret_get["success"], ret_get["message"]
+        private_ips = ret_get['private_ips']
+        public_ips = ret_get['public_ips']
+        self.cluster_client.restart_sshd(public_ips[0])
+        get_script = self.cluster_client.generate_install_cmd("test_data/cluster/cluster_cmd.json",
+                                                              {"$cluster_name": settings.REGION_NAME,
+                                                               "$node_ip": private_ips[0]})
+        assert get_script.status_code == 200, "获取创建集群脚本失败:{}".format(get_script.text)
+        cmd = get_script.json()["commands"]["install"]
+        ret_excute = self.cluster_client.excute_script(cmd, public_ips[0])
+        assert "Install successfully!" in ret_excute[1], "执行脚本失败:{}".format(ret_excute[1])
+        is_exist = self.cluster_client.check_value_in_response("v1/regions/{}".format(self.cluster_client.account),
+                                                               settings.REGION_NAME,
+                                                               params={})
+        assert is_exist, "添加集群超时"
+
+        ret_list = self.cluster_client.get_region_list()
+        assert ret_list.status_code == 200, "获取集群列表失败:{}".format(ret_list.text)
+        region_name_list = self.cluster_client.get_value_list(ret_list.json(), "name")
+        assert settings.REGION_NAME in region_name_list, "新建集群不在集群列表内"
+        region_id = self.cluster_client.get_uuid_accord_name(ret_list.json(), {"name": settings.REGION_NAME}, "id")
+        self.cluster_client.region_id = region_id
+
+        # 获取下namespace 不然安装不了nevermore 会出错default namespace找不到
+        self.send(method="GET", path="v2/kubernetes/clusters/{}/namespaces".format(region_id), params={})
+        sleep(5)
+        self.cluster_client.check_exists(
+            "v2/kubernetes/clusters/{}/namespaces/{}".format(region_id, "default"), 200, params={})
+
+        # 部署完第一次安装会出错，需要等待一段时间才可以正常安装，但是不确定具体时间
+        self.cluster_client.install_nevermore(settings.REGION_NAME,
+                                              "test_data/cluster/install_nevermore.json")
+        ret_log = self.cluster_client.install_nevermore(settings.REGION_NAME,
+                                                        "test_data/cluster/install_nevermore.json")
+        assert ret_log.status_code == 200, "安装nevermore失败：{}".format(ret_log.text)
+
+        ret_registry = self.cluster_client.install_registry(settings.REGION_NAME,
+                                                            "test_data/cluster/install_registry.json")
+        assert ret_registry.status_code == 200, "安装registry失败：{}".format(ret_registry.text)
+
+        ret_result = self.cluster_client.check_feature_status(settings.REGION_NAME)
+        assert ret_result['success'], "特性安装失败:{}".format(ret_result)
 
     @retry()
     def get_region_data(self):
         """
         :return: 给self.region_data赋值集群信息  给self.region_id赋值集群ID
         """
-        # if not self.is_weblab_open("USER_VIEW_ENABLED"):
-        #     response = self.send(method="GET", path="/v1/regions/{}/{}/".format(self.account, self.region_name))
-        # else:
         response = self.send(method="GET", path="/v2/regions/{}/{}/".format(self.account, self.region_name),
                              params={})
         assert response.status_code == 200, response.json()
@@ -140,19 +152,6 @@ class SetUp(AlaudaRequest):
         self.common.update({"NETWORK_MODES": self.network_modes})
         self.common.update({"$NETWORK_TYPE": self.network_type})
         self.common.update({"$NETWORK_POLICY": self.network_policy})
-
-    @retry()
-    def get_build_endpointid(self):
-        """
-        :return: 给self.build_endpoint赋值构建的集群ID
-        """
-        response = self.send(method="GET", path="/v1/private-build-endpoints/{}".format(self.account))
-        assert response.status_code == 200, response.text
-        for content in response.json():
-            if content['region_id'] == self.region_id:
-                self.build_endpointid = content['endpoint_id']
-                self.common.update({"$BUILD_ENDPOINT_ID": self.build_endpointid})
-                break
 
     @retry()
     def get_load_balance_info(self):
@@ -194,18 +193,6 @@ class SetUp(AlaudaRequest):
 
     @retry()
     def get_slave_ips(self):
-        # if not self.is_weblab_open("USER_VIEW_ENABLED"):
-        #     response = self.send(method='GET',
-        #                          path='/v1/regions/{}/{}/nodes/'.format(self.account, self.region_name))
-        #     assert response.status_code == 200, response.text
-        #     contents = response.json()
-        #     slaveips = []
-        #     for content in contents:
-        #         if content.get("type") == "SYSLAVE" or content.get("type") == "SLAVE" and content.get("attr").get(
-        #                 "schedulable") is True:
-        #             slaveips.append(content.get("private_ip"))
-        #     self.common.update({"$SLAVEIPS": ','.join(slaveips)})
-        # else:
         response = self.send(method='GET',
                              path='/v2/regions/{}/{}/nodes'.format(self.account, self.region_name), params={})
         assert response.status_code == 200, response.text
@@ -219,17 +206,6 @@ class SetUp(AlaudaRequest):
 
     @retry()
     def get_master_ips(self):
-        # if not self.is_weblab_open("USER_VIEW_ENABLED"):
-        #     response = self.send(method='GET',
-        #                          path='/v1/regions/{}/{}/nodes/'.format(self.account, self.region_name))
-        #     assert response.status_code == 200, response.text
-        #     contents = response.json()
-        #     masterips = []
-        #     for content in contents:
-        #         if content.get("type") in ["SYSLAVE", "SYS"]:
-        #             masterips.append(content.get("private_ip"))
-        #     self.common.update({"$MASTERIPS": ','.join(masterips)})
-        # else:
         response = self.send(method='GET',
                              path='/v2/regions/{}/{}/nodes'.format(self.account, self.region_name), params={})
         assert response.status_code == 200, response.text
@@ -264,42 +240,6 @@ class SetUp(AlaudaRequest):
             self.common.update({"CREATE_PROJECT": True, "$PROJECT_UUID": response.json()['uuid']})
         else:
             self.common.update({"$PROJECT_UUID": response.json()['uuid']})
-        # if not self.is_weblab_open("USER_VIEW_ENABLED"):
-        #     # create k8s namespace
-        #     response = self.namespace_client.get_namespaces(settings.K8S_NAMESPACE)
-        #     if response.status_code != 200:
-        #         response = self.namespace_client.create_namespaces("./test_data/namespace/namespace.yml",
-        #                                                            {"$K8S_NAMESPACE": settings.K8S_NAMESPACE})
-        #         assert response.status_code == 201, "prepare data failed: create namespace failed {}".format(
-        #             response.text)
-        #         self.common.update({"CREATE_NAMESPACE": True})
-        #     response = self.namespace_client.get_namespaces(settings.K8S_NAMESPACE)
-        #
-        #     assert response.status_code == 200, "prepare data failed: get namespace detail failed {}".format(
-        #         response.text)
-        #     namespace_uuid = response.json()["kubernetes"]["metadata"]["uid"]
-        #     self.common.update({"$K8S_NS_UUID": namespace_uuid})
-        #     # create space
-        #     response = self.space_client.get_space(settings.SPACE_NAME)
-        #     if response.status_code != 200:
-        #         response = self.space_client.create_space("./test_data/space/space.json",
-        #                                                   {"$SPACE_NAME": settings.SPACE_NAME})
-        #         assert response.status_code == 201, "prepare data failed: create space failed {}".format(response.text)
-        #         self.common.update({"CREATE_SPACE": True, "$SPACE_UUID": response.json()['uuid']})
-        #     else:
-        #         self.common.update({"$SPACE_UUID": response.json()['uuid']})
-        #
-        #     # 创建全局通知，提供给构建，流水线等使用
-        #     global_noti_name = "e2e-global-noti"
-        #     # 先删除已经存在的通知
-        #     noti_id = self.noti_client.get_noti_id_from_list(global_noti_name)
-        #     self.noti_client.delete_noti(noti_id)
-        #     # 创建
-        #     response = self.noti_client.create_noti("./test_data/notification/global_noti.json",
-        #                                             {"$noti_name": global_noti_name})
-        #     assert response.status_code == 201, "创建全局通知失败了，原因是：{}".format(response.text)
-        #     self.common.update({"$NOTI_NAME": response.json().get("name"), "$NOTI_UUID": response.json().get("uuid")})
-        # else:
         self.namespace_client.delete_general_namespaces(settings.K8S_NAMESPACE)
         self.namespace_client.check_exists(self.namespace_client.get_namespace_url(settings.K8S_NAMESPACE), 404)
         response = self.namespace_client.get_namespaces(settings.K8S_NAMESPACE)
@@ -311,33 +251,11 @@ class SetUp(AlaudaRequest):
             self.common.update({"CREATE_NAMESPACE": True})
         response = self.namespace_client.get_namespaces(settings.K8S_NAMESPACE)
 
-        assert response.status_code == 200, "prepare data failed: get namespace detail failed {}".format(
-            response.text)
+        assert response.status_code == 200, "prepare data failed: get namespace detail failed {}".format(response.text)
         namespace_uuid = response.json()["kubernetes"]["metadata"]["uid"]
         self.common.update({"$K8S_NS_UUID": namespace_uuid})
 
     def create_global_app(self):
-        # if not self.is_weblab_open("USER_VIEW_ENABLED"):
-        #     # 先删除已经存在的应用
-        #     self.app_client.delete_app(self.app_name)
-        #     # create service
-        #     ret = self.app_client.create_app('./test_data/application/create_app.yml',
-        #                                      {"$app_name": self.app_name, "$description": self.app_name,
-        #                                       "$K8S_NS_UUID": self.common["$K8S_NS_UUID"]})
-        #
-        #     assert ret.status_code == 201, "创建应用失败"
-        #
-        #     # get service status
-        #     content = ret.json()
-        #     app_id = self.app_client.get_value(content, 'resource.uuid')
-        #     service_uuid = self.app_client.get_value(content, 'services.0.resource.uuid')
-        #
-        #     app_status = self.app_client.get_app_status(app_id, 'resource.status', 'Running')
-        #     assert app_status, "应用运行失败"
-        #
-        #     self.common.update({"$GLOBAL_APP_NAME": self.app_name, "$GLOBAL_APP_ID": app_id,
-        #                         "$GLOBAL_SERVICE_ID": service_uuid})
-        # else:
         self.newapp.delete_newapp(settings.K8S_NAMESPACE, self.app_name)
         self.newapp.check_exists(
             self.newapp.get_newapp_common_url(settings.K8S_NAMESPACE, self.app_name), 404)
@@ -360,34 +278,31 @@ class TearDown(AlaudaRequest):
         super(TearDown, self).__init__()
         self.global_info = FileUtils.load_file(self.global_info_path)
         self.namespace_client = Namespace()
-        self.space_client = Space()
         self.project_client = Project()
         self.noti_client = Notification()
-        self.app_client = Application()
         self.newapp = Newapplication()
+        self.cluster = Cluster()
         self.delete()
 
     def delete(self):
-        # if not self.newapp.is_weblab_open("USER_VIEW_ENABLED"):
-        #     self.app_client.delete_app(self.global_info['$GLOBAL_APP_NAME'])
-        #     self.app_client.check_exists(self.app_client.app_common_url(self.global_info['$GLOBAL_APP_ID']), 404)
-        # else:
         self.newapp.delete_newapp(settings.K8S_NAMESPACE, self.global_info['$GLOBAL_APP_NAME'])
         self.newapp.check_exists(
             self.newapp.get_newapp_common_url(settings.K8S_NAMESPACE, self.global_info['$GLOBAL_APP_NAME']), 404)
 
         if "CREATE_NAMESPACE" in self.global_info:
-            # if not self.newapp.is_weblab_open("USER_VIEW_ENABLED"):
-            #     self.namespace_client.delete_namespaces(settings.K8S_NAMESPACE)
-            # else:
             self.namespace_client.delete_general_namespaces(settings.K8S_NAMESPACE)
-
-        if "CREATE_SPACE" in self.global_info:
-            self.space_client.delete_space(settings.SPACE_NAME)
 
         if "CREATE_PROJECT" in self.global_info:
             self.project_client.delete_project_role(settings.PROJECT_NAME)
             self.project_client.delete_project(settings.PROJECT_NAME)
+
+        if "CREATE_REGION" in self.global_info:
+            self.cluster.uninstall_nevermore(settings.REGION_NAME)
+            self.cluster.uninstall_registry(settings.REGION_NAME)
+            self.namespace_client.delete_general_namespaces("default")
+            self.namespace_client.delete_general_namespaces("kube-system")
+            self.cluster.delete_cluster(settings.REGION_NAME)
+            destroy_instance(instances_id)
 
         noti_id = self.global_info.get("$NOTI_UUID")
         self.noti_client.delete_noti(noti_id)
