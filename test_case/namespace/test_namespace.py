@@ -1,6 +1,5 @@
 import pytest
 
-from backup.application.app import Application
 from test_case.namespace.namespace import Namespace
 from test_case.persistentvolumeclaims.pvc import Pvc
 
