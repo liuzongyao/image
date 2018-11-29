@@ -1,4 +1,4 @@
-from test_case.alarm.alarm import Alarm
+from backup.alarm.alarm import Alarm
 
 
 class TestAlarmSuite(object):

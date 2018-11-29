@@ -3,7 +3,7 @@ import pytest
 from backup.application.app import Application
 from common.log import logger
 from test_case.integrations.ci_cd_integrations import Integrations
-from test_case.plugin.plugin import Plugin
+from backup.plugin.plugin import Plugin
 
 
 class TestPluginSuite(object):

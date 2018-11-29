@@ -1,5 +1,5 @@
 import json
-from test_case.loadbalancers.lb import LoadBalancer
+from backup.loadbalancers.lb import LoadBalancer
 
 
 class TestLoadBalancer(object):
