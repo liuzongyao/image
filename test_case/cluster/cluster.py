@@ -1,8 +1,8 @@
 import sys
+import yaml
 from common.base_request import Common
 from common.log import logger
 from subprocess import getstatusoutput
-import json, yaml
 
 
 class Cluster(Common):
@@ -103,15 +103,16 @@ class Cluster(Common):
             if template["is_active"]:
                 content = template["values_yaml_content"]
                 return {
-                    "$values_yaml_content": json.dumps(yaml.load(content))
+                    "$values_yaml_content": yaml.load(content)
                 }
         return {}
 
     def install_nevermore(self, region_name, file):
         logger.info(sys._getframe().f_code.co_name.center(50, '*'))
         data = self.get_feature_template(region_name, "log")
+        data.update({"$values_yaml_content": yaml.dump(data["$values_yaml_content"])})
         url = "v2/regions/{}/{}/features/log".format(self.account, region_name)
-        data = self.generate_data(file, data)
+        data = self.generate_data(file, data).replace("\n", "\\n")
         return self.send(method="post", path=url, data=data, params={})
 
     def uninstall_nevermore(self, region_name):
@@ -122,9 +123,10 @@ class Cluster(Common):
     def install_registry(self, region_name, registry_name, file):
         logger.info(sys._getframe().f_code.co_name.center(50, '*'))
         data = self.get_feature_template(region_name, "registry")
-        data['environment']['name'] = registry_name
+        data['$values_yaml_content']['environment']['name'] = registry_name
+        data.update({"$values_yaml_content": yaml.dump(data["$values_yaml_content"])})
         url = "v2/regions/{}/{}/features/registry".format(self.account, region_name)
-        data = self.generate_data(file, data)
+        data = self.generate_data(file, data).replace("\n", "\\n")
         return self.send(method="post", path=url, data=data, params={})
 
     def uninstall_registry(self, region_name):

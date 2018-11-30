@@ -42,7 +42,7 @@ def create_instance(num):
         "SystemDisk.DiskSize": 50,
         "DataDisks.0.DiskType": "CLOUD_PREMIUM",
         "DataDisks.0.DiskSize": 50,
-        "InstanceName": "AkePublicDeploy-DT",
+        "InstanceName": "ACEE2ETest",
         "LoginSettings.Password": "07Apples",
         # "SecurityGroupIds.0": "sg-52hnrp2p",
         "Version": "2017-03-12",

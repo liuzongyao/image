@@ -16,6 +16,7 @@ from test_case.cluster.cluster import Cluster
 from test_case.cluster.qcloud import create_instance, destroy_instance, get_instance
 
 instances_id = []
+global_app_name = ''
 
 
 class SetUp(AlaudaRequest):
@@ -25,7 +26,8 @@ class SetUp(AlaudaRequest):
 
     def __init__(self):
         super(SetUp, self).__init__()
-        self.app_name = "alauda-global-app"
+        global global_app_name
+        global_app_name = "alauda-global-app"
         self.common = {
             "$NAMESPACE": settings.ACCOUNT,
             "$PASSWORD": settings.PASSWORD,
@@ -84,12 +86,14 @@ class SetUp(AlaudaRequest):
         assert ret_create["success"], ret_create["message"]
         global instances_id
         instances_id = ret_create['instances_id']
-        # instances_id = ['ins-rw4xyjdm']
+        # instances_id = ['ins-9g5juvv6', 'ins-6t6okkqc']
         ret_get = get_instance(instances_id)
         assert ret_get["success"], ret_get["message"]
         private_ips = ret_get['private_ips']
         public_ips = ret_get['public_ips']
         self.cluster_client.restart_sshd(public_ips[0])
+        for public_ip in public_ips:
+            self.cluster_client.excute_script("hostname node$RANDOM", public_ip)
         get_script = self.cluster_client.generate_install_cmd("test_data/cluster/two_node_cluster_cmd.json",
                                                               {"$cluster_name": settings.REGION_NAME,
                                                                "$master_ip": private_ips[0],
@@ -117,11 +121,13 @@ class SetUp(AlaudaRequest):
             "v2/kubernetes/clusters/{}/namespaces/{}".format(region_id, "default"), 200, params={})
 
         # 部署完第一次安装会出错，需要等待一段时间才可以正常安装，但是不确定具体时间
-        self.cluster_client.install_nevermore(settings.REGION_NAME,
-                                              "test_data/cluster/install_nevermore.json")
-        ret_log = self.cluster_client.install_nevermore(settings.REGION_NAME,
-                                                        "test_data/cluster/install_nevermore.json")
-        assert ret_log.status_code == 200, "安装nevermore失败：{}".format(ret_log.text)
+        ret_log1 = self.cluster_client.install_nevermore(settings.REGION_NAME,
+                                                         "test_data/cluster/install_nevermore.json")
+        sleep(1)
+        ret_log2 = self.cluster_client.install_nevermore(settings.REGION_NAME,
+                                                         "test_data/cluster/install_nevermore.json")
+        assert ret_log1.status_code == 200 or ret_log2.status_code ==200, "安装nevermore失败：{}, {}".format(
+            ret_log1.text, ret_log2.text)
 
         ret_registry = self.cluster_client.install_registry(settings.REGION_NAME, settings.REGISTRY_NAME,
                                                             "test_data/cluster/install_registry.json")
@@ -257,16 +263,16 @@ class SetUp(AlaudaRequest):
         self.common.update({"$K8S_NS_UUID": namespace_uuid})
 
     def create_global_app(self):
-        self.newapp.delete_newapp(settings.K8S_NAMESPACE, self.app_name)
+        self.newapp.delete_newapp(settings.K8S_NAMESPACE, global_app_name)
         self.newapp.check_exists(
-            self.newapp.get_newapp_common_url(settings.K8S_NAMESPACE, self.app_name), 404)
+            self.newapp.get_newapp_common_url(settings.K8S_NAMESPACE, global_app_name), 404)
         create_result = self.newapp.create_newapp('./test_data/newapp/newapp.json',
-                                                  {'$newapp_name': self.app_name})
+                                                  {'$newapp_name': global_app_name})
         assert create_result.status_code == 201, "新版应用创建失败 {}".format(create_result.text)
-        app_status = self.newapp.get_newapp_status(settings.K8S_NAMESPACE, self.app_name, 'Running')
-        assert app_status, "创建应用后，验证应用状态出错：app: {} is not running".format(self.app_name)
+        app_status = self.newapp.get_newapp_status(settings.K8S_NAMESPACE, global_app_name, 'Running')
+        assert app_status, "创建应用后，验证应用状态出错：app: {} is not running".format(global_app_name)
         app_uuid = self.newapp.get_value(create_result.json(), '0.kubernetes.metadata.uid')
-        self.common.update({"$GLOBAL_APP_NAME": self.app_name})
+        self.common.update({"$GLOBAL_APP_NAME": global_app_name})
         self.common.update({"$GLOBAL_APP_ID": app_uuid})
 
 
@@ -286,9 +292,9 @@ class TearDown(AlaudaRequest):
         self.delete()
 
     def delete(self):
-        self.newapp.delete_newapp(settings.K8S_NAMESPACE, self.global_info['$GLOBAL_APP_NAME'])
+        self.newapp.delete_newapp(settings.K8S_NAMESPACE, global_app_name)
         self.newapp.check_exists(
-            self.newapp.get_newapp_common_url(settings.K8S_NAMESPACE, self.global_info['$GLOBAL_APP_NAME']), 404)
+            self.newapp.get_newapp_common_url(settings.K8S_NAMESPACE, global_app_name), 404)
 
         if "CREATE_NAMESPACE" in self.global_info:
             self.namespace_client.delete_general_namespaces(settings.K8S_NAMESPACE)
