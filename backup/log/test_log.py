@@ -1,5 +1,5 @@
 from backup.application.app import Application
-from test_case.log.log import Log
+from backup.log.log import Log
 
 
 class TestLogSuite(object):

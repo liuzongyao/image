@@ -1,5 +1,5 @@
 import pytest
-from test_case.resources.resources import Resources
+from backup.resources.resources import Resources
 from test_case.integrations.ci_cd_integrations import Integrations
 from test_case.jenkins.jenkins import Jenkins
 

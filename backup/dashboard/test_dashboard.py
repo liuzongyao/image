@@ -1,4 +1,4 @@
-from test_case.dashboard.dashboard import Dashboard
+from backup.dashboard.dashboard import Dashboard
 
 
 class TestDashboard(object):
