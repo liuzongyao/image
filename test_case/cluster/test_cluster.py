@@ -40,7 +40,7 @@ class TestClusterSuite(object):
                                                        {"$cluster_name": self.cluster_name,
                                                         "$node_ip": self.private_ips[0]})
         assert get_script.status_code == 200, "获取创建集群脚本失败:{}".format(get_script.text)
-        cmd = get_script.json()["commands"]["install"]
+        cmd = "export LANG=zh_CN.utf8;{}".format(get_script.json()["commands"]["install"])
         ret_excute = self.cluster.excute_script(cmd, self.public_ips[0])
         assert "Install successfully!" in ret_excute[1], "执行脚本失败:{}".format(ret_excute[1])
         is_exist = self.cluster.check_value_in_response("v1/regions/{}".format(self.cluster.account),
