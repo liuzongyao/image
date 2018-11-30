@@ -11,6 +11,7 @@ class TestClusterSuite(object):
         self.cluster = Cluster()
         self.namespace = Namespace()
         self.cluster_name = "e2e-region-test4"
+        self.registry_name = 'e2e-registry-test4'
         self.namespace.region_name = self.cluster_name
         ret_create = create_instance(1)
         assert ret_create["success"], ret_create["message"]
@@ -36,7 +37,7 @@ class TestClusterSuite(object):
         设置节点不可调度-清理集群资源-删除集群
         """
         result = {"flag": True}
-        get_script = self.cluster.generate_install_cmd("test_data/cluster/cluster_cmd.json",
+        get_script = self.cluster.generate_install_cmd("test_data/cluster/one_node_cluster_cmd.json",
                                                        {"$cluster_name": self.cluster_name,
                                                         "$node_ip": self.private_ips[0]})
         assert get_script.status_code == 200, "获取创建集群脚本失败:{}".format(get_script.text)
@@ -71,7 +72,8 @@ class TestClusterSuite(object):
         ret_log = self.cluster.install_nevermore(self.cluster_name, "test_data/cluster/install_nevermore.json")
         assert ret_log.status_code == 200, "安装nevermore失败：{}".format(ret_log.text)
 
-        ret_registry = self.cluster.install_registry(self.cluster_name, "test_data/cluster/install_registry.json")
+        ret_registry = self.cluster.install_registry(self.cluster_name,
+                                                     self.registry_name, "test_data/cluster/install_registry.json")
         assert ret_registry.status_code == 200, "安装registry失败：{}".format(ret_registry.text)
 
         ret_result = self.cluster.check_feature_status(self.cluster_name)

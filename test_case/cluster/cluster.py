@@ -2,6 +2,7 @@ import sys
 from common.base_request import Common
 from common.log import logger
 from subprocess import getstatusoutput
+import json, yaml
 
 
 class Cluster(Common):
@@ -102,8 +103,7 @@ class Cluster(Common):
             if template["is_active"]:
                 content = template["values_yaml_content"]
                 return {
-                    "$values_yaml_content":
-                        "\\n".join([x for x in content.split('\n') if x.find("CH") < 0]).replace('""', '\\"\\"')
+                    "$values_yaml_content": json.dumps(yaml.load(content))
                 }
         return {}
 
@@ -119,9 +119,10 @@ class Cluster(Common):
         url = "v2/regions/{}/{}/features/log".format(self.account, region_name)
         return self.send(method="delete", path=url, params={})
 
-    def install_registry(self, region_name, file):
+    def install_registry(self, region_name, registry_name, file):
         logger.info(sys._getframe().f_code.co_name.center(50, '*'))
         data = self.get_feature_template(region_name, "registry")
+        data['environment']['name'] = registry_name
         url = "v2/regions/{}/{}/features/registry".format(self.account, region_name)
         data = self.generate_data(file, data)
         return self.send(method="post", path=url, data=data, params={})

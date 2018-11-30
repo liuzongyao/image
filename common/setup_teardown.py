@@ -80,7 +80,7 @@ class SetUp(AlaudaRequest):
         if self.cluster_client.get_region_info(settings.REGION_NAME).status_code == 200:
             return
         self.common.update({"CREATE_REGION": True})
-        ret_create = create_instance(1)
+        ret_create = create_instance(2)
         assert ret_create["success"], ret_create["message"]
         global instances_id
         instances_id = ret_create['instances_id']
@@ -90,9 +90,10 @@ class SetUp(AlaudaRequest):
         private_ips = ret_get['private_ips']
         public_ips = ret_get['public_ips']
         self.cluster_client.restart_sshd(public_ips[0])
-        get_script = self.cluster_client.generate_install_cmd("test_data/cluster/cluster_cmd.json",
+        get_script = self.cluster_client.generate_install_cmd("test_data/cluster/two_node_cluster_cmd.json",
                                                               {"$cluster_name": settings.REGION_NAME,
-                                                               "$node_ip": private_ips[0]})
+                                                               "$master_ip": private_ips[0],
+                                                               "$slave_ip": private_ips[1]})
         assert get_script.status_code == 200, "获取创建集群脚本失败:{}".format(get_script.text)
         cmd = "export LANG=zh_CN.utf8;{}".format(get_script.json()["commands"]["install"])
         ret_excute = self.cluster_client.excute_script(cmd, public_ips[0])
@@ -122,7 +123,7 @@ class SetUp(AlaudaRequest):
                                                         "test_data/cluster/install_nevermore.json")
         assert ret_log.status_code == 200, "安装nevermore失败：{}".format(ret_log.text)
 
-        ret_registry = self.cluster_client.install_registry(settings.REGION_NAME,
+        ret_registry = self.cluster_client.install_registry(settings.REGION_NAME, settings.REGISTRY_NAME,
                                                             "test_data/cluster/install_registry.json")
         assert ret_registry.status_code == 200, "安装registry失败：{}".format(ret_registry.text)
 
