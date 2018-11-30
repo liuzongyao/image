@@ -1,5 +1,6 @@
 import pytest
-from test_case.privatebuild.build import PrivateBuild
+
+from backup.privatebuild.build import PrivateBuild
 
 
 @pytest.mark.region
