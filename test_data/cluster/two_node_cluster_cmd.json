@@ -1,0 +1,30 @@
+{
+   "name": "$cluster_name",
+   "display_name": "$cluster_name",
+   "apiserver": "https://$master_ip:6443",
+   "cluster_type": {
+       "is_ha": false,
+       "loadbalancer": ""
+   },
+   "masters": [
+       {
+           "ipaddress": "$master_ip"
+       }
+   ], "nodes": [
+       {
+           "ipaddress": "$master_ip",
+           "ipaddress": "$slave_ip"
+        }
+   ],
+   "ssh": {
+       "type": "password",
+       "name": "root",
+       "secret": "07Apples",
+       "port": 22
+    }, "cni": {
+       "type": "flannel",
+       "backend": "vxlan",
+       "cidr": "10.1.0.0/16",
+       "network_policy": "none"
+    }
+}
