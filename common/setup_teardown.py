@@ -126,7 +126,7 @@ class SetUp(AlaudaRequest):
         sleep(1)
         ret_log2 = self.cluster_client.install_nevermore(settings.REGION_NAME,
                                                          "test_data/cluster/install_nevermore.json")
-        assert ret_log1.status_code == 200 or ret_log2.status_code ==200, "安装nevermore失败：{}, {}".format(
+        assert ret_log1.status_code == 200 or ret_log2.status_code == 200, "安装nevermore失败：{}, {}".format(
             ret_log1.text, ret_log2.text)
 
         ret_registry = self.cluster_client.install_registry(settings.REGION_NAME, settings.REGISTRY_NAME,

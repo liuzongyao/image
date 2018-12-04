@@ -1,0 +1,38 @@
+{
+  "apiVersion": "networking.k8s.io/v1",
+  "kind": "NetworkPolicy",
+  "metadata": {
+    "name": "$networkpolicy_name",
+    "namespace": "$K8S_NAMESPACE",
+    "spec": {
+      "podSelector": {
+        "matchLabels": {
+          "role": "db"
+        }
+      },
+      "policyTypes": [
+        "Ingress"
+      ],
+      "ingress": [
+        {
+          "from": [
+            {
+              "podSelector": {
+                "matchLabels": {
+                  "role": "backend"
+                }
+              }
+            },
+            {
+              "namespaceSelector": {
+                "matchLabels": {
+                  "project": "myproject"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
