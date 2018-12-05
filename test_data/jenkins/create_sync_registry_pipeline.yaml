@@ -1,6 +1,6 @@
 name: $pipeline_name
 display_name: $pipeline_name
-space_name: $SPACE_NAME
+space_name: $PROJECT_NAME
 jenkins_integration_id: $jenkins_integration_id
 description: ""
 icon: ""
@@ -15,14 +15,14 @@ template:
     sourceImage:
       registry: $source_reg_url
       registryUUID: ""
-      repository: $source_repo
+      repository: $REPO_NAME
       repositoryUUID: ""
     sourceImageTag: $source_tag
-    sourceImageRegistryCredentialsId: ""
+    sourceImageRegistryCredentialsId: $REG_CREDENTIAL
     image:
       registry: $reg_url
       registryUUID: ""
-      repository: $REPO_NAME
+      repository: $target_repo
       repositoryUUID: ""
     imageTag: $tag
     imageRegistryCredentialsId: $REG_CREDENTIAL

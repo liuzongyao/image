@@ -12,19 +12,19 @@ ACCOUNT = os.getenv("ACCOUNT", "alauda")
 SUB_ACCOUNT = os.getenv("SUB_ACCOUNT", "")
 PASSWORD = os.getenv("PASSWORD", "Alauda2018!@#")
 REGION_NAME = os.getenv("REGION_NAME", "high-region-available")
-REGISTRY_NAME = os.getenv("REGISTRY_NAME", "high-region-available")
+REGISTRY_NAME = os.getenv("REGISTRY_NAME", "high")
 IMAGE = os.getenv("IMAGE", "index.alauda.cn/alaudaorg/qaimages:helloworld")
 # not necessary
 REGISTRY_CREDENTIAL = os.getenv("REGISTRY_CREDENTIAL", "alauda-registry-credential")
 
 JENKINS_ENDPOINT = os.getenv("JENKINS_ENDPOINT",
-                             "http://118.24.216.33:8899")
+                             "http://192.144.148.212:8899")
 JENKINS_USER = os.getenv("JENKINS_USER", "admin")
-JENKINS_TOKEN = os.getenv("JENKINS_TOKEN", "1e4da3b45f3d4fbe7845e0c3a96d4b31")
+JENKINS_TOKEN = os.getenv("JENKINS_TOKEN", "b1f626706775f04f5aef764a8fda5966")
 
 SONAR_ENDPOINT = os.getenv("SONAR_ENDPOINT",
-                           "http://sonarqube-donotdelete.nolimited.haproxy-54-223-242-27-alaudacn.myalauda.cn/")
-SONAR_TOKEN = os.getenv("SONAR_TOKEN", "318983ce89e6f48c6d1bc3235119841dbff12a2b")
+                           "http://192.144.148.212:10007")
+SONAR_TOKEN = os.getenv("SONAR_TOKEN", "94df71bcca7d1e03cecee2222e4afa6047618533")
 
 CLAIR_ENDPOINT = os.getenv("CLAIR_ENDPOINT", "zhang-clair.default.haproxy-52-80-107-116-testorg001.myalauda.cn")
 CLAIR_SERVICE_PORT = os.getenv("CLAIR_SERVICE_PORT", "6060")
@@ -74,4 +74,5 @@ SMTP = {
 LOG_LEVEL = "INFO"
 LOG_PATH = "./report"
 REPO_NAME = "hello-world"
+TARGET_REPO_NAME = "sys-repo"
 GLOBAL_INFO_FILE = "./temp_data/global_info.json"

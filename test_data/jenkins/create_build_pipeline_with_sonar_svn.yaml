@@ -1,6 +1,6 @@
 name: $pipeline_name
 display_name: $pipeline_name
-space_name: $SPACE_NAME
+space_name: $PROJECT_NAME
 jenkins_integration_id: $jenkins_integration_id
 description: ""
 icon: ""
@@ -22,7 +22,7 @@ template:
     qualityGate: $quality
     lang: $lang
     sonarContextDir: "."
-    propertiesPath: "./sonar-project.properties"
+    propertiesPath: ~
     waitForQualityGate: false
     ciEnabled: true
     contextDir: "./"

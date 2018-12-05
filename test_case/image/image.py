@@ -73,49 +73,49 @@ class Image(Common):
         logger.info("************************** create registry project ********************************")
         path = self.create_reg_project_url()
         data = self.generate_data(file, data)
-        return self.send(method='post', path=path, data=data)
+        return self.send(method='post', path=path, data=data, params={})
 
     def delete_reg_project(self, reg_project_name):
         logger.info("************************** delete registry project ********************************")
         path = self.delete_reg_project_url(reg_project_name)
-        return self.send(method='delete', path=path)
+        return self.send(method='delete', path=path, params={})
 
     def create_repo(self, file, data, reg_project_name=None):
         logger.info("************************** create repository ********************************")
         path = self.create_repo_url(reg_project_name=reg_project_name)
         data = self.generate_data(file, data)
-        return self.send(method='post', path=path, data=data)
+        return self.send(method='post', path=path, data=data, params={})
 
     def update_repo(self, repo_name, file, data, reg_project_name=None):
         logger.info("************************** update repository ********************************")
         path = self.common_url(repo_name, reg_project_name=reg_project_name)
         data = self.generate_data(file, data)
-        return self.send(method='put', path=path, data=data)
+        return self.send(method='put', path=path, data=data, params={})
 
     def delete_repo(self, repo_name, reg_project_name=None):
         logger.info("************************** delete repository ********************************")
         path = self.common_url(repo_name, reg_project_name=reg_project_name)
-        return self.send(method='delete', path=path)
+        return self.send(method='delete', path=path, params={})
 
     def get_repo_detail(self, repo_name, reg_project_name=None):
         path = self.common_url(repo_name, reg_project_name=reg_project_name)
-        return self.send(method='get', path=path)
+        return self.send(method='get', path=path, params={})
 
     def get_repo_tag(self, repo_name, reg_project_name=None):
         path = self.get_repo_tag_url(repo_name, reg_project_name=reg_project_name)
-        return self.send(method='get', path=path)
+        return self.send(method='get', path=path, params={})
 
     def delete_repo_tag(self, repo_name, tag_name, reg_project_name=None):
         path = self.get_delete_repo_tag_url(repo_name, tag_name, reg_project_name=reg_project_name)
-        return self.send(method='delete', path=path)
+        return self.send(method='delete', path=path, params={})
 
     def get_repo_list(self, reg_project_name=None):
         path = self.get_repo_list_url(reg_project_name=reg_project_name)
-        return self.send(method='get', path=path)
+        return self.send(method='get', path=path, params={})
 
     def get_reg_project(self, reg_project_name):
         path = self.get_reg_project_list_url()
-        response = self.send(method='get', path=path)
+        response = self.send(method='get', path=path, params={})
         if response.status_code == 200:
             contents = response.json()
             for content in contents:
@@ -131,4 +131,4 @@ class Image(Common):
 
     def get_artifacts(self, repo_name, repo_tag, reg_project=None):
         path = self.get_artifacts_url(repo_name, repo_tag, reg_project=reg_project)
-        return self.send(method='get', path=path)
+        return self.send(method='get', path=path, params={})
