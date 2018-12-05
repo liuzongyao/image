@@ -14,5 +14,5 @@
 			"uuid": "$version_id"
 		}
 	},
-    "values_yaml_content":"registryAddress: '10.0.96.23:60080'\nimagePullPolicy: IfNotPresent\nserviceType: ClusterIP\nusePassword: true\nredisPassword: '123456'\nargs: ''\npersistence:\n  enabled: false\n  accessMode: ReadWriteOnce\n  size: 8Gi\nmetrics:\n  enabled: false\n  imagePullPolicy: IfNotPresent\n  resources: {}\nresources:\n  requests:\n    cpu: 100m\n    memory: 256Mi\n  limits:\n    cpu: 200m\n    memory: 500Mi\ninitresources:\n  requests:\n    cpu: 100m\n    memory: 256Mi\n  limits:\n    cpu: 200m\n    memory: 500Mi\nnodeSelector: {}\ntolerations: []\nnetworkPolicy:\n  enabled: false\n  allowExternal: true\n"
+    "values_yaml_content":"registryAddress: $MIDDLEWARE_REGISTRY\nimagePullPolicy: IfNotPresent\nserviceType: ClusterIP\nusePassword: true\nredisPassword: '123456'\nargs: ''\npersistence:\n  enabled: false\n  accessMode: ReadWriteOnce\n  size: 8Gi\n  storageClassName: '-'\nmetrics:\n  enabled: false\n  imagePullPolicy: IfNotPresent\n  resources: {}\nresources:\n  requests:\n    cpu: 100m\n    memory: 256Mi\n  limits:\n    cpu: 200m\n    memory: 500Mi\ninitresources:\n  requests:\n    cpu: 100m\n    memory: 256Mi\n  limits:\n    cpu: 200m\n    memory: 500Mi\nnodeSelector: {}\ntolerations: []\nnetworkPolicy:\n  enabled: false\n  allowExternal: true\n"
 }

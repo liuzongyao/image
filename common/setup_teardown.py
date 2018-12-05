@@ -56,7 +56,8 @@ class SetUp(AlaudaRequest):
             "$CLAIR_DATABASE_ADDR": settings.CLAIR_DATABASE_ADDR,
             "$CLAIR_DATABASE_NAME": settings.CLAIR_DATABASE_NAME,
             "$CLAIR_DATABASE_USER_NAME": settings.CLAIR_DATABASE_USER_NAME,
-            "$CLAIR_DATABASE_PASSWORD": settings.CLAIR_DATABASE_PASSWORD
+            "$CLAIR_DATABASE_PASSWORD": settings.CLAIR_DATABASE_PASSWORD,
+            "$MIDDLEWARE_REGISTRY": settings.MIDDLEWARE_REGISTRY
         }
         # self.get_user_weblab()
         self.input_file(self.common)

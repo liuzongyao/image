@@ -89,7 +89,7 @@ class Middleware(Common):
 
         cnt = 0
         flag = False
-        while cnt < 60 and not flag:
+        while cnt < 80 and not flag:
             cnt += 1
             url = self.get_status_url(namespace, name)
             responce = self.send(method='get', path=url)

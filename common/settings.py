@@ -7,12 +7,12 @@ def get_list_from_str(string, separator=','):
 
 
 # necessary
-API_URL = os.getenv("API_URL", "https://cloud-staging-api.alauda.cn")
+API_URL = os.getenv("API_URL", "http://94.191.95.20:32001")
 ACCOUNT = os.getenv("ACCOUNT", "alauda")
 SUB_ACCOUNT = os.getenv("SUB_ACCOUNT", "")
-PASSWORD = os.getenv("PASSWORD", "Alauda2018!@#")
-REGION_NAME = os.getenv("REGION_NAME", "high-region-available")
-REGISTRY_NAME = os.getenv("REGISTRY_NAME", "hightest")
+PASSWORD = os.getenv("PASSWORD", "alauda")
+REGION_NAME = os.getenv("REGION_NAME", "business")
+REGISTRY_NAME = os.getenv("REGISTRY_NAME", "business-registry")
 IMAGE = os.getenv("IMAGE", "index.alauda.cn/alaudaorg/qaimages:helloworld")
 # not necessary
 REGISTRY_CREDENTIAL = os.getenv("REGISTRY_CREDENTIAL", "alauda-registry-credential")
@@ -40,23 +40,26 @@ SVN_USERNAME = os.getenv("SVN_USERNAME", "User_Name-01")
 SVN_PASSWORD = os.getenv("SVN_PASSWORD", "alauda_Test-!@#")
 
 GIT_REPO = os.getenv("GIT_REPO",
-                     "http://192.144.148.212/rzli/alauda")
+                     "http://192.144.148.212/li/alauda")
 GIT_CREDENTIAL = os.getenv("GIT_CREDENTIAL", "alauda-git-credential")
 GIT_USERNAME = os.getenv("GIT_USERNAME", "rzli@alauda.io")
 GIT_PASSWORD = os.getenv("GIT_PASSWORD", "Luhan0420.")
-GIT_PATH = os.getenv("GIT_PATH", "/test")
+GIT_PATH = os.getenv("GIT_PATH", "/")
 GIT_BRANCH = os.getenv("GIT_BRANCH", "master")
 
-TESTCASES = os.getenv("TESTCASES", "test_case/middleware")
-CASE_TYPE = os.getenv("CASE_TYPE")
+TESTCASES = os.getenv("TESTCASES", "test_case/integrations")
+CASE_TYPE = os.getenv("CASE_TYPE", "integration_sonarqube")
 PROJECT_NAME = os.getenv("PROJECT_NAME", "e2etest")
 ENV = os.getenv("ENV", "Staging")
 RECIPIENTS = get_list_from_str(os.getenv("RECIPIENTS", "rzli@alauda.io"))
-K8S_NAMESPACE = os.getenv("K8S_NAMESPACE", "{}-alauda-test-{}".format(PROJECT_NAME, REGION_NAME).replace("_", "-"))
+K8S_NAMESPACE = os.getenv("K8S_NAMESPACE", "{}-alauda-lrz-{}".format(PROJECT_NAME, REGION_NAME).replace("_", "-"))
 SPACE_NAME = os.getenv("SPACE_NAME", "alauda-default-{}".format(REGION_NAME).replace("_", "-"))
 
 SECRET_ID = os.getenv("SECRET_ID", "AKID84kBMHwKUP4VggjwBAKFvxlJcgU3frtg")
 SECRET_KEY = os.getenv("SECRET_EKY", "aDlNSjBSZGRPdkxXUjZWZ2JHZnFPaGpXMklJa3d0WjA=")
+
+# 中间件的镜像仓库地址
+MIDDLEWARE_REGISTRY = os.getenv("MIDDLEWARE_REGISTRY", "10.0.128.201:60080")
 
 SMTP = {
     'host': os.getenv('SMTP_HOST', 'smtpdm.aliyun.com'),

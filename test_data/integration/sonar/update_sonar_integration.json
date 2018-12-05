@@ -1,8 +1,10 @@
-space_name: $SPACE_NAME
-name: $integration_name
-description: $description
-enabled: true
-fields:
-  endpoint: $SONAR_ENDPOINT
-  token: $SONAR_TOKEN
-namespace: $NAMESPACE
+{
+	"description": "$description",
+	"enabled": false,
+	"fields": {
+		"endpoint": "$SONAR_ENDPOINT",
+		"token": "$SONAR_TOKEN"
+	},
+	"name": "$integration_name",
+	"type": "SonarQube"
+}

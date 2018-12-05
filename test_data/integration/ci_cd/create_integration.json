@@ -1,10 +1,11 @@
-space_name: $SPACE_NAME
-name: $INTEGRATION_NAME
-description: ""
-enabled: true
-fields:
-  endpoint: $JENKINS_ENDPOINT
-  user_id: $JENKINS_USER
-  token: $JENKINS_TOKEN
-type: Jenkins
-namespace: $NAMESPACE
+{
+	"description": "",
+	"enabled": true,
+	"fields": {
+		"endpoint": "$JENKINS_ENDPOINT",
+		"token": "$JENKINS_TOKEN",
+		"user_id": "$JENKINS_USER"
+	},
+	"name": "$INTEGRATION_NAME",
+	"type": "Jenkins"
+}

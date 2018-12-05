@@ -1,0 +1,18 @@
+{
+  "cluster": {
+    "name": "$REGION_NAME"
+  },
+  "display_name": "",
+  "name": "$name",
+  "namespace": {
+    "name": "$K8S_NAMESPACE"
+  },
+  "template": {
+    "name": "eureka",
+    "uuid": "$template_id",
+    "version": {
+      "uuid": "$version_id"
+    }
+  },
+  "values_yaml_content":"registryAddress: $MIDDLEWARE_REGISTRY\nimagePullPolicy: IfNotPresent\nresources:\n  requests:\n    memory: 1G\n    cpu: 100m\n  limits:\n    memory: 1G\n    cpu: 100m\nreplicas: 2\nport: 8761\njavaOptions: ''\nloadbalancerName: ''\nloadbalancerPort: ''\n"
+}

@@ -14,5 +14,5 @@
 			"uuid": "$version_id"
 		}
 	},
-	"values_yaml_content": "registryAddress: '10.0.96.23:60080'\nmysqlRootPassword: admin\nmysqlUser: db_user\nmysqlPassword: '123456'\nimagePullPolicy: IfNotPresent\npersistence:\n  enabled: false\n  accessMode: ReadWriteOnce\n  size: 8Gi\nresources:\n  requests:\n    cpu: 100m\n    memory: 256Mi\n  limits:\n    cpu: 200m\n    memory: 500Mi\ninitresources:\n  requests:\n    cpu: 100m\n    memory: 256Mi\n  limits:\n    cpu: 200m\n    memory: 500Mi\nconfigurationFiles: ''\nphpmyadmin:\n  resources:\n    requests:\n      cpu: 100m\n      memory: 256Mi\n    limits:\n      cpu: 200m\n      memory: 500Mi\nloadbalancename: alauda-lb\n"
+	"values_yaml_content": "registryAddress: $MIDDLEWARE_REGISTRY\nmysqlRootPassword: admin\nmysqlUser: db_user\nmysqlPassword: '123456'\nimagePullPolicy: IfNotPresent\npersistence:\n  enabled: false\n  storageClassName: '-'\n  accessMode: ReadWriteOnce\n  size: 8Gi\nresources:\n  requests:\n    cpu: 100m\n    memory: 256Mi\n  limits:\n    cpu: 200m\n    memory: 500Mi\ninitresources:\n  requests:\n    cpu: 100m\n    memory: 256Mi\n  limits:\n    cpu: 200m\n    memory: 500Mi\nconfigurationFiles: ''\nphpmyadmin:\n  resources:\n    requests:\n      cpu: 100m\n      memory: 256Mi\n    limits:\n      cpu: 200m\n      memory: 500Mi\nloadbalancename: alauda-lb\n"
 }

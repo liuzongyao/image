@@ -1,20 +1,10 @@
-resource_actions:
-- integration:update
-- integration:view
-- integration:create
-- integration:delete
-space_uuid: $SPACE_UUID
-project_name: $PROJECT_NAME
-description: ""
-project_uuid: $PROJECT_UUID
-fields:
-  token: $SONAR_TOKEN
-  endpoint: $SONAR_ENDPOINT
-enabled: false
-space_name: $SPACE_NAME
-namespace: $NAMESPACE
-type: SonarQube
-id: $integration_id
-name: $integration_name
-integration_family: 代码扫描
-logo: https://s3.cn-north-1.amazonaws.com.cn/alauda-cn-integrations/assets/sonarqube-logo.png
+{
+	"description": "",
+	"enabled": false,
+	"fields": {
+		"endpoint": "$SONAR_ENDPOINT",
+		"token": "$SONAR_TOKEN"
+	},
+	"name": "$integration_name",
+	"type": "SonarQube"
+}

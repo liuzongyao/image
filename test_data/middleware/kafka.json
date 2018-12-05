@@ -14,5 +14,5 @@
 			"uuid": "$version_id"
 		}
 	},
-    "values_yaml_content":""
+    "values_yaml_content":"Replicas: 2\nregistryAddress: $MIDDLEWARE_REGISTRY\nImagePullPolicy: IfNotPresent\nresources:\n  limits:\n    cpu: 500m\n    memory: 800Mi\n  requests:\n    cpu: 300m\n    memory: 500Mi\nStorage: 1Gi\nDataDirectory: /opt/kafka/data\nstorageClassName: $scs_name\nzookeeper:\n  serverhost: $zookeeper\n  serverport: 2181\n"
 }

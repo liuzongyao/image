@@ -3,6 +3,7 @@ import pytest
 from common.log import logger
 from test_case.middleware.middleware import Middleware
 from test_case.newapp.newapp import Newapplication
+from test_case.storageclasses.scs import Scs
 
 
 class TestZookeeperSuite(object):
@@ -10,11 +11,21 @@ class TestZookeeperSuite(object):
     def setup_class(self):
         self.newapp = Newapplication()
         self.middleware = Middleware()
+        self.scs = Scs()
+
         self.namespace = self.middleware.global_info["$K8S_NAMESPACE"]
         self.zookeeper_name = "e2e-zookeeper-pub"
+        self.kafka_name = "e2e-kafka-pub"
+
+        scs_list_result = self.scs.list_scs()
+        assert len(scs_list_result.json()) > 0, "没有存储类,不能创建zookeeper,创建zookeeper用例失败"
+        self.scs_name = scs_list_result.json()[0]["kubernetes"]["metadata"]["name"]
+        logger.info("查出来的第一个scs {}".format(self.scs_name))
 
     def teardown_class(self):
         logger.info("清除zookeeper应用资源")
+        self.newapp.delete_newapp(self.namespace, self.kafka_name)
+        self.newapp.check_exists(self.newapp.get_newapp_common_url(self.namespace, self.kafka_name), 404)
         self.newapp.delete_newapp(self.namespace, self.zookeeper_name)
         self.newapp.check_exists(self.newapp.get_newapp_common_url(self.namespace, self.zookeeper_name), 404)
         logger.info("清除完毕")
@@ -22,13 +33,12 @@ class TestZookeeperSuite(object):
     @pytest.mark.middleware_zookeeper
     def test_zookeeper(self):
 
-        # todo: 创建zookeeper应用失败，报错500。但是页面可以创建成功
         result = {"flag": True}
         zookeeper_template_id = self.middleware.get_template_id("zookeeper")
         version_id = self.middleware.get_version_id(zookeeper_template_id)
         create_result = self.middleware.create_application('./test_data/middleware/zookeeper.json',
                                                            {"$name": self.zookeeper_name, "$template_id": zookeeper_template_id,
-                                                            "$version_id": version_id})
+                                                            "$version_id": version_id, "$scs_name":self.scs_name})
         assert create_result.status_code == 201, "中间件创建zookeeper应用失败 {}".format(create_result.text)
         logger.info("中间件创建zookeeper应用成功")
 
@@ -42,4 +52,6 @@ class TestZookeeperSuite(object):
         logger.info("删除zookeeper应用成功")
 
         assert result["flag"], True
+
+
 

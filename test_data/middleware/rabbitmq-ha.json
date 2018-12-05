@@ -1,0 +1,18 @@
+{
+	"cluster": {
+		"name": "$REGION_NAME"
+	},
+	"display_name": "",
+	"name": "$name",
+	"namespace": {
+		"name": "$K8S_NAMESPACE"
+	},
+	"template": {
+		"name": "rabbitmq-ha",
+		"uuid": "$template_id",
+		"version": {
+			"uuid": "$version_id"
+		}
+	},
+	"values_yaml_content": "rabbitmqPassword: guest\nregistryAddress: $MIDDLEWARE_REGISTRY\nreplicaCount: 3\nlb:\n  load_balance_name: alauda-lb\n  rabbitmqEpmdPort: 4369\n  rabbitmqNodePort: 5672\n  rabbitmqManagerPort: 15672\nrabbitmqEpmdPort: 4369\nrabbitmqNodePort: 5672\nrabbitmqManagerPort: 15672\nrabbitmqHipeCompile: false\npersistentVolume:\n  mode: host\n  pvc:\n    size: 8Gi\n    storageClassName: alauda-system-gfs\n  host:\n    HostUsedPath: /tmp\nusePodAffnity: false\nnodeSelector: {}\nlivenessProbe:\n  initialDelaySeconds: 120\n  timeoutSeconds: 5\n  failureThreshold: 6\nreadinessProbe:\n  initialDelaySeconds: 10\n  timeoutSeconds: 3\n  periodSeconds: 5\nnum_tcp_acceptors: 10\nhandshake_timeout: 10000\nvm_memory_high_watermark_paging_ratio: 0.5\ndisk_free_limit: '50000000'\nframe_max: 131072\nchannel_max: 0\nheartbeat: 60\ncollect_statistics: none\ncollect_statistics_interval: 5000\ncluster_keepalive_interval: 10000\nqueue_index_embed_msgs_below: 4096\nmnesia_table_loading_retry_timeout: 30000\nimage:\n  pullPolicy: IfNotPresent\ninitresources:\n  limits:\n    cpu: 1\n    memory: 2Gi\n  requests:\n    cpu: 500m\n    memory: 1Gi\nresources:\n  limits:\n    cpu: 1\n    memory: 2Gi\n  requests:\n    cpu: 500m\n    memory: 1Gi\n"
+}

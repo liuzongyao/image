@@ -33,6 +33,6 @@ limitrange:
        memory: 1G
        cpu: "0.5"
     max:
-       cpu: 1
-       memory: 1G
+       cpu: 8
+       memory: 16G
     type: Container
