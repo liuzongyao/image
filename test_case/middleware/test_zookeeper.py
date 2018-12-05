@@ -6,7 +6,6 @@ from test_case.newapp.newapp import Newapplication
 from test_case.storageclasses.scs import Scs
 
 
-@pytest.mark.BAT
 class TestZookeeperSuite(object):
 
     def setup_class(self):

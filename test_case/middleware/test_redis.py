@@ -5,7 +5,6 @@ from test_case.newapp.newapp import Newapplication
 from test_case.middleware.middleware import Middleware
 
 
-@pytest.mark.BAT
 class TestRedisSuite(object):
 
     def setup_class(self):

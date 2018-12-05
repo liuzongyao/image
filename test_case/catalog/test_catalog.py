@@ -6,6 +6,7 @@ from test_case.middleware.middleware import Middleware
 from test_case.newapp.newapp import Newapplication
 
 
+@pytest.mark.BAT
 class TestCatalogSuite(object):
     def setup_class(self):
 

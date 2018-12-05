@@ -5,7 +5,6 @@ from test_case.middleware.middleware import Middleware
 from test_case.newapp.newapp import Newapplication
 
 
-@pytest.mark.BAT
 class TestMysqlSuite(object):
 
     def setup_class(self):
