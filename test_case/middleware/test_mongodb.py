@@ -6,6 +6,7 @@ from test_case.catalog.catalog import Catalog
 from test_case.newapp.newapp import Newapplication
 
 
+@pytest.mark.BAT
 class TestMongodbSuite(object):
 
     def setup_class(self):
