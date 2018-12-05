@@ -264,13 +264,13 @@ class Common(AlaudaRequest):
             logger.info(child.before)
             return ret
 
-    def check_exists(self, url, expect_status):
+    def check_exists(self, url, expect_status, params={"project_name": settings.PROJECT_NAME}):
         logger.info(sys._getframe().f_code.co_name.center(50, '*'))
         cnt = 0
         flag = False
         while cnt < 60 and not flag:
             cnt += 1
-            response = self.send(method="GET", path=url)
+            response = self.send(method="GET", path=url, params=params)
             if response.status_code == expect_status:
                 flag = True
             sleep(5)
@@ -294,7 +294,7 @@ class Common(AlaudaRequest):
             if value in response.text:
                 flag = True
                 break
-            sleep(1)
+            sleep(5)
         return flag
 
     def access_jenkins(self):

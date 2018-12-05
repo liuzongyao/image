@@ -7,7 +7,7 @@ resourcequota:
  apiVersion: v1
  kind: ResourceQuota
  metadata:
-  name: $K8S_NAMESPACE
+  name: default
   namespace: $K8S_NAMESPACE
  spec:
   hard:
@@ -22,7 +22,7 @@ limitrange:
  apiVersion: v1
  kind: LimitRange
  metadata:
-  name: $K8S_NAMESPACE
+  name: default
   namespace: $K8S_NAMESPACE
  spec:
   limits:

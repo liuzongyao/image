@@ -55,6 +55,9 @@ RECIPIENTS = get_list_from_str(os.getenv("RECIPIENTS", "rzli@alauda.io"))
 K8S_NAMESPACE = os.getenv("K8S_NAMESPACE", "{}-alauda-test-{}".format(PROJECT_NAME, REGION_NAME).replace("_", "-"))
 SPACE_NAME = os.getenv("SPACE_NAME", "alauda-default-{}".format(REGION_NAME).replace("_", "-"))
 
+SECRET_ID = os.getenv("SECRET_ID", "AKID84kBMHwKUP4VggjwBAKFvxlJcgU3frtg")
+SECRET_KEY = os.getenv("SECRET_EKY", "aDlNSjBSZGRPdkxXUjZWZ2JHZnFPaGpXMklJa3d0WjA=")
+
 SMTP = {
     'host': os.getenv('SMTP_HOST', 'smtpdm.aliyun.com'),
     'port': os.getenv('SMTP_PORT', 465),

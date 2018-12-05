@@ -27,6 +27,42 @@ class Newapplication(Common):
     def get_remove_newapp_url(self, namespace, name):
         return "v2/kubernetes/clusters/{}/applications/{}/{}/remove".format(self.region_name, namespace, name)
 
+    def get_newapp_status_url(self, namespace, name):
+        return "v2/kubernetes/clusters/{}/applications/{}/{}/status".format(self.region_name, namespace, name)
+
+    def get_newapp_address_url(self, namespace, name):
+        return "v2/kubernetes/clusters/{}/applications/{}/{}/address".format(self.region_name, namespace, name)
+
+    def get_newapp_topology_url(self, namespace, name, kind='Deployment'):
+        return "v2/kubernetes/clusters/{}/topology/{}?kind={}&name={}".format(self.region_name, namespace, kind, name)
+
+    def get_newapp_pod_url(self, namespace, name):
+        return "v2/kubernetes/clusters/{}/applications/{}/{}/pods".format(self.region_name, namespace, name)
+
+    def get_scale_newapp_url(self, namespace, name, step):
+        return "v2/misc/clusters/{}/scale/deployments/{}/{}?step={}".format(self.region_name, namespace, name,
+                                                                            step)
+
+    def get_exec_newapp_url(self, namespace, name, container_name):
+        return "v2/misc/clusters/{}/exec/{}/{}/{}".format(self.region_name, namespace, container_name, name)
+
+    def get_newapp_logs_url(self, namespace, name, container_name):
+        return "v2/kubernetes/clusters/{}/pods/{}/{}/{}/log".format(self.region_name, namespace, container_name, name)
+
+    def get_newapp_event_url(self, app_id):
+        return "v1/events/{}/application/{}?pageno=1&size=20&query_string=".format(self.account, app_id)
+
+    def get_newapp_kevent_url(self, namespace, name):
+        return "v2/kevents/?&cluster={}&namespace={}&name={}&page=1&page_size=20&kind=Deployment,Application," \
+               "Pod,EndPoint,Service,HorizontalPodAutoscaler,ReplicaSet,DaemonSet,StatefulSet".format(self.region_name,
+                                                                                                      namespace, name)
+
+    def search_newapp_url(self, namespace, name):
+        return "v2/kubernetes/clusters/{}/applications/{}/?search={}".format(self.region_name, namespace, name)
+
+    def delete_deploy_url(self, namespace, name):
+        return "v2/kubernetes/clusters/{}/deployments/{}/{}".format(self.region_name, namespace, name)
+
     def get_all_newapp(self):
         logger.info(sys._getframe().f_code.co_name.center(50, '*'))
         url = self.get_newapp_url()
@@ -37,6 +73,12 @@ class Newapplication(Common):
         url = self.get_newapp_url()
         data = self.generate_data(file, data)
         return self.send(method='post', path=url, data=data)
+
+    def create_newapp_by_yaml(self, namespace, name, file, data):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        url = self.get_newapp_common_url(namespace, name)
+        data = self.generate_data(file, data)
+        return self.send(method='post', path=url, data=data, headers={"Content-Type": "application/yaml"})
 
     def get_newapp_in_namespace(self, namespace):
         logger.info(sys._getframe().f_code.co_name.center(50, '*'))
@@ -86,44 +128,81 @@ class Newapplication(Common):
         data = self.generate_data(file, data)
         return self.send(method='put', path=url, data=data)
 
+    def get_newapp_status_withoutassert(self, namespace, name):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        url = self.get_newapp_status_url(namespace, name)
+        return self.send(method='get', path=url)
+
+    def get_newapp_pods(self, namespace, name):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        url = self.get_newapp_pod_url(namespace, name)
+        return self.send(method='get', path=url)
+
+    def get_newapp_topology(self, namespace, name):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        url = self.get_newapp_topology_url(namespace, name)
+        return self.send(method='get', path=url)
+
+    def get_newapp_address(self, namespace, name):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        url = self.get_newapp_address_url(namespace, name)
+        return self.send(method='get', path=url)
+
+    def get_newapp_event(self, name):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        url = self.get_newapp_event_url(name)
+        params = Common.generate_time_params()
+        return self.send(method='get', path=url, params=params)
+
+    def get_newapp_kevent(self, namespace, name):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        url = self.get_newapp_kevent_url(namespace, name)
+        params = Common.generate_time_params()
+        return self.send(method='get', path=url, params=params)
+
+    def scale_up_newapp(self, namespace, name):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        url = self.get_scale_newapp_url(namespace, name, 1)
+        return self.send(method='post', path=url)
+
+    def scale_down_newapp(self, namespace, name):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        url = self.get_scale_newapp_url(namespace, name, -1)
+        return self.send(method='post', path=url)
+
+    def exec_newapp(self, namespace, name, container_name):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        url = self.get_exec_newapp_url(namespace, name, container_name)
+        return self.send(method='post', path=url)
+
+    def get_newapp_log(self, namespace, name, container_name):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        url = self.get_newapp_logs_url(namespace, name, container_name)
+        return self.send(method='get', path=url)
+
+    def search_newapp(self, namespace, name):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        url = self.search_newapp_url(namespace, name)
+        return self.send(method='get', path=url)
+
+    def delete_deployment(self, namespace, name):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        url = self.delete_deploy_url(namespace, name)
+        return self.send(method='delete', path=url)
+
     def get_newapp_status(self, namespace, name, expect_value):
         logger.info(sys._getframe().f_code.co_name.center(50, '*'))
         cnt = 0
         flag = False
         while cnt < 60 and not flag:
             cnt += 1
-            url = self.get_newapp_common_url(namespace, name)
+            url = self.get_newapp_status_url(namespace, name)
             response = self.send(method="GET", path=url)
-            assert response.status_code == 200, "get status failed"
-            for resource in response.json():
-                if self.get_value(resource, 'kubernetes.kind') == 'Application':
-                    value = self.get_value(resource, 'kubernetes.spec.assemblyPhase')
-                    logger.info("应用状态：{}".format(value))
-                    if value == expect_value:
-                        flag = True
-                        break
-            sleep(5)
-        return flag
-
-    def get_deployment_status(self, namespace, name, expect_value):
-        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
-        cnt = 0
-        flag = False
-        while cnt < 60 and not flag:
-            cnt += 1
-            url = self.get_newapp_common_url(namespace, name)
-            response = self.send(method="GET", path=url)
-            assert response.status_code == 200, "get status failed"
-            for resource in response.json():
-                if self.get_value(resource, 'kubernetes.kind') == 'Deployment':
-                    logger.info("组件状态：{}".format(self.get_value(resource, 'kubernetes.status')))
-                    if expect_value == "start":
-                        if 'readyReplicas' in self.get_value(resource, 'kubernetes.status'):
-                            flag = True
-                            break
-                    else:
-                        if 'readyReplicas' not in self.get_value(resource, 'kubernetes.status'):
-                            flag = True
-                            break
+            assert response.status_code == 200, "get app status failed"
+            value = self.get_value(response.json(), 'app_status')
+            logger.info("应用状态：{}".format(value))
+            if value == expect_value:
+                flag = True
+                break
             sleep(5)
         return flag
