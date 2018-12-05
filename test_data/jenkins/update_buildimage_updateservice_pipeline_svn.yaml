@@ -1,6 +1,6 @@
 name: $pipeline_name
 display_name: $display_name
-space_name: $SPACE_NAME
+space_name: $PROJECT_NAME
 jenkins_integration_id: $jenkins_integration_id
 description: $pipeline_description
 icon: ""
@@ -35,12 +35,11 @@ template:
     containerInfo:
       clusterName: $REGION_NAME
       namespace: $K8S_NAMESPACE
-      serviceName: $service_name
+      applicationName: $service_name
+      componentName: $service_name
+      componentType: "Deployment"
       containerName: $service_name
     command: ~
     args: ~
-    env: ~
-    envFrom: ~
-    autoRollbackOnFail: true
     timeout: $time_out
 namespace: $NAMESPACE

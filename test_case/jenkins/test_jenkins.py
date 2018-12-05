@@ -1,9 +1,8 @@
 import re
 import time
-
 import pytest
 
-from backup.application.app import Application
+from test_case.newapp.newapp import Newapplication
 from common.log import logger
 from test_case.image.image import Image
 from test_case.integrations.ci_cd_integrations import Integrations
@@ -14,7 +13,7 @@ from test_case.jenkins.jenkins import Jenkins
 @pytest.mark.buildimageupdateservice
 class TestJenkinsBuildImageUpdateService(object):
     def setup_class(self):
-        self.app_tool = Application()
+        self.app_tool = Newapplication()
         self.jenkins_tool = Jenkins()
         self.integration_tool = Integrations()
         self.image_tool = Image()
@@ -30,30 +29,30 @@ class TestJenkinsBuildImageUpdateService(object):
         self.registry_credential_name = self.app_tool.global_info.get('$REG_CREDENTIAL')
         self.git_code_credential_name = self.app_tool.global_info.get('$GIT_CREDENTIAL')
 
-        self.get_publick_registry = self.app_tool.global_info.get('PUBLIC_REGISTRY')
+        #self.get_publick_registry = self.app_tool.global_info.get('PUBLIC_REGISTRY')
         self.image = self.app_tool.global_info.get('$IMAGE')
 
         self.registry_name = self.app_tool.global_info.get("$REGISTRY")
         self.integration_name = "alauda-integration-instance-name-svn"
         self.sonar_integration_name = "alauda-sonar-integration-instance-name"
+        self.namespace=self.app_tool.global_info["$K8S_NAMESPACE"]
         self.app_name = self.app_tool.global_info.get("$GLOBAL_APP_NAME")
-        self.app_id = self.app_tool.global_info.get("$GLOBAL_APP_ID")
+        #self.app_id = self.app_tool.global_info.get("$GLOBAL_APP_ID")
         self.repo_tag = "alauda-e2e"
         self.repo_additional_tag = "alauda-e2e-additional"
         self.sync_repo_tag = "alauda-e2e-sync"
         self.branch = "master"
 
-        self.template_name = "alaudaBuildImageAndDeployService"
+        self.template_name = "newalaudaBuildImageAndDeployService"
         self.build_template_name = "alaudaBuildImage"
         self.syncimage_template_name = "alaudaSyncImage"
-        self.updateservice_template_name = "alaudaDeployService"
+        self.updateservice_template_name = "newalaudaDeployService"
 
         self.time_out = '300'
         self.repo = self.app_tool.global_info.get("$REPO_NAME")
+        self.target_repo = self.app_tool.global_info.get("$TARGET_REPO_NAME")
         self.pipeline_description = "alauda jenkins pipeline"
 
-        self.envname = 'alauda-envname'
-        self.envvalue = 'alauda-envvalue'
 
         self.qualitygates_name = "SonarQube way"
         self.language_name = 'Java'
@@ -191,7 +190,7 @@ class TestJenkinsBuildImageUpdateService(object):
         assert ret, "流水线项目执行失败"
 
         # get the service image tag
-        ret = self.app_tool.get_app_detail(self.app_id)
+        ret = self.app_tool.get_newapp_status(self.namespace, self.app_name)
 
         assert ret.status_code == 200, "获取应用的镜像版本失败"
 
@@ -224,6 +223,7 @@ class TestJenkinsBuildImageUpdateService(object):
 
         assert self.repo_additional_tag not in ret.text, "镜像版本没有被成功删除掉"
 
+    @pytest.mark.BAT
     def test_jenkins_build_with_git(self):
         # access jenkins
         ret = self.jenkins_tool.access_jenkins()
@@ -312,6 +312,7 @@ class TestJenkinsBuildImageUpdateService(object):
         ret = self.jenkins_tool.check_pipeline_exist(pipeline_id, 404)
         assert ret, "流水线没有被成功删除掉"
 
+    @pytest.mark.BAT
     def test_jenkins_build_with_svn_no_sonar(self):
         # access jenkins
         ret = self.jenkins_tool.access_jenkins()
@@ -404,10 +405,11 @@ class TestJenkinsBuildImageUpdateService(object):
 
         assert ret, "删除流水线项目失败"
 
+    @pytest.mark.BAT
     def test_jenkins_update_service(self):
         # access jenkins
-        ret = self.jenkins_tool.access_jenkins()
-        assert ret, "访问Jenkins失败, 请确认Jenkins是否正常"
+        #ret = self.jenkins_tool.access_jenkins()
+        #assert ret, "访问Jenkins失败, 请确认Jenkins是否正常"
 
         # Verify that the integration instance was created successfully
         assert self.create_integration.status_code == 201, "创建集成中心实例失败"
@@ -439,7 +441,6 @@ class TestJenkinsBuildImageUpdateService(object):
                                                  "$jenkins_integration_name": self.integration_name,
                                                  "$template_uuid": template_id, "$service_name": self.app_name,
                                                  "$REG_URL": registry_endpoint, "$imageTag": repo_tag,
-                                                 "$envname": self.envname, "$envvalue": self.envvalue,
                                                  "$time_out": self.time_out})
 
         assert ret.status_code == 201, "创建Jenkins流水线项目失败"
@@ -460,26 +461,18 @@ class TestJenkinsBuildImageUpdateService(object):
         assert ret, "流水线项目执行失败"
 
         # get the service info
-        ret = self.app_tool.get_app_detail(self.app_id)
+        ret = self.app_tool.get_newapp_detail(self.namespace, self.app_name)
 
         assert ret.status_code == 200, "获取应用的详情失败"
-
-        envs = self.app_tool.get_value(ret.json(), 'kubernetes.0.spec.template.spec.containers.0.env')
-
+        """
         image_tag = self.app_tool.get_value(ret.json(), 'kubernetes.0.spec.template.spec.containers.0.image'
                                             ).split(":")[-1]
 
         logger.info("image tag: {}".format(
-            self.app_tool.get_value(ret.json(), 'kubernetes.0.spec.template.spec.containers.0.image')))
+             self.app_tool.get_value(ret.json(), 'kubernetes.0.spec.template.spec.containers.0.image')))
 
         assert image_tag == repo_tag, "流水线更新应用镜像版本失败"
-
-        ret = self.app_tool.get_uuid_accord_name(envs, {"name": self.envname}, 'value')
-
-        logger.info("get the env value from service: {}".format(ret))
-
-        assert ret == self.envvalue, "更新应用的环境变量失败"
-
+        """
         # delete pipeline
         ret = self.jenkins_tool.delete_pipeline(pipeline_id)
 
@@ -489,6 +482,7 @@ class TestJenkinsBuildImageUpdateService(object):
 
         assert ret, "删除Jenkins流水线失败"
 
+    @pytest.mark.BAT
     def test_jenkins_build_with_svn_sonar(self):
         # access jenkins
         ret = self.jenkins_tool.access_jenkins()
@@ -578,10 +572,11 @@ class TestJenkinsBuildImageUpdateService(object):
 
         assert ret, "删除Jenkins流水线失败"
 
+    @pytest.mark.BAT
     def test_jenkins_sync_registry(self):
-        if not self.get_publick_registry:
-            assert True, "no public registry, no need to run"
-            return
+        #if not self.get_publick_registry:
+           # assert True, "no public registry, no need to run"
+            #return
 
         # access jenkins
         ret = self.jenkins_tool.access_jenkins()
@@ -603,18 +598,38 @@ class TestJenkinsBuildImageUpdateService(object):
         assert template_id, "获取模板失败"
 
         # get source registry info
-        contents = self.image.split('/', 1)
+        #contents = self.image.split('/', 1)
 
-        source_reg_url = contents[0]
+        #source_reg_url = contents[0]
 
-        content = contents[1].split(":")
+        #content = contents[1].split(":")
 
-        source_repo = content[0]
+        #source_repo = content[0]
 
-        source_tag = content[1]
+        #source_tag = content[1]
+
 
         # get dest registry url
-        reg_url = self.jenkins_tool.global_info.get("PRIVATE_REGISTRY")[0]['endpoint']
+        #reg_url = self.jenkins_tool.global_info.get("PRIVATE_REGISTRY")[0]['endpoint']
+
+        source_reg_url = self.app_tool.get_uuid_accord_name(self.app_tool.global_info.get("PRIVATE_REGISTRY"),
+                                                               {"name": self.app_tool.global_info.get("$REGISTRY")},
+                                                               "endpoint")
+
+        # get repo tag
+        ret = self.image_tool.get_repo_tag(self.repo)
+        assert ret.status_code == 200, "获取镜像版本失败"
+
+        contents = ret.json()['results']
+
+        assert len(contents) > 0, "镜像版本为空"
+
+        self.sync_repo_tag = contents[0]['tag_name']
+
+        #create source_repo
+        ret = self.image_tool.create_repo('./test_data/image/create_repo.yaml',
+                                          {"$REPO_IMAGE":self.target_repo})
+        assert ret.status_code == 201, "创建目标镜像仓库失败"
 
         # create pipeline
         ret = self.jenkins_tool.create_pipeline('./test_data/jenkins/create_sync_registry_pipeline.yaml',
@@ -622,8 +637,8 @@ class TestJenkinsBuildImageUpdateService(object):
                                                  "$jenkins_integration_id": integration_id,
                                                  "$jenkins_integration_name": self.integration_name,
                                                  "$template_uuid": template_id, "$source_reg_url": source_reg_url,
-                                                 "$source_repo": source_repo, "$source_tag": source_tag,
-                                                 "$reg_url": reg_url, "$tag": self.sync_repo_tag})
+                                                 "$source_tag": self.sync_repo_tag,
+                                                 "$reg_url": source_reg_url, "$target_repo": self.target_repo, "$tag": self.sync_repo_tag})
 
         assert ret.status_code == 201, "创建Jenkins流水线项目失败"
 
@@ -646,21 +661,17 @@ class TestJenkinsBuildImageUpdateService(object):
         time.sleep(2)
 
         # get repo tag
-        ret = self.image_tool.get_repo_tag(self.repo)
+        ret = self.image_tool.get_repo_tag(self.target_repo)
         assert ret.status_code == 200, "获取镜像版本失败"
 
         logger.info("image tags list: {}".format(ret.text))
 
         assert self.sync_repo_tag in ret.text, "同步镜像仓库失败"
 
-        # delete image tag
-        ret = self.image_tool.delete_repo_tag(self.repo, self.sync_repo_tag)
+        # delete image repo
+        ret = self.image_tool.delete_repo(self.target_repo)
         assert ret.status_code == 204, "删除镜像版本操作失败"
 
-        ret = self.image_tool.get_repo_tag(self.repo)
-        assert ret.status_code == 200, "获取镜像版本失败"
-
-        assert self.sync_repo_tag not in ret.text, "镜像版本没有被成功删除掉"
 
         # delete pipeline
         ret = self.jenkins_tool.delete_pipeline(pipeline_id)

@@ -149,7 +149,7 @@ class Jenkins(Common):
 
     def get_sys_template_list(self):
         path = self.get_template_url()
-        return self.send(method='get', path=path)
+        return self.send(method='get', path=path, params={})
 
     def get_sys_template_id(self, name, uuid_key):
         response = self.get_sys_template_list()
@@ -189,7 +189,7 @@ class Jenkins(Common):
 
     def get_template_list(self, template_resource_id='', official=True):
         path = self.get_template_list_url(template_resource_id=template_resource_id, official=official)
-        return self.send(method='get', path=path)
+        return self.send(method='get', path=path, params={})
 
     def get_template_source_list(self):
         path = self.common_template_source_url()
