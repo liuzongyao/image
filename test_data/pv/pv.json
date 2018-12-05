@@ -1,21 +1,20 @@
 {
+  "apiVersion": "v1",
   "kind": "PersistentVolume",
+  "metadata": {
+    "name": "$pv_name"
+  },
   "spec": {
-    "accessModes": [
-      "ReadWriteOnce"
-    ],
     "capacity": {
       "storage": "$sizeG"
     },
-    "persistentVolumeReclaimPolicy": "$pv_policy"
-  },
-  "apiVersion": "v1",
-  "metadata": {
-    "name": "$pv_name",
-    "annotations": {
-      "pv.alauda.io/volume_uuid": "$volume_id",
-      "pv.alauda.io/volume_driver": "$volume_driver",
-      "cluster.alauda.io/name": "$REGION_NAME"
+    "accessModes": [
+      "ReadWriteMany"
+    ],
+    "csi": {
+      "driver": "fake",
+      "volumeHandle": "1",
+      "readOnly": false
     }
   }
 }

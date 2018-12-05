@@ -1,6 +1,6 @@
 import pytest
 
-from test_case.volume.volume import Volume
+from backup.volume.volume import Volume
 
 
 @pytest.mark.volume

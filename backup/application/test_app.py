@@ -3,10 +3,10 @@ from time import sleep
 import pytest
 
 from backup.application.app import Application
+from backup.volume.volume import Volume
 from test_case.configmap.configmap import Configmap
 from test_case.persistentvolumeclaims.pvc import Pvc
 from test_case.persistentvolumes.pv import Pv
-from test_case.volume.volume import Volume
 
 
 @pytest.mark.region
