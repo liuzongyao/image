@@ -1,5 +1,5 @@
 import pytest
-from test_case.job.job import Job
+from backup.job.job import Job
 from time import sleep
 
 

@@ -19,7 +19,7 @@ class Common(AlaudaRequest):
         self.global_info = FileUtils.load_file(self.global_info_path)
         self.final_status = ["S", "F", "Running", "Error", "FAILURE", "failed", "FAIL", "Failed",
                              "CreateError", "StartError"]
-        self.region_id = self.global_info["$REGION_ID"]
+        self.region_id = self.global_info.get("$REGION_ID", None)
 
     def generate_data(self, file_path, data={}):
         """

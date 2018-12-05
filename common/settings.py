@@ -7,20 +7,20 @@ def get_list_from_str(string, separator=','):
 
 
 # necessary
-API_URL = os.getenv("API_URL", "http://94.191.95.20:32001")
+API_URL = os.getenv("API_URL", "https://cloud-staging-api.alauda.cn")
 ACCOUNT = os.getenv("ACCOUNT", "alauda")
 SUB_ACCOUNT = os.getenv("SUB_ACCOUNT", "")
-PASSWORD = os.getenv("PASSWORD", "alauda")
-REGION_NAME = os.getenv("REGION_NAME", "business")
-REGISTRY_NAME = os.getenv("REGISTRY_NAME", "business-registry")
+PASSWORD = os.getenv("PASSWORD", "Alauda2018!@#")
+REGION_NAME = os.getenv("REGION_NAME", "high-region-available")
+REGISTRY_NAME = os.getenv("REGISTRY_NAME", "high-region-available")
 IMAGE = os.getenv("IMAGE", "index.alauda.cn/alaudaorg/qaimages:helloworld")
 # not necessary
 REGISTRY_CREDENTIAL = os.getenv("REGISTRY_CREDENTIAL", "alauda-registry-credential")
 
 JENKINS_ENDPOINT = os.getenv("JENKINS_ENDPOINT",
-                             "http://154.8.229.251:8899")
+                             "http://118.24.216.33:8899")
 JENKINS_USER = os.getenv("JENKINS_USER", "admin")
-JENKINS_TOKEN = os.getenv("JENKINS_TOKEN", "dccbd8d020b4e461f73f7bbb646477e8")
+JENKINS_TOKEN = os.getenv("JENKINS_TOKEN", "1e4da3b45f3d4fbe7845e0c3a96d4b31")
 
 SONAR_ENDPOINT = os.getenv("SONAR_ENDPOINT",
                            "http://sonarqube-donotdelete.nolimited.haproxy-54-223-242-27-alaudacn.myalauda.cn/")
@@ -47,12 +47,12 @@ GIT_PASSWORD = os.getenv("GIT_PASSWORD", "Luhan0420.")
 GIT_PATH = os.getenv("GIT_PATH", "/")
 GIT_BRANCH = os.getenv("GIT_BRANCH", "master")
 
-TESTCASES = os.getenv("TESTCASES", "test_case/integrations")
-CASE_TYPE = os.getenv("CASE_TYPE", "integration_sonarqube")
+TESTCASES = os.getenv("TESTCASES", "")
+CASE_TYPE = os.getenv("CASE_TYPE", "BAT")
 PROJECT_NAME = os.getenv("PROJECT_NAME", "e2etest")
 ENV = os.getenv("ENV", "Staging")
-RECIPIENTS = get_list_from_str(os.getenv("RECIPIENTS", "rzli@alauda.io"))
-K8S_NAMESPACE = os.getenv("K8S_NAMESPACE", "{}-alauda-lrz-{}".format(PROJECT_NAME, REGION_NAME).replace("_", "-"))
+RECIPIENTS = get_list_from_str(os.getenv("RECIPIENTS", "testing@alauda.io"))
+K8S_NAMESPACE = os.getenv("K8S_NAMESPACE", "{}-alauda-default2-{}".format(PROJECT_NAME, REGION_NAME).replace("_", "-"))
 SPACE_NAME = os.getenv("SPACE_NAME", "alauda-default-{}".format(REGION_NAME).replace("_", "-"))
 
 SECRET_ID = os.getenv("SECRET_ID", "AKID84kBMHwKUP4VggjwBAKFvxlJcgU3frtg")

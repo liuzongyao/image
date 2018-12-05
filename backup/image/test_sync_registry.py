@@ -1,8 +1,8 @@
 import pytest
 
-from test_case.image.sync_registry import SyncRegistry
+from backup.image.sync_registry import SyncRegistry
 from test_case.image.image import Image
-from test_case.image.sync_registry_history import SyncRegistryHistory
+from backup.image.sync_registry_history import SyncRegistryHistory
 
 
 @pytest.mark.region

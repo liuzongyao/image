@@ -38,7 +38,6 @@ class TestPvcSuite(object):
         volume_id = self.volume.get_volume_id_from_list(self.volume_name)
         self.volume.delete_volume(volume_id)
 
-    @pytest.mark.BAT
     def test_pvc(self):
         if self.region_volumes == ['']:
             assert True, "集群不支持存储卷"

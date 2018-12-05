@@ -18,6 +18,7 @@ def main():
     except Exception as e:
         logger.error(e)
         TearDown()
+        exit(1)
 
     # 执行case
     run_command = ['-s', settings.TESTCASES, "--html=./report/pytest.html"]

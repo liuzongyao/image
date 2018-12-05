@@ -1,5 +1,4 @@
 from test_case.project.project import Project
-import pytest
 
 
 class TestProjectSuite(object):
@@ -13,7 +12,6 @@ class TestProjectSuite(object):
         self.project.delete_project_role(self.project_name)
         self.project.delete_project(self.project_name)
 
-    @pytest.mark.BAT
     def test_project(self):
         """
         创建项目-获取项目列表-更新项目-获取项目详情-删除项目

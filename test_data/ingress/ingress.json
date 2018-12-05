@@ -1,0 +1,35 @@
+{
+  "apiVersion": "extensions/v1beta1",
+  "kind": "Ingress",
+  "metadata": {
+    "name": "$ingress_name",
+    "namespace": "$K8S_NAMESPACE",
+    "annotations": {
+      "kubernetes.io/ingress.class": "erroringress"
+    }
+  },
+  "spec": {
+    "tls": [
+      {
+        "hosts": [],
+        "secretName": ""
+      }
+    ],
+    "rules": [
+      {
+        "host": "host.test.cn",
+        "http": {
+          "paths": [
+            {
+              "path": "/",
+              "backend": {
+                "serviceName": "$ingress_name",
+                "servicePort": 80
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,9 @@
+name: $INTEGRATION_NAME
+description: ""
+enabled: true
+fields:
+  endpoint: $JENKINS_ENDPOINT
+  user_id: $JENKINS_USER
+  token: $JENKINS_TOKEN
+type: Jenkins
+namespace: $NAMESPACE

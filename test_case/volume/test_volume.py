@@ -18,7 +18,6 @@ class TestVolumeSuite(object):
         volume_id = self.volume.get_volume_id_from_list(self.ebs_name)
         self.volume.delete_volume(volume_id)
 
-    @pytest.mark.BAT
     def test_gfs_volume(self):
         if "glusterfs" not in self.region_volumes:
             assert True, "集群不支持glusterfs"

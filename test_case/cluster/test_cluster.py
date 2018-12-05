@@ -11,10 +11,12 @@ class TestClusterSuite(object):
         self.cluster = Cluster()
         self.namespace = Namespace()
         self.cluster_name = "e2e-region-test4"
+        self.registry_name = 'e2e-registry-test4'
         self.namespace.region_name = self.cluster_name
         ret_create = create_instance(1)
         assert ret_create["success"], ret_create["message"]
-        ret_get = get_instance()
+        self.instances_id = ret_create['instances_id']
+        ret_get = get_instance(self.instances_id)
         assert ret_get["success"], ret_get["message"]
         self.private_ips = ret_get['private_ips']
         self.public_ips = ret_get['public_ips']
@@ -27,7 +29,7 @@ class TestClusterSuite(object):
         response = self.cluster.delete_cluster(self.cluster_name)
         if response.status_code in (204, 404):
             self.cluster.cleanup_cluster(self.public_ips)
-        destroy_instance()
+        destroy_instance(self.instances_id)
 
     def test_create_xvlan_region(self):
         """
@@ -35,11 +37,11 @@ class TestClusterSuite(object):
         设置节点不可调度-清理集群资源-删除集群
         """
         result = {"flag": True}
-        get_script = self.cluster.generate_install_cmd("test_data/cluster/cluster_cmd.json",
+        get_script = self.cluster.generate_install_cmd("test_data/cluster/one_node_cluster_cmd.json",
                                                        {"$cluster_name": self.cluster_name,
                                                         "$node_ip": self.private_ips[0]})
         assert get_script.status_code == 200, "获取创建集群脚本失败:{}".format(get_script.text)
-        cmd = get_script.json()["commands"]["install"]
+        cmd = "export LANG=zh_CN.utf8;{}".format(get_script.json()["commands"]["install"])
         ret_excute = self.cluster.excute_script(cmd, self.public_ips[0])
         assert "Install successfully!" in ret_excute[1], "执行脚本失败:{}".format(ret_excute[1])
         is_exist = self.cluster.check_value_in_response("v1/regions/{}".format(self.cluster.account),
@@ -70,7 +72,8 @@ class TestClusterSuite(object):
         ret_log = self.cluster.install_nevermore(self.cluster_name, "test_data/cluster/install_nevermore.json")
         assert ret_log.status_code == 200, "安装nevermore失败：{}".format(ret_log.text)
 
-        ret_registry = self.cluster.install_registry(self.cluster_name, "test_data/cluster/install_registry.json")
+        ret_registry = self.cluster.install_registry(self.cluster_name,
+                                                     self.registry_name, "test_data/cluster/install_registry.json")
         assert ret_registry.status_code == 200, "安装registry失败：{}".format(ret_registry.text)
 
         ret_result = self.cluster.check_feature_status(self.cluster_name)

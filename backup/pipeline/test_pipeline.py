@@ -3,7 +3,7 @@ import pytest
 from backup.application.app import Application
 from common.log import logger
 from test_case.image.image import Image
-from test_case.pipeline.pipeline import Pipeline
+from backup.pipeline.pipeline import Pipeline
 
 
 @pytest.mark.region
@@ -29,7 +29,6 @@ class TestPipelineSuite(object):
         pipeline_id = self.pipeline_tool.get_pipeline_id(self.pipeline_name, 'uuid')
         self.pipeline_tool.delete_pipeline(pipeline_id)
 
-    @pytest.mark.BAT
     def test_pipeline(self):
         result = {"flag": True}
 

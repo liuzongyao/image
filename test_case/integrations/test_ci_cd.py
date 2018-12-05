@@ -6,6 +6,7 @@ from test_case.integrations.ci_cd_integrations import Integrations
 
 @pytest.mark.region
 @pytest.mark.ci_cd
+@pytest.mark.BAT
 class TestCICDSuite(object):
     def setup_class(self):
         self.integration_tool = Integrations()
