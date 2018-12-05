@@ -73,13 +73,13 @@ class TestLoadBalancer(object):
             dns_domain_url = "{}://{}".format(protocol, dns_domain)
             ret_access_dns = self.loadbalancer.access_service(dns_domain_url, "Hello")
             result = self.loadbalancer.update_result(result, ret_access_dns,
-                                                     "访问自定义域名生成的服务地址:({})不可访问，错误:{}".format(dns_domain_url,
-                                                                                            ret_access_dns))
+                                                     "访问自定义域名生成的服务地址:({})不可访问，错误:{}".format(
+                                                         dns_domain_url, ret_access_dns))
             default_domain_url = "{}://{}".format(protocol, default_domain)
             ret_access_default = self.loadbalancer.access_service(default_domain_url, "Hellp")
             result = self.loadbalancer.update_result(result, ret_access_default,
-                                                     "访问默认服务地址:({})不可访问，错误:{}".format(default_domain_url,
-                                                                                      ret_access_default))
+                                                     "访问默认服务地址:({})不可访问，错误:{}".format(
+                                                         default_domain_url, ret_access_default))
         else:
             result = self.loadbalancer.update_result(result, False, "获取app_lb_detail为空")
 
@@ -123,5 +123,3 @@ class TestLoadBalancer(object):
         ret_update_dns = self.loadbalancer.update_lb_dns(self.ha_name, './test_data/loadbalancers/update_dns.json',
                                                          {"\"$bool\"": "false"})
         assert ret_update_dns.status_code == 204, "更新lb_dns失败：{}".format(ret_update_dns.text)
-
-        # check num of lb_app

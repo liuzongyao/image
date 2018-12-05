@@ -22,7 +22,6 @@ class TestMongodbSuite(object):
 
     @pytest.mark.middleware_mongodb
     def test_mongodb(self):
-
         # 中间件获取mongodb的模板id-获取mongodb可用的version id-创建mongodb应用-获取应用状态-删除应用
         result = {'flag': True}
 
@@ -36,7 +35,6 @@ class TestMongodbSuite(object):
                                                            {"$name": self.name, "$template_id": mongodb_template_id,
                                                             "$version_id": version_id})
         assert create_result.status_code == 201, "创建mongodb失败 {}".format(create_result.text)
-        app_id = create_result.json()["kubernetes"]["metadata"]["uid"]
         logger.info("创建mongodb成功，name是：{}".format(self.name))
 
         app_status = self.middleware.get_application_status(self.namespace, self.name, "Running")
@@ -54,12 +52,3 @@ class TestMongodbSuite(object):
         logger.info("删除中间件创建的mongodb应用成功")
         self.newapp.check_exists(self.newapp.get_newapp_common_url(self.namespace, self.name), 404)
         assert result["flag"], True
-
-
-
-
-
-
-
-
-

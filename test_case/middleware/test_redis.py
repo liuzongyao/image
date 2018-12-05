@@ -9,7 +9,6 @@ from test_case.middleware.middleware import Middleware
 class TestRedisSuite(object):
 
     def setup_class(self):
-
         self.newapp = Newapplication()
         self.middleware = Middleware()
         self.namespace = self.middleware.global_info["$K8S_NAMESPACE"]

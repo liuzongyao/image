@@ -63,6 +63,7 @@ class Catalog(Common):
     '''
     等待仓库模板倒入成功，状态为"SUCCESS"
     '''
+
     def get_repository_status(self, uuid, expect_status):
         logger.info(sys._getframe().f_code.co_name.center(50, '*'))
         cnt = 0
@@ -78,8 +79,3 @@ class Catalog(Common):
             sleep(5)
 
         return flag
-
-
-
-
-

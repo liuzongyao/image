@@ -47,7 +47,6 @@ class TestZookeeperSuite(object):
 
     @pytest.mark.middleware_kafka
     def test_kafka(self):
-
         zookeeper_deploy = self.zookeeper_name + "-zookeeper"
         logger.info("拼接起来的zookeeper deploy的名称 {}".format(zookeeper_deploy))
 
@@ -71,6 +70,3 @@ class TestZookeeperSuite(object):
         logger.info("删除kafka应用成功")
 
         assert result["flag"], True
-
-
-

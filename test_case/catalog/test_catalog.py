@@ -24,12 +24,12 @@ class TestCatalogSuite(object):
     def teardown_class(self):
 
         logger.info("开始清除应用目录数据")
-        # self.newapp.delete_newapp(self.namespace, self.app_name)
-        # self.newapp.check_exists(self.newapp.get_newapp_common_url(self.namespace, self.app_name), 404)
-        # self.catalog.delete_repository(self.catalog.get_uuid_accord_name(self.catalog.get_repository_list().json()
-        #                                                                  ["results"], {"name": self.git_name}, "uuid"))
-        # self.catalog.delete_repository(self.catalog.get_uuid_accord_name(self.catalog.get_repository_list().json()
-        #                                                                  ["results"], {"name": self.svn_name}, "uuid"))
+        self.newapp.delete_newapp(self.namespace, self.app_name)
+        self.newapp.check_exists(self.newapp.get_newapp_common_url(self.namespace, self.app_name), 404)
+        self.catalog.delete_repository(self.catalog.get_uuid_accord_name(self.catalog.get_repository_list().json()
+                                                                         ["results"], {"name": self.git_name}, "uuid"))
+        self.catalog.delete_repository(self.catalog.get_uuid_accord_name(self.catalog.get_repository_list().json()
+                                                                         ["results"], {"name": self.svn_name}, "uuid"))
         logger.info("清除完毕")
 
     @pytest.mark.repository_git
@@ -84,14 +84,7 @@ class TestCatalogSuite(object):
         repository_status = self.catalog.get_repository_status(self.git_id, "SUCCESS")
         assert repository_status, "同步应用目录git模板仓库后，状态不是SUCCESS"
         logger.info("同步git模板仓库成功")
-
-        '''
-        删除模板仓库 
-        '''
-        # delete_result = self.catalog.delete_repository(self.git_id)
-        # result = self.catalog.update_result(result, delete_result.status_code == 200, "删除应用目录git模板仓库失败")
         assert result['flag'], result
-        # logger.info("删除应用目录git模板仓库成功")
 
     @pytest.mark.repository_svn
     def test_repository_svn(self):
@@ -146,12 +139,12 @@ class TestCatalogSuite(object):
         logger.info("同步模板仓库成功")
 
         '''
-        删除模板仓库 
+        删除模板仓库
         '''
-        # delete_result = self.catalog.delete_repository(self.svn_id)
-        # result = self.catalog.update_result(result, delete_result.status_code == 200, "删除应用目录svn模板仓库失败")
+        delete_result = self.catalog.delete_repository(self.svn_id)
+        result = self.catalog.update_result(result, delete_result.status_code == 200, "删除应用目录svn模板仓库失败")
         assert result['flag'], result
-        # logger.info("删除应用目录svn模板仓库成功")
+        logger.info("删除应用目录svn模板仓库成功")
 
     @pytest.mark.catalog_mongodb
     def test_catalog_mongodb(self):
@@ -198,18 +191,3 @@ class TestCatalogSuite(object):
         assert delete_result.status_code == 204, "删除应用目录创建出的mongodb应用失败 {}".format(delete_result.text)
         self.newapp.check_exists(self.newapp.get_newapp_common_url(self.namespace, self.app_name), 404)
         assert result['flag'], True
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -30,6 +30,7 @@ class Middleware(Common):
     '''
     使用模板创建应用，如中间件等
     '''
+
     def get_template_list(self):
         logger.info(sys._getframe().f_code.co_name.center(50, '*'))
         url = self.get_public_templates()
@@ -71,6 +72,7 @@ class Middleware(Common):
     '''
     根据模板id获取version id
     '''
+
     def get_version_id(self, template_id):
         template_info = self.get_template_info(template_id)
         versions = template_info.json()["versions"]
@@ -85,6 +87,7 @@ class Middleware(Common):
     '''
     创建应用后，等待状态为running
     '''
+
     def get_application_status(self, namespace, name, expectstatus):
 
         cnt = 0
@@ -100,4 +103,3 @@ class Middleware(Common):
                 break
             sleep(5)
         return flag
-

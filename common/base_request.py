@@ -306,7 +306,8 @@ class Common(AlaudaRequest):
             response = requests.request(method='get', url=jenkins_address, auth=(jenkins_user, jenkins_token))
             if response.status_code == 200:
                 return True
-        except requests.exceptions.ConnectionError:
+        except Exception as e:
+            logger.debug(e)
             return False
         return False
 
@@ -329,7 +330,7 @@ class Common(AlaudaRequest):
             logger.info(ret.text)
             if ret.status_code == 200 and query in ret.text:
                 return True
-        except ConnectionError as e:
+        except Exception as e:
             logger.error("access service failed: {}".format(e))
         return False
 

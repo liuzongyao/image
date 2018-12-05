@@ -9,7 +9,6 @@ from test_case.newapp.newapp import Newapplication
 class TestRabbitmq(object):
 
     def setup_class(self):
-
         self.middleware = Middleware()
         self.newapp = Newapplication()
         self.namespace = self.middleware.global_info["$K8S_NAMESPACE"]
@@ -21,7 +20,6 @@ class TestRabbitmq(object):
 
     @pytest.mark.middleware_rabbitmq_ha
     def test_rabbitmq_ha(self):
-
         result = {"flag": True}
         template_id = self.middleware.get_template_id("rabbitmq-ha")
         version_id = self.middleware.get_version_id(template_id)

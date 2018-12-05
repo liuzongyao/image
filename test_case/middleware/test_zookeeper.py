@@ -33,13 +33,13 @@ class TestZookeeperSuite(object):
 
     @pytest.mark.middleware_zookeeper
     def test_zookeeper(self):
-
         result = {"flag": True}
         zookeeper_template_id = self.middleware.get_template_id("zookeeper")
         version_id = self.middleware.get_version_id(zookeeper_template_id)
         create_result = self.middleware.create_application('./test_data/middleware/zookeeper.json',
-                                                           {"$name": self.zookeeper_name, "$template_id": zookeeper_template_id,
-                                                            "$version_id": version_id, "$scs_name":self.scs_name})
+                                                           {"$name": self.zookeeper_name,
+                                                            "$template_id": zookeeper_template_id,
+                                                            "$version_id": version_id, "$scs_name": self.scs_name})
         assert create_result.status_code == 201, "中间件创建zookeeper应用失败 {}".format(create_result.text)
         logger.info("中间件创建zookeeper应用成功")
 
@@ -53,6 +53,3 @@ class TestZookeeperSuite(object):
         logger.info("删除zookeeper应用成功")
 
         assert result["flag"], True
-
-
-

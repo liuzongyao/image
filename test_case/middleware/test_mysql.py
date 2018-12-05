@@ -22,7 +22,6 @@ class TestMysqlSuite(object):
 
     @pytest.mark.middleware_mysql
     def test_mysql(self):
-
         result = {"flag": True}
         mysql_template_id = self.middleware.get_template_id("mysql")
         version_id = self.middleware.get_version_id(mysql_template_id)

@@ -9,7 +9,6 @@ from test_case.newapp.newapp import Newapplication
 class TestMysqlClusterSuite(object):
 
     def setup_class(self):
-
         self.middleware = Middleware()
         self.newapp = Newapplication()
         self.namespace = self.middleware.global_info["$K8S_NAMESPACE"]
@@ -21,7 +20,6 @@ class TestMysqlClusterSuite(object):
 
     @pytest.mark.middleware_mysql_cluster
     def test_mysql_cluster(self):
-
         result = {"flag": True}
         template_id = self.middleware.get_template_id("mysql-cluster")
         version_id = self.middleware.get_version_id(template_id)
