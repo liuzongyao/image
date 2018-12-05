@@ -223,7 +223,6 @@ class TestJenkinsBuildImageUpdateService(object):
 
         assert self.repo_additional_tag not in ret.text, "镜像版本没有被成功删除掉"
 
-    @pytest.mark.BAT
     def test_jenkins_build_with_git(self):
         # access jenkins
         ret = self.jenkins_tool.access_jenkins()
@@ -312,7 +311,6 @@ class TestJenkinsBuildImageUpdateService(object):
         ret = self.jenkins_tool.check_pipeline_exist(pipeline_id, 404)
         assert ret, "流水线没有被成功删除掉"
 
-    @pytest.mark.BAT
     def test_jenkins_build_with_svn_no_sonar(self):
         # access jenkins
         ret = self.jenkins_tool.access_jenkins()
@@ -405,11 +403,10 @@ class TestJenkinsBuildImageUpdateService(object):
 
         assert ret, "删除流水线项目失败"
 
-    @pytest.mark.BAT
     def test_jenkins_update_service(self):
         # access jenkins
-        #ret = self.jenkins_tool.access_jenkins()
-        #assert ret, "访问Jenkins失败, 请确认Jenkins是否正常"
+        ret = self.jenkins_tool.access_jenkins()
+        assert ret, "访问Jenkins失败, 请确认Jenkins是否正常"
 
         # Verify that the integration instance was created successfully
         assert self.create_integration.status_code == 201, "创建集成中心实例失败"
@@ -482,7 +479,6 @@ class TestJenkinsBuildImageUpdateService(object):
 
         assert ret, "删除Jenkins流水线失败"
 
-    @pytest.mark.BAT
     def test_jenkins_build_with_svn_sonar(self):
         # access jenkins
         ret = self.jenkins_tool.access_jenkins()
@@ -572,7 +568,6 @@ class TestJenkinsBuildImageUpdateService(object):
 
         assert ret, "删除Jenkins流水线失败"
 
-    @pytest.mark.BAT
     def test_jenkins_sync_registry(self):
         #if not self.get_publick_registry:
            # assert True, "no public registry, no need to run"

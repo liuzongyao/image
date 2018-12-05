@@ -18,12 +18,12 @@ IMAGE = os.getenv("IMAGE", "index.alauda.cn/alaudaorg/qaimages:helloworld")
 REGISTRY_CREDENTIAL = os.getenv("REGISTRY_CREDENTIAL", "alauda-registry-credential")
 
 JENKINS_ENDPOINT = os.getenv("JENKINS_ENDPOINT",
-                             "http://10.0.128.14:8899")
+                             "http://192.144.148.212:8899")
 JENKINS_USER = os.getenv("JENKINS_USER", "admin")
 JENKINS_TOKEN = os.getenv("JENKINS_TOKEN", "b1f626706775f04f5aef764a8fda5966")
 
 SONAR_ENDPOINT = os.getenv("SONAR_ENDPOINT",
-                           "http://10.0.128.14:10007")
+                           "http://192.144.148.212:10007")
 SONAR_TOKEN = os.getenv("SONAR_TOKEN", "94df71bcca7d1e03cecee2222e4afa6047618533")
 
 CLAIR_ENDPOINT = os.getenv("CLAIR_ENDPOINT", "zhang-clair.default.haproxy-52-80-107-116-testorg001.myalauda.cn")
@@ -40,7 +40,7 @@ SVN_USERNAME = os.getenv("SVN_USERNAME", "User_Name-01")
 SVN_PASSWORD = os.getenv("SVN_PASSWORD", "alauda_Test-!@#")
 
 GIT_REPO = os.getenv("GIT_REPO",
-                     "http://10.0.128.14:10008/root/test123")
+                     "http://192.144.148.212:10008/root/test123")
 GIT_CREDENTIAL = os.getenv("GIT_CREDENTIAL", "alauda-git-credential")
 GIT_USERNAME = os.getenv("GIT_USERNAME", "root")
 GIT_PASSWORD = os.getenv("GIT_PASSWORD", "07Apples")
@@ -49,9 +49,9 @@ TESTCASES = os.getenv("TESTCASES", "")
 CASE_TYPE = os.getenv("CASE_TYPE", "BAT")
 PROJECT_NAME = os.getenv("PROJECT_NAME", "e2etest")
 ENV = os.getenv("ENV", "Staging")
-RECIPIENTS = get_list_from_str(os.getenv("RECIPIENTS", "jhchen@alauda.io"))
-K8S_NAMESPACE = os.getenv("K8S_NAMESPACE", "{}-alauda-default-{}".format(PROJECT_NAME, REGION_NAME).replace("_", "-"))
-SPACE_NAME = os.getenv("SPACE_NAME", "alauda-default2-{}".format(REGION_NAME).replace("_", "-"))
+RECIPIENTS = get_list_from_str(os.getenv("RECIPIENTS", "testing@alauda.io"))
+K8S_NAMESPACE = os.getenv("K8S_NAMESPACE", "{}-alauda-default2-{}".format(PROJECT_NAME, REGION_NAME).replace("_", "-"))
+SPACE_NAME = os.getenv("SPACE_NAME", "alauda-default-{}".format(REGION_NAME).replace("_", "-"))
 
 SECRET_ID = os.getenv("SECRET_ID", "AKID84kBMHwKUP4VggjwBAKFvxlJcgU3frtg")
 SECRET_KEY = os.getenv("SECRET_EKY", "aDlNSjBSZGRPdkxXUjZWZ2JHZnFPaGpXMklJa3d0WjA=")
