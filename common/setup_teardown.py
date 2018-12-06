@@ -37,7 +37,7 @@ class SetUp(AlaudaRequest):
             "$SVN_REPO": settings.SVN_REPO,
             "$REGISTRY": settings.REGISTRY_NAME,
             "$REPO_NAME": settings.REPO_NAME,
-            "$TARGET_REPO_NAME":settings.TARGET_REPO_NAME,
+            "$TARGET_REPO_NAME": settings.TARGET_REPO_NAME,
             "$SPACE_NAME": settings.SPACE_NAME,
             "$REGION_NAME": settings.REGION_NAME,
             "$REG_CREDENTIAL": settings.REGISTRY_CREDENTIAL,
