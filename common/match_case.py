@@ -68,5 +68,14 @@ def casename():
         "test_sonarqube_plugin": "判断集群的网络模式-判断插件的类型-安装插件-获取已安装插件的状态-获取已安装插件的详情-删除应用-删除集成中心实例",
         "test_lb_dns": "创建(导入)lb-获取lb列表-删除新创建lb-添加自定义域名后缀-查看lb详情自定义域名-添加挂ha服务-获取服务域名(包括默认域名)-验证服务能够访问"
                        "-不使用默认域名-获取lb域名信息-验证ha地址不能访问-删除域名后缀-域名后缀地址不能访问"
+                              "-不使用默认域名-获取lb域名信息-验证ha地址不能访问-删除域名后缀-域名后缀地址不能访问",
+        "test_repository_git": "应用目录添加git模板仓库-获取模板仓库列表-获取git模板仓库详情信息-更新模板仓库-同步模板仓库",
+        "test_repository_svn": "应用目录添加svn模板仓库-获取模板仓库列表-获取svn模板仓库详情信息-更新模板仓库-同步模板仓库-删除svn模板仓库",
+        "test_catalog_mongodb": "应用目录获取git模板仓库id-获取模板仓库list-获取mongodb模板仓库id-获取模板仓库version id-创建mongodb应用-获取应用状态-删除应用",
+        "test_mongodb": "中间件获取mongodb的模板id-获取mongodb可用的version id-创建mongodb应用-获取应用状态-删除应用",
+        "test_mysql": "中间件获取mysql的模板id-获取mysql可用的version id-创建mongodb应用-获取应用状态-删除应用",
+        "test_mysql_cluster": "中间件获取mysql-cluster的模板id-获取mysql-cluster可用的version id-创建mongodb应用-获取应用状态-删除应用",
+        "test_rabbitmq_ha": "中间件获取rabbitmq的模板id-获取rabbitmq可用的version id-创建mongodb应用-获取应用状态-删除应用",
+        "test_redis": "中间件获取redis的模板id-获取redis可用的version id-创建mongodb应用-获取应用状态-删除应用"
     }
     return casename_dict

@@ -34,16 +34,18 @@ CLAIR_DATABASE_NAME = os.getenv("CLAIR_DATABASE_NAME", "alauda")
 CLAIR_DATABASE_USER_NAME = os.getenv("CLAIR_DATABASE_USER_NAME", "alauda")
 CLAIR_DATABASE_PASSWORD = os.getenv("CLAIR_DATABASE_PASSWORD", "alauda")
 
-SVN_REPO = os.getenv("SVN_REPO", "http://10.0.128.14:10009/alauda_test/ ")
+SVN_REPO = os.getenv("SVN_REPO", "http://192.144.148.212:10009/alauda_test/")
 SVN_CREDENTIAL = os.getenv("SVN_CREDENTIAL", "alauda-svn-credential")
 SVN_USERNAME = os.getenv("SVN_USERNAME", "User_Name-01")
 SVN_PASSWORD = os.getenv("SVN_PASSWORD", "alauda_Test-!@#")
 
 GIT_REPO = os.getenv("GIT_REPO",
-                     "http://192.144.148.212:10008/root/test123")
+                     "http://192.144.148.212/li/alauda")
 GIT_CREDENTIAL = os.getenv("GIT_CREDENTIAL", "alauda-git-credential")
-GIT_USERNAME = os.getenv("GIT_USERNAME", "root")
-GIT_PASSWORD = os.getenv("GIT_PASSWORD", "07Apples")
+GIT_USERNAME = os.getenv("GIT_USERNAME", "rzli@alauda.io")
+GIT_PASSWORD = os.getenv("GIT_PASSWORD", "Luhan0420.")
+GIT_PATH = os.getenv("GIT_PATH", "/")
+GIT_BRANCH = os.getenv("GIT_BRANCH", "master")
 
 TESTCASES = os.getenv("TESTCASES", "")
 CASE_TYPE = os.getenv("CASE_TYPE", "BAT")
@@ -55,6 +57,9 @@ SPACE_NAME = os.getenv("SPACE_NAME", "alauda-default-{}".format(REGION_NAME).rep
 
 SECRET_ID = os.getenv("SECRET_ID", "AKID84kBMHwKUP4VggjwBAKFvxlJcgU3frtg")
 SECRET_KEY = os.getenv("SECRET_EKY", "aDlNSjBSZGRPdkxXUjZWZ2JHZnFPaGpXMklJa3d0WjA=")
+
+# 中间件的镜像仓库地址
+MIDDLEWARE_REGISTRY = os.getenv("MIDDLEWARE_REGISTRY", "10.0.128.201:60080")
 
 SMTP = {
     'host': os.getenv('SMTP_HOST', 'smtpdm.aliyun.com'),

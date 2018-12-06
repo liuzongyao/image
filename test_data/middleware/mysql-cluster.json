@@ -1,0 +1,18 @@
+{
+	"cluster": {
+		"name": "$REGION_NAME"
+	},
+	"display_name": "",
+	"name": "$name",
+	"namespace": {
+		"name": "$K8S_NAMESPACE"
+	},
+	"template": {
+		"name": "mysql-cluster",
+		"uuid": "$template_id",
+		"version": {
+			"uuid": "$version_id"
+		}
+	},
+	"values_yaml_content":"registryAddress: $MIDDLEWARE_REGISTRY\nreplicas: 3\nmysqlRootPassword: test\nmysqlUser: test\nmysqlPassword: test\nxtrabackPassword: test\nmysqlDatabase: test\nimagePullPolicy: Always\nresources:\n  requests:\n    cpu: 500m\n    memory: 1Gi\n  limits:\n    cpu: 1000m\n    memory: 2Gi\ninitresources:\n  requests:\n    cpu: 500m\n    memory: 1Gi\n  limits:\n    cpu: 1000m\n    memory: 2Gi\nlb:\n  load_balance_name: alauda-lb\n  mysqlPort: 3306\npersistentVolume:\n  mode: host\n  pvc:\n    size: 10Gi\n    storageClassName: alauda-system-gfs\n  host:\n    HostUsedPath: /tmp/mysql\nnodeSelector: {}\nusePodAntAffnity: false\nmax_connections: '1000'\nmax_connect_errors: '6000'\nback_log: '600'\ntable_open_cache: '128'\nbinlog_cache_size: 1M\nmax_heap_table_size: 8M\ntmp_table_size: 16M\n"
+}

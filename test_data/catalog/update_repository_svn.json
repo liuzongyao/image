@@ -1,0 +1,8 @@
+{
+  "display_name":"$display_name",
+  "name":"$repository_name",
+  "password":"$SVN_PASSWORD",
+  "type":"svn",
+  "url":"$SVN_REPO",
+  "username":"$SVN_USERNAME"
+}

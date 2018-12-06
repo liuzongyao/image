@@ -1,7 +1,0 @@
-name: $integration_name
-description: $description
-enabled: true
-fields:
-  endpoint: $SONAR_ENDPOINT
-  token: $SONAR_TOKEN
-namespace: $NAMESPACE

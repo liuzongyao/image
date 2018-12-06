@@ -1,0 +1,18 @@
+{
+	"cluster": {
+		"name": "$REGION_NAME"
+	},
+	"display_name": "",
+	"name": "$name",
+	"namespace": {
+		"name": "$K8S_NAMESPACE"
+	},
+	"template": {
+		"name": "mysql",
+		"uuid": "$template_id",
+		"version": {
+			"uuid": "$version_id"
+		}
+	},
+	"values_yaml_content": "registryAddress: $MIDDLEWARE_REGISTRY\nmysqlRootPassword: admin\nmysqlUser: db_user\nmysqlPassword: '123456'\nimagePullPolicy: IfNotPresent\npersistence:\n  enabled: false\n  storageClassName: '-'\n  accessMode: ReadWriteOnce\n  size: 8Gi\nresources:\n  requests:\n    cpu: 100m\n    memory: 256Mi\n  limits:\n    cpu: 200m\n    memory: 500Mi\ninitresources:\n  requests:\n    cpu: 100m\n    memory: 256Mi\n  limits:\n    cpu: 200m\n    memory: 500Mi\nconfigurationFiles: ''\nphpmyadmin:\n  resources:\n    requests:\n      cpu: 100m\n      memory: 256Mi\n    limits:\n      cpu: 200m\n      memory: 500Mi\nloadbalancename: alauda-lb\n"
+}

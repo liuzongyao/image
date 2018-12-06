@@ -51,6 +51,8 @@ class SetUp(AlaudaRequest):
             "$GIT_CREDENTIAL": settings.GIT_CREDENTIAL,
             "$GIT_USERNAME": settings.GIT_USERNAME,
             "$GIT_PASSWORD": settings.GIT_PASSWORD,
+            "$GIT_PATH": settings.GIT_PATH,
+            "$GIT_BRANCH": settings.GIT_BRANCH,
             "$SONAR_ENDPOINT": settings.SONAR_ENDPOINT,
             "$SONAR_TOKEN": settings.SONAR_TOKEN,
             "$CLAIR_ENDPOINT": settings.CLAIR_ENDPOINT,
@@ -59,7 +61,8 @@ class SetUp(AlaudaRequest):
             "$CLAIR_DATABASE_ADDR": settings.CLAIR_DATABASE_ADDR,
             "$CLAIR_DATABASE_NAME": settings.CLAIR_DATABASE_NAME,
             "$CLAIR_DATABASE_USER_NAME": settings.CLAIR_DATABASE_USER_NAME,
-            "$CLAIR_DATABASE_PASSWORD": settings.CLAIR_DATABASE_PASSWORD
+            "$CLAIR_DATABASE_PASSWORD": settings.CLAIR_DATABASE_PASSWORD,
+            "$MIDDLEWARE_REGISTRY": settings.MIDDLEWARE_REGISTRY
         }
         self.input_file(self.common)
         self.cluster_client = Cluster()
