@@ -27,10 +27,14 @@ class TestCatalogSuite(object):
         logger.info("开始清除应用目录数据")
         self.newapp.delete_newapp(self.namespace, self.app_name)
         self.newapp.check_exists(self.newapp.get_newapp_common_url(self.namespace, self.app_name), 404)
-        self.catalog.delete_repository(self.catalog.get_uuid_accord_name(self.catalog.get_repository_list().json()
-                                                                         ["results"], {"name": self.git_name}, "uuid"))
-        self.catalog.delete_repository(self.catalog.get_uuid_accord_name(self.catalog.get_repository_list().json()
-                                                                         ["results"], {"name": self.svn_name}, "uuid"))
+        if len(self.catalog.get_repository_list().json()) > 0:
+            self.catalog.delete_repository(self.catalog.get_uuid_accord_name(self.catalog.get_repository_list().json()
+                                                                             ["results"], {"name": self.git_name},
+                                                                             "uuid"))
+        if len(self.catalog.get_repository_list().json()) > 0:
+            self.catalog.delete_repository(self.catalog.get_uuid_accord_name(self.catalog.get_repository_list().json()
+                                                                             ["results"], {"name": self.svn_name},
+                                                                             "uuid"))
         logger.info("清除完毕")
 
     @pytest.mark.repository_git
@@ -156,39 +160,41 @@ class TestCatalogSuite(object):
         '''
 
         result = {"flag": True}
-        repository_id = self.catalog.get_uuid_accord_name(self.catalog.get_repository_list().json()["results"],
-                                                          {"name": self.git_name}, "uuid")
+        assert len(self.catalog.get_repository_list().json()) > 0, "应用没有创建出git仓库，没法创建mongodb应用"
+        if len(self.catalog.get_repository_list().json()) > 0:
+            repository_id = self.catalog.get_uuid_accord_name(self.catalog.get_repository_list().json()["results"],
+                                                              {"name": self.git_name}, "uuid")
 
-        templates_list = self.catalog.get_templates(repository_id)
-        templates = self.catalog.get_value(templates_list.json(), 'results')
-        template_id = ""
-        for template in templates:
-            template_name = template["name"]
-            if "mongodb" == template_name:
-                template_id = template["uuid"]
-                break
-        logger.info("获取应用目录mongodb模板的id：{}".format(template_id))
-        mongodb_info = self.middleware.get_template_info(template_id)
-        version_id = mongodb_info.json()["versions"][0]["uuid"]
-        logger.info("获取到的mongodb的version id:{}".format(version_id))
+            templates_list = self.catalog.get_templates(repository_id)
+            templates = self.catalog.get_value(templates_list.json(), 'results')
+            template_id = ""
+            for template in templates:
+                template_name = template["name"]
+                if "mongodb" == template_name:
+                    template_id = template["uuid"]
+                    break
+            logger.info("获取应用目录mongodb模板的id：{}".format(template_id))
+            mongodb_info = self.middleware.get_template_info(template_id)
+            version_id = mongodb_info.json()["versions"][0]["uuid"]
+            logger.info("获取到的mongodb的version id:{}".format(version_id))
 
-        create_result = self.middleware.create_application('./test_data/catalog/catalog_mongodb.json',
-                                                           {"$catalog_app_name": self.app_name,
-                                                            "$template_id": template_id, "$version_id": version_id})
-        assert create_result.status_code == 201, "创建mongodb失败 {}".format(create_result.text)
-        logger.info("应用目录创建mongodb成功")
+            create_result = self.middleware.create_application('./test_data/catalog/catalog_mongodb.json',
+                                                               {"$catalog_app_name": self.app_name,
+                                                                "$template_id": template_id, "$version_id": version_id})
+            assert create_result.status_code == 201, "创建mongodb失败 {}".format(create_result.text)
+            logger.info("应用目录创建mongodb成功")
 
-        app_id = create_result.json()["kubernetes"]["metadata"]["uid"]
-        logger.info("创建mongodb成功，id是：{}".format(app_id))
-        logger.info("创建mongodb成功，name是：{}".format(self.app_name))
+            app_id = create_result.json()["kubernetes"]["metadata"]["uid"]
+            logger.info("创建mongodb成功，id是：{}".format(app_id))
+            logger.info("创建mongodb成功，name是：{}".format(self.app_name))
 
-        app_status = self.middleware.get_application_status(self.namespace, self.app_name, "Running")
+            app_status = self.middleware.get_application_status(self.namespace, self.app_name, "Running")
 
-        assert app_status, "创建应用后，验证应用状态出错：app: {} is not running".format(self.app_name)
-        logger.info("mongodb的应用状态为：Running")
+            assert app_status, "创建应用后，验证应用状态出错：app: {} is not running".format(self.app_name)
+            logger.info("mongodb的应用状态为：Running")
 
-        # 删除应用
-        delete_result = self.newapp.delete_newapp(self.namespace, self.app_name)
-        assert delete_result.status_code == 204, "删除应用目录创建出的mongodb应用失败 {}".format(delete_result.text)
-        self.newapp.check_exists(self.newapp.get_newapp_common_url(self.namespace, self.app_name), 404)
-        assert result['flag'], True
+            # 删除应用
+            delete_result = self.newapp.delete_newapp(self.namespace, self.app_name)
+            assert delete_result.status_code == 204, "删除应用目录创建出的mongodb应用失败 {}".format(delete_result.text)
+            self.newapp.check_exists(self.newapp.get_newapp_common_url(self.namespace, self.app_name), 404)
+            assert result['flag'], True
