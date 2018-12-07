@@ -58,6 +58,8 @@ def casename():
         "test_general_namespaces": "新命名空间测试:创建命名空间-验证resourcequota-验证limitrange-获取列表-删除",
         "test_newapp": "创建应用-获取拓扑图-获取容器组-获取yaml-获取日志-获取事件-获取k8s事件-exec-获取全部应用-获取命名空间下的应用-搜索应用-"
                        "更新应用-获取应用yaml-缩容-扩容-删除应用下的资源-获取应用详情-添加资源到应用-停止应用-启动应用-删除组件-删除应用",
+        "test_app_with_cm": "应用使用configmap测试：创建configmap-创建应用-删除应用-删除configmap",
+        "test_app_with_pvc": "应用使用pvc测试：创建sc-创建pvc-创建应用-删除应用-删除pvc-删除sc",
         "test_service": "内部路由测试:创建内部路由-内部路由列表-获取详情-更新内部路由-搜索内部路由-删除内部路由",
         "test_domain": "域名测试:创建域名-更新域名-域名列表-搜索域名-删除域名",
         "test_ingress": "外部路由测试:创建外部路由-外部路由列表-获取详情-更新外部路由-搜索外部路由-删除外部路由",

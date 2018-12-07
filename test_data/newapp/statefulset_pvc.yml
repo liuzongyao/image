@@ -1,0 +1,32 @@
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: $newapp_name
+  namespace: $K8S_NAMESPACE
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: $newapp_name
+          image: '$IMAGE'
+          resources:
+            requests:
+              cpu: 10m
+              memory: 10M
+          volumeMounts:
+            - mountPath: /pvc/test/
+              name: pvcpath
+            - mountPath: /subpath/test/
+              name: pvcpath
+              subPath: subpath
+      volumes:
+        - name: pvcpath
+          persistentVolumeClaim:
+            claimName: $pvc_name
+      hostNetwork: false
+    metadata:
+      labels:
+        service.alauda.io/name: statefulset-$newapp_name
+  strategy:
+    type: OnDelete

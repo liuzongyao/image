@@ -63,6 +63,9 @@ class Newapplication(Common):
     def delete_deploy_url(self, namespace, name):
         return "v2/kubernetes/clusters/{}/deployments/{}/{}".format(self.region_name, namespace, name)
 
+    def get_component_url(self, namespace, name, kind):
+        return "v2/kubernetes/clusters/{}/{}/{}/{}".format(self.region_name, kind, namespace, name)
+
     def get_all_newapp(self):
         logger.info(sys._getframe().f_code.co_name.center(50, '*'))
         url = self.get_newapp_url()
@@ -206,3 +209,8 @@ class Newapplication(Common):
                 break
             sleep(5)
         return flag
+
+    def get_component(self, namespace, name, kind):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        url = self.get_component_url(namespace, name, kind)
+        return self.send(method='get', path=url)

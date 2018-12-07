@@ -1,6 +1,10 @@
 import pytest
+import time
 
+from test_case.configmap.configmap import Configmap
 from test_case.newapp.newapp import Newapplication
+from test_case.persistentvolumeclaims.pvc import Pvc
+from test_case.storageclasses.scs import Scs
 
 
 @pytest.mark.newapp
@@ -10,10 +14,26 @@ class TestNewApplicationSuite(object):
         self.newapp = Newapplication()
         self.k8s_namespace = self.newapp.global_info["$K8S_NAMESPACE"]
         self.newapp_name = 'alauda-newapp'
+
+        self.configmap = Configmap()
+        self.configmap_name = 'alauda-cmforapp-{}'.format(self.newapp.region_name).replace('_', '-')
+        self.appwithcm_name = 'alauda-appwithcm-{}'.format(self.newapp.region_name).replace('_', '-')
+
+        self.scs = Scs()
+        self.scs_name = 'alauda-scsforapp-{}'.format(self.newapp.region_name).replace('_', '-')
+        self.pvc = Pvc()
+        self.pvc_name = 'alauda-pvcforapp-{}'.format(self.newapp.region_name).replace('_', '-')
+        self.appwithpvc_name = 'alauda-appwithpvc-{}'.format(self.newapp.region_name).replace('_', '-')
+
         self.teardown_class(self)
 
     def teardown_class(self):
         self.newapp.delete_newapp(self.k8s_namespace, self.newapp_name)
+        self.newapp.delete_newapp(self.k8s_namespace, self.appwithcm_name)
+        self.newapp.delete_newapp(self.k8s_namespace, self.appwithpvc_name)
+        self.configmap.delete_configmap(self.k8s_namespace, self.configmap_name)
+        self.pvc.delete_pvc(self.k8s_namespace, self.pvc_name)
+        self.scs.delete_scs(self.scs_name)
 
     @pytest.mark.BAT
     def test_newapp(self):
@@ -185,6 +205,93 @@ class TestNewApplicationSuite(object):
         # 删除应用
         delete_result = self.newapp.delete_newapp(self.k8s_namespace, self.newapp_name)
         assert delete_result.status_code == 204, "删除应用失败 {}".format(delete_result.text)
-        delete_flag = self.newapp.check_exists(self.newapp.get_newapp_common_url(self.k8s_namespace, self.newapp_name), 404)
+        delete_flag = self.newapp.check_exists(self.newapp.get_newapp_common_url(self.k8s_namespace, self.newapp_name),
+                                               404)
         assert delete_flag, "删除应用失败"
+        assert result['flag'], result
+
+    @pytest.mark.cm
+    @pytest.mark.BAT
+    def test_app_with_cm(self):
+        """
+        应用使用configmap测试：创建configmap-创建应用-删除应用-删除configmap
+        :return:
+        """
+        result = {"flag": True}
+        # create configmap
+        createconfigmap_result = self.configmap.create_configmap("./test_data/configmap/configmap.json",
+                                                                 {"$cm_name": self.configmap_name,
+                                                                  "$cm_key": self.configmap_name})
+        assert createconfigmap_result.status_code == 201, "创建cm出错:{}".format(createconfigmap_result.text)
+
+        # create app with cm
+        create_result = self.newapp.create_newapp_by_yaml(self.k8s_namespace,
+                                                          self.appwithcm_name, './test_data/newapp/daemonset_cm.yml',
+                                                          {'$newapp_name': self.appwithcm_name,
+                                                           "$cm_name": self.configmap_name,
+                                                           "$cm_key": self.configmap_name})
+        assert create_result.status_code == 201, "新版应用创建失败 {}".format(create_result.text)
+        app_status = self.newapp.get_newapp_status(self.k8s_namespace, self.appwithcm_name, 'Running')
+        assert app_status, "创建使用configmap的应用后，验证应用状态出错：app: {} is not running".format(self.appwithcm_name)
+        daemonset_result = self.newapp.get_component(self.k8s_namespace, self.appwithcm_name, 'daemonsets')
+        result = self.newapp.update_result(result, daemonset_result.status_code == 200, '获取daemonset详情失败')
+        content = daemonset_result.json()
+        v1 = self.newapp.get_value(content, 'kubernetes.spec.template.spec.volumes.0.configMap.name')
+        result = self.newapp.update_result(result, v1 == self.configmap_name, '存储卷挂载configmap失败')
+        v2 = self.newapp.get_value(content, 'kubernetes.spec.template.spec.volumes.1.configMap.name')
+        result = self.newapp.update_result(result, v2 == self.configmap_name, '存储卷挂载configmap失败')
+        e1 = self.newapp.get_value(content,
+                                   'kubernetes.spec.template.spec.containers.0.envFrom.0.configMapRef.name')
+        result = self.newapp.update_result(result, e1 == self.configmap_name, '环境变量完整引用configmap失败')
+        e2 = ''
+        env = self.newapp.get_value(content, 'kubernetes.spec.template.spec.containers.0.env')
+        for e in env:
+            if e.get('name') == 'cm':
+                e2 = self.newapp.get_value(e, 'valueFrom.configMapKeyRef.name')
+        result = self.newapp.update_result(result, e2 == self.configmap_name, '环境变量引用configmap的key失败')
+        self.newapp.delete_newapp(self.k8s_namespace, self.appwithcm_name)
+        self.newapp.check_exists(self.newapp.get_newapp_common_url(self.k8s_namespace, self.appwithcm_name), 404)
+        self.configmap.delete_configmap(self.k8s_namespace, self.configmap_name)
+        assert result['flag'], result
+
+    @pytest.mark.pvc
+    def test_app_with_pvc(self):
+        """
+        应用使用pvc测试：创建sc-创建pvc-创建应用-删除应用-删除pvc-删除sc
+        :return:
+        """
+        result = {"flag": True}
+        create_result = self.scs.create_scs("./test_data/scs/scs.yml",
+                                            {"$scs_name": self.scs_name, "$is_default": "false",
+                                             })
+        assert create_result.status_code == 201, "创建sc失败{}".format(create_result.text)
+
+        # create pvc
+        createpvc_result = self.pvc.create_pvc("./test_data/pvc/pvc.json",
+                                               {"$pvc_name": self.pvc_name, "$pvc_mode": "ReadWriteOnce",
+                                                "$scs_name": self.scs_name, "$size": "1"})
+        assert createpvc_result.status_code == 201, "创建pvc失败{}".format(createpvc_result.text)
+        self.pvc.get_status(self.pvc.get_common_pvc_url(self.pvc.global_info["$K8S_NAMESPACE"], self.pvc_name),
+                            "status.phase", "Bound")
+        # create app
+        create_app = self.newapp.create_newapp_by_yaml(self.k8s_namespace,
+                                                       self.appwithpvc_name,
+                                                       './test_data/newapp/statefulset_pvc.yml',
+                                                       {"$newapp_name": self.appwithpvc_name,
+                                                        "$pvc_name": self.pvc_name})
+        assert create_app.status_code == 201, "创建app出错:{}".format(create_app.text)
+        app_status = self.newapp.get_newapp_status(self.k8s_namespace, self.appwithpvc_name, 'Running')
+        assert app_status, "创建使用pvc的应用后，验证应用状态出错：app: {} is not running".format(self.appwithpvc_name)
+        statefulset_result = self.newapp.get_component(self.k8s_namespace, self.appwithpvc_name, 'statefulsets')
+        result = self.newapp.update_result(result, statefulset_result.status_code == 200, '获取statefulset详情失败')
+        claimName = self.newapp.get_value(statefulset_result.json(),
+                                          "kubernetes.spec.template.spec.volumes.0.persistentVolumeClaim.claimName")
+        result = self.newapp.update_result(result, claimName == self.pvc_name, "详情中挂载pvc失败")
+
+        self.newapp.delete_newapp(self.k8s_namespace, self.appwithpvc_name)
+        self.newapp.check_exists(self.newapp.get_newapp_common_url(self.k8s_namespace, self.appwithpvc_name), 404)
+        time.sleep(60)
+        self.pvc.delete_pvc(self.k8s_namespace, self.pvc_name)
+        self.scs.delete_scs(self.scs_name)
+
         assert result['flag'], result

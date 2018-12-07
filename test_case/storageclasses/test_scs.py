@@ -4,6 +4,7 @@ from test_case.storageclasses.scs import Scs
 
 
 @pytest.mark.scs
+@pytest.mark.ace
 class Teststorageclass():
     def setup_class(self):
         self.scs = Scs()

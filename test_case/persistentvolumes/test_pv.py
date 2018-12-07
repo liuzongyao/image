@@ -5,6 +5,7 @@ from test_case.persistentvolumes.pv import Pv
 
 
 @pytest.mark.pv
+@pytest.mark.ace
 class TestPvSuite(object):
     def setup_class(self):
         self.pv = Pv()

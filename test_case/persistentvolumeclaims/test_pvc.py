@@ -5,6 +5,7 @@ from test_case.storageclasses.scs import Scs
 
 
 @pytest.mark.pvc
+@pytest.mark.ace
 class TestPvcSuite(object):
     def setup_class(self):
 
@@ -29,7 +30,6 @@ class TestPvcSuite(object):
         self.pvc.delete_pvc(self.pvc.global_info["$K8S_NAMESPACE"], self.pvcusescs_name)
 
     @pytest.mark.scs
-    @pytest.mark.BAT
     def test_pvc_use_scs(self):
         result = {"flag": True}
         create_result = self.scs.create_scs("./test_data/scs/scs.yml",

@@ -1,0 +1,44 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: $newapp_name
+  namespace: $K8S_NAMESPACE
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: $newapp_name
+          image: '$IMAGE'
+          resources:
+            requests:
+              cpu: 10m
+              memory: 10M
+          env:
+            - name: cm
+              valueFrom:
+                configMapKeyRef:
+                  name: $cm_name
+                  key: $cm_key
+          envFrom:
+            - configMapRef:
+                name: $cm_name
+          volumeMounts:
+            - mountPath: /configmap/test/
+              name: configmappath
+            - name: configmapsubpath
+              mountPath: /test/configmap2/subpath
+              subPath: $cm_key
+      volumes:
+        - name: configmappath
+          configMap:
+            name: $cm_name
+        - name: configmapsubpath
+          configMap:
+            name: $cm_name
+      hostNetwork: false
+    metadata:
+      labels:
+        service.alauda.io/name: daemonset-$newapp_name
+  strategy:
+    type: OnDelete
