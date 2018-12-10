@@ -104,7 +104,7 @@ class SetUp(AlaudaRequest):
                                                                "$master_ip": private_ips[0],
                                                                "$slave_ip": private_ips[1]})
         assert get_script.status_code == 200, "获取创建集群脚本失败:{}".format(get_script.text)
-        cmd = "export LANG=zh_CN.utf8;{}".format(get_script.json()["commands"]["install"])
+        cmd = "export LANG=zh_CN.utf8;export LC_ALL=zh_CN.utf8;{}".format(get_script.json()["commands"]["install"])
         ret_excute = self.cluster_client.excute_script(cmd, public_ips[0])
         assert "Install successfully!" in ret_excute[1], "执行脚本失败:{}".format(ret_excute[1])
         is_exist = self.cluster_client.check_value_in_response("v1/regions/{}".format(self.cluster_client.account),
