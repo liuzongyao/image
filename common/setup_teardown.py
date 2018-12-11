@@ -314,7 +314,7 @@ class TearDown(AlaudaRequest):
             self.namespace_client.delete_general_namespaces("default")
             self.namespace_client.delete_general_namespaces("kube-system")
             self.cluster.delete_cluster(settings.REGION_NAME)
-            destroy_instance(instances_id)
+        destroy_instance(instances_id)
 
         noti_id = self.global_info.get("$NOTI_UUID")
         self.noti_client.delete_noti(noti_id)
