@@ -49,6 +49,7 @@ class TestPvcSuite(object):
         result = self.pvc.update_result(result, list_result.status_code == 200, list_result.text)
         result = self.pvc.update_result(result, self.pvcusescs_name in list_result.text, "获取持久卷声明列表：新建pvc不在列表中")
 
+        # update pvc
         # get pvc detail
         detail_result = self.pvc.get_pvc_detail(self.pvc.global_info["$K8S_NAMESPACE"], self.pvcusescs_name)
         result = self.pvc.update_result(result, detail_result.status_code == 200, detail_result.text)

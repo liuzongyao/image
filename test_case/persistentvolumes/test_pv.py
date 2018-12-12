@@ -44,8 +44,8 @@ class TestPvSuite(object):
                                        "获取持久卷详情失败：状态不是可用")
         result = self.pv.update_result(result,
                                        self.pv.get_value(detail_result.json(),
-                                                         "kubernetes.spec.capacity.storage") == "2G",
-                                       "获取持久卷详情失败：大小不是2G")
+                                                         "kubernetes.spec.capacity.storage") == "2Gi",
+                                       "获取持久卷详情失败：大小不是2Gi")
         # delete pv
         delete_result = self.pv.delete_pv(self.pv_name)
         assert delete_result.status_code == 204, "删除pv失败{}".format(delete_result.text)
