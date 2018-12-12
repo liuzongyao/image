@@ -28,3 +28,9 @@ class Pvc(Common):
         logger.info(sys._getframe().f_code.co_name.center(50, '*'))
         url = self.get_common_pvc_url(ns_name, pvc_name)
         return self.send(method='delete', path=url)
+
+    def update_pvc(self, ns_name, pvc_name, file, data):
+        logger.info(sys._getframe().f_code.co_name.center(50, '*'))
+        url = self.get_common_pvc_url(ns_name, pvc_name)
+        data = self.generate_data(file, data)
+        return self.send(method='put', path=url, data=data)
