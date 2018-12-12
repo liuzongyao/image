@@ -141,9 +141,9 @@ class Newapplication(Common):
         url = self.get_newapp_pod_url(namespace, name)
         return self.send(method='get', path=url)
 
-    def get_newapp_topology(self, namespace, name):
+    def get_newapp_topology(self, namespace, name, kind='Deployment'):
         logger.info(sys._getframe().f_code.co_name.center(50, '*'))
-        url = self.get_newapp_topology_url(namespace, name)
+        url = self.get_newapp_topology_url(namespace, name, kind)
         return self.send(method='get', path=url)
 
     def get_newapp_address(self, namespace, name):

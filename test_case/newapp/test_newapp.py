@@ -257,7 +257,7 @@ class TestNewApplicationSuite(object):
     @pytest.mark.pvc
     def test_app_with_pvc(self):
         """
-        应用使用pvc测试：创建sc-创建pvc-创建应用-删除应用-删除pvc-删除sc
+        应用使用pvc测试：创建sc-创建pvc-创建应用-获取pvc拓扑图-删除应用-删除pvc-删除sc
         :return:
         """
         result = {"flag": True}
@@ -282,14 +282,26 @@ class TestNewApplicationSuite(object):
         assert create_app.status_code == 201, "创建app出错:{}".format(create_app.text)
         app_status = self.newapp.get_newapp_status(self.k8s_namespace, self.appwithpvc_name, 'Running')
         assert app_status, "创建使用pvc的应用后，验证应用状态出错：app: {} is not running".format(self.appwithpvc_name)
+
+        # get statefulset detail
         statefulset_result = self.newapp.get_component(self.k8s_namespace, self.appwithpvc_name, 'statefulsets')
         result = self.newapp.update_result(result, statefulset_result.status_code == 200, '获取statefulset详情失败')
         claimName = self.newapp.get_value(statefulset_result.json(),
                                           "kubernetes.spec.template.spec.volumes.0.persistentVolumeClaim.claimName")
         result = self.newapp.update_result(result, claimName == self.pvc_name, "详情中挂载pvc失败")
-
+        # get pvc topology
+        pvc_topology = self.newapp.get_newapp_topology(self.k8s_namespace, self.pvc_name,
+                                                       'PersistentVolumeClaim')
+        result = self.newapp.update_result(result, pvc_topology.status_code == 200,
+                                           "获取pvc拓扑图失败 {}".format(pvc_topology.status_code))
+        result = self.newapp.update_result(result, len(pvc_topology.json()['referenced_by']) == 1,
+                                           "获取pvc拓扑图错误 {}".format(pvc_topology.text))
+        # delete
         self.newapp.delete_newapp(self.k8s_namespace, self.appwithpvc_name)
         self.newapp.check_exists(self.newapp.get_newapp_common_url(self.k8s_namespace, self.appwithpvc_name), 404)
+        self.pvc.get_status(
+            self.newapp.get_newapp_topology_url(self.k8s_namespace, self.pvc_name, 'PersistentVolumeClaim'),
+            "referenced_by", [])
         time.sleep(60)
         self.pvc.delete_pvc(self.k8s_namespace, self.pvc_name)
         self.scs.delete_scs(self.scs_name)
