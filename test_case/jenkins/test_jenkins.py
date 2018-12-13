@@ -143,7 +143,7 @@ class TestJenkinsBuildImageUpdateService(object):
 
         contents = ret.json()
 
-        script = re.search(r'("script":) "(.*)"(, "namespace": "[a-zA-Z0-9_-]*?",)', ret.text).group(2)
+        script = re.search(r'("script":) "(.*)"(, "namespace": "[a-zA-Z0-9_-]*?", "created_by")', ret.text).group(2)
 
         logger.info("script: {}".format(script))
 
@@ -189,15 +189,14 @@ class TestJenkinsBuildImageUpdateService(object):
         assert ret, "流水线项目执行失败"
 
         # get the service image tag
-        ret = self.app_tool.get_newapp_status(self.namespace, self.app_name)
+        ret = self.app_tool.get_newapp_detail(self.namespace, self.app_name)
 
         assert ret.status_code == 200, "获取应用的镜像版本失败"
 
-        image_tag = self.app_tool.get_value(ret.json(), 'kubernetes.0.spec.template.spec.containers.0.image'
-                                            ).split(":")[-1]
-
-        logger.info("image tag: {}".format(
-            self.app_tool.get_value(ret.json(), 'kubernetes.0.spec.template.spec.containers.0.image')))
+        for i in range(0, len(ret.json())):
+            if ("image" in str(ret.json()[i])):
+                image_tag = self.app_tool.get_value(ret.json()[i], 'kubernetes.spec.template.spec.containers.0.image'
+                                                    ).split(":")[-1]
 
         assert image_tag == self.repo_tag, "流水线更新应用失败"
 
@@ -207,20 +206,6 @@ class TestJenkinsBuildImageUpdateService(object):
 
         ret = self.jenkins_tool.get_pipeline_detail(pipeline_id)
         assert ret.status_code == 404, "流水线没有被成功删除掉"
-
-        # delete image tag
-        ret = self.image_tool.delete_repo_tag(self.repo, self.repo_tag)
-        assert ret.status_code == 204, "删除镜像版本操作失败"
-
-        ret = self.image_tool.delete_repo_tag(self.repo, self.repo_additional_tag)
-        assert ret.status_code == 204, "删除镜像版本操作失败"
-
-        ret = self.image_tool.get_repo_tag(self.repo)
-        assert ret.status_code == 200, "获取镜像版本失败"
-
-        assert self.repo_tag not in ret.text, "镜像版本没有被成功删除掉"
-
-        assert self.repo_additional_tag not in ret.text, "镜像版本没有被成功删除掉"
 
     def test_jenkins_build_with_git(self):
         # access jenkins
@@ -460,15 +445,14 @@ class TestJenkinsBuildImageUpdateService(object):
         ret = self.app_tool.get_newapp_detail(self.namespace, self.app_name)
 
         assert ret.status_code == 200, "获取应用的详情失败"
-        """
-        image_tag = self.app_tool.get_value(ret.json(), 'kubernetes.0.spec.template.spec.containers.0.image'
-                                            ).split(":")[-1]
 
-        logger.info("image tag: {}".format(
-             self.app_tool.get_value(ret.json(), 'kubernetes.0.spec.template.spec.containers.0.image')))
+        for i in range(0, len(ret.json())):
+            if ("image" in str(ret.json()[i])):
+                image_tag = self.app_tool.get_value(ret.json()[i], 'kubernetes.spec.template.spec.containers.0.image'
+                                                    ).split(":")[-1]
 
         assert image_tag == repo_tag, "流水线更新应用镜像版本失败"
-        """
+
         # delete pipeline
         ret = self.jenkins_tool.delete_pipeline(pipeline_id)
 
