@@ -1,0 +1,5 @@
+{
+  "organization": "$account",
+  "username": "$sub_account_user_name",
+  "password": "$sub_account_password"
+}

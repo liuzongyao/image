@@ -1,0 +1,14 @@
+{
+    "department": "$department",
+    "email": "$email",
+    "extra_info": "$extra_info",
+    "landline_phone": "$landline_phone",
+    "mobile": "$mobile",
+    "office_address": "$office_address",
+    "permission": null,
+    "position": "$position",
+    "realname": "$realname",
+    "sub_type": null,
+    "type": "organizations.Account",
+    "username": "$sub_account_user_name"
+}
