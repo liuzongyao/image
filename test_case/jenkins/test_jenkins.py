@@ -193,6 +193,7 @@ class TestJenkinsBuildImageUpdateService(object):
 
         assert ret.status_code == 200, "获取应用的镜像版本失败"
 
+        image_tag = ""
         for i in range(0, len(ret.json())):
             if ("image" in str(ret.json()[i])):
                 image_tag = self.app_tool.get_value(ret.json()[i], 'kubernetes.spec.template.spec.containers.0.image'
@@ -446,6 +447,7 @@ class TestJenkinsBuildImageUpdateService(object):
 
         assert ret.status_code == 200, "获取应用的详情失败"
 
+        image_tag = ""
         for i in range(0, len(ret.json())):
             if ("image" in str(ret.json()[i])):
                 image_tag = self.app_tool.get_value(ret.json()[i], 'kubernetes.spec.template.spec.containers.0.image'
