@@ -18,7 +18,7 @@ template:
       applicationName: $service_name
       componentName: $service_name
       componentType: "Deployment"
-      containerName: $service_name
+      containerName: "containersname"
     command: ~
     args: ~
     image:
