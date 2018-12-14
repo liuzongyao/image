@@ -3,7 +3,9 @@ import pytest
 from test_case.configmap.configmap import Configmap
 
 
-@pytest.mark.configmap
+@pytest.mark.ace
+@pytest.mark.BAT
+@pytest.mark.flaky(reruns=2, reruns_delay=3)
 class TestCmSuite(object):
     def setup_class(self):
         self.configmap = Configmap()
@@ -14,7 +16,6 @@ class TestCmSuite(object):
     def teardown_class(self):
         self.configmap.delete_configmap(self.configmap.global_info["$K8S_NAMESPACE"], self.configmap_name)
 
-    @pytest.mark.BAT
     def test_configmap(self):
         result = {"flag": True}
         # create configmap

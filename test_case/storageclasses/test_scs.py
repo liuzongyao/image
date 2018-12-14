@@ -1,10 +1,10 @@
 import pytest
-
 from test_case.storageclasses.scs import Scs
 
 
-@pytest.mark.scs
+@pytest.mark.BAT
 @pytest.mark.ace
+@pytest.mark.flaky(reruns=2, reruns_delay=3)
 class Teststorageclass():
     def setup_class(self):
         self.scs = Scs()
@@ -14,7 +14,6 @@ class Teststorageclass():
     def teardown_class(self):
         self.scs.delete_scs(self.scs_name)
 
-    @pytest.mark.BAT
     def test_scs(self):
         result = {"flag": True}
         # create scs

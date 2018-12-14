@@ -2,8 +2,6 @@ import pytest
 from test_case.image.image import Image
 
 
-@pytest.mark.region
-@pytest.mark.image
 class TestImageSuite(object):
     def setup_class(self):
         self.image_tool = Image()

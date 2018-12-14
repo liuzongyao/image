@@ -3,8 +3,9 @@ import pytest
 from test_case.ingress.ingress import Ingress
 
 
-@pytest.mark.ingress
 @pytest.mark.ace
+@pytest.mark.BAT
+@pytest.mark.flaky(reruns=2, reruns_delay=3)
 class TestIngressSuite(object):
     def setup_class(self):
         self.ingress = Ingress()
@@ -15,7 +16,6 @@ class TestIngressSuite(object):
     def teardown_class(self):
         self.ingress.delete_ingress(self.k8s_namespace, self.ingress_name)
 
-    @pytest.mark.BAT
     def test_ingress(self):
         '''
         创建外部路由-外部路由列表-获取详情-更新外部路由-搜索外部路由-删除外部路由

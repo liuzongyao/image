@@ -1,11 +1,11 @@
 import pytest
-
 from common.log import logger
 from test_case.persistentvolumes.pv import Pv
 
 
-@pytest.mark.pv
+@pytest.mark.BAT
 @pytest.mark.ace
+@pytest.mark.flaky(reruns=2, reruns_delay=3)
 class TestPvSuite(object):
     def setup_class(self):
         self.pv = Pv()
@@ -15,7 +15,6 @@ class TestPvSuite(object):
     def teardown_class(self):
         self.pv.delete_pv(self.pv_name)
 
-    @pytest.mark.BAT
     def test_pv(self):
         result = {"flag": True}
 

@@ -4,6 +4,9 @@ from test_case.namespace.namespace import Namespace
 from test_case.persistentvolumeclaims.pvc import Pvc
 
 
+@pytest.mark.BAT
+@pytest.mark.ace
+@pytest.mark.flaky(reruns=2, reruns_delay=3)
 class TestNamespaceSuite(object):
     def setup_class(self):
         self.namespace = Namespace()
@@ -28,7 +31,6 @@ class TestNamespaceSuite(object):
         self.namespace.delete_namespaces(self.nsforquota_name)
         self.namespace.delete_general_namespaces(self.general_namespace_name)
 
-    @pytest.mark.BAT
     def test_namespace(self):
         '''
         创建命名空间-获取命名空间列表-获取命名空间详情-创建配额-获取配额列表-验证配额pvc-更新配额-验证配额pvc-获取配额详情-删除配额-删除命名空间
@@ -155,7 +157,6 @@ class TestNamespaceSuite(object):
     #     assert delete_flag, "删除命名空间失败"
     #     assert result['flag'], result
 
-    @pytest.mark.BAT
     def test_general_namespaces(self):
         # if not self.namespace.is_weblab_open("USER_VIEW_ENABLED"):
         #     return True, "用户视角未打开，不需要测试"

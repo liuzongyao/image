@@ -4,6 +4,8 @@ from test_case.resources_manage.resource_list import ResourceList
 
 
 @pytest.mark.BAT
+@pytest.mark.ace
+@pytest.mark.flaky(reruns=2, reruns_delay=3)
 class TestResourceSuite(object):
     def test_resource_list(self):
         result = {"flag": True}

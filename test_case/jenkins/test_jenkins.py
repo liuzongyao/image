@@ -1,7 +1,6 @@
 import re
 import time
 import pytest
-
 from test_case.newapp.newapp import Newapplication
 from common.log import logger
 from test_case.image.image import Image
@@ -9,8 +8,6 @@ from test_case.integrations.ci_cd_integrations import Integrations
 from test_case.jenkins.jenkins import Jenkins
 
 
-@pytest.mark.region
-@pytest.mark.buildimageupdateservice
 class TestJenkinsBuildImageUpdateService(object):
     def setup_class(self):
         self.app_tool = Newapplication()
@@ -662,6 +659,8 @@ class TestJenkinsBuildImageUpdateService(object):
         assert ret, "删除Jenkins流水线失败"
 
     @pytest.mark.BAT
+    @pytest.mark.ace
+    @pytest.mark.flaky(reruns=2, reruns_delay=3)
     def test_jenkins_template(self):
         # access jenkins
         ret = self.jenkins_tool.access_jenkins()

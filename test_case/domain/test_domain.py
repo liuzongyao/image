@@ -3,8 +3,9 @@ import pytest
 from test_case.domain.domain import Domain
 
 
-@pytest.mark.domain
 @pytest.mark.ace
+@pytest.mark.BAT
+@pytest.mark.flaky(reruns=2, reruns_delay=3)
 class TestDomainSuite(object):
     def setup_class(self):
         self.domain = Domain()
@@ -15,7 +16,6 @@ class TestDomainSuite(object):
         domain_id = self.domain.get_domain_id(self.domain_name)
         self.domain.delete_domain(domain_id)
 
-    @pytest.mark.BAT
     def test_domain(self):
         '''
         创建域名-更新域名-域名列表-搜索域名-删除域名

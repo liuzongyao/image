@@ -1,11 +1,11 @@
 import pytest
-
 from test_case.networkpolicy.networkpolicy import Networkpolicy
 from test_case.newapp.newapp import Newapplication
 
 
-@pytest.mark.networkpolicy
+@pytest.mark.BAT
 @pytest.mark.ace
+@pytest.mark.flaky(reruns=2, reruns_delay=3)
 class TestNetworkpolicySuite(object):
     def setup_class(self):
         self.networkpolicy = Networkpolicy()
@@ -18,11 +18,9 @@ class TestNetworkpolicySuite(object):
     def teardown_class(self):
         self.networkpolicy.delete_networkpolicy(self.k8s_namespace, self.networkpolicy_name)
 
-    @pytest.mark.BAT
     def test_networkpolicy(self):
         '''
         创建网络策略-网络策略列表-更新网络策略-获取详情-删除网络策略
-        :return:
         '''
         if self.networkpolicy.global_info["$NETWORK_POLICY"] != "calico":
             return True, "网络策略不是calico,不需要测试"

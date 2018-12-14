@@ -7,6 +7,8 @@ from test_case.newapp.newapp import Newapplication
 
 
 @pytest.mark.BAT
+@pytest.mark.ace
+@pytest.mark.flaky(reruns=2, reruns_delay=3)
 class TestCatalogSuite(object):
     def setup_class(self):
 
