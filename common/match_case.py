@@ -78,6 +78,7 @@ def casename():
         "test_mysql": "中间件获取mysql的模板id-获取mysql可用的version id-创建mongodb应用-获取应用状态-删除应用",
         "test_mysql_cluster": "中间件获取mysql-cluster的模板id-获取mysql-cluster可用的version id-创建mongodb应用-获取应用状态-删除应用",
         "test_rabbitmq_ha": "中间件获取rabbitmq的模板id-获取rabbitmq可用的version id-创建mongodb应用-获取应用状态-删除应用",
-        "test_redis": "中间件获取redis的模板id-获取redis可用的version id-创建mongodb应用-获取应用状态-删除应用"
+        "test_redis": "中间件获取redis的模板id-获取redis可用的version id-创建mongodb应用-获取应用状态-删除应用",
+        "test_resource_list": "获取资源管理列表-校验列表资源类型"
     }
     return casename_dict
