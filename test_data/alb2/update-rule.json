@@ -1,0 +1,32 @@
+{
+  "apiVersion": "crd.alauda.io/v1",
+  "kind": "Rule",
+  "metadata": {
+    "name": "$rule_name",
+    "namespace": "$alb-namespace",
+    "resourceVersion": "$resourceVersion",
+    "labels": {
+      "alb2.alauda.io/name": "$alb_name",
+      "alb2.alauda.io/frontend": "$alb_name-777-http"
+    }
+  },
+  "spec": {
+    "priority": 10000,
+    "domain": "",
+    "url": "",
+    "dsl": "(AND (STARTS_WITH URL /start))",
+    "description": "$rule_name",
+    "serviceGroup": {
+      "session_affinity_attribute": "cookie",
+      "session_affinity_policy": "cookie",
+      "services": [
+        {
+          "name": "$GLOBAL_APP_NAME",
+          "namespace": "$K8S_NAMESPACE",
+          "port": 80,
+          "weight": 100
+        }
+      ]
+    }
+  }
+}

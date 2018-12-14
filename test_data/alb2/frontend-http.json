@@ -1,0 +1,27 @@
+{
+  "apiVersion": "crd.alauda.io/v1",
+  "kind": "Frontend",
+  "metadata": {
+    "name": "$alb_name-777-http",
+    "namespace": "$alb-namespace",
+    "labels": {
+      "alb2.alauda.io/name": "$alb_name"
+    }
+  },
+  "spec": {
+    "port": 777,
+    "protocol": "http",
+    "serviceGroup": {
+      "session_affinity_attribute": "",
+      "session_affinity_policy": "",
+      "services": [
+        {
+          "name": "$GLOBAL_APP_NAME",
+          "namespace": "$K8S_NAMESPACE",
+          "port": 80,
+          "weight": 100
+        }
+      ]
+    }
+  }
+}

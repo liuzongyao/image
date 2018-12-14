@@ -65,7 +65,7 @@
       },
       "spec": {
         "selector": {
-          "service.alauda.io/name": "deployment-$newapp_name",
+          "service.alauda.io/name": "$newapp_name",
           "app.alauda.io/name": "$newapp_name.$K8S_NAMESPACE"
         },
         "ports": [

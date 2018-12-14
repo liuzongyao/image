@@ -1,0 +1,29 @@
+{
+  "apiVersion": "crd.alauda.io/v1",
+  "kind": "Frontend",
+  "metadata": {
+    "name": "$alb_name-999",
+    "namespace": "$alb-namespace",
+    "resourceVersion": "$resourceVersion",
+    "labels": {
+      "alb2.alauda.io/name": "$alb_name"
+    }
+  },
+  "spec": {
+    "port": 999,
+    "protocol": "tcp",
+    "serviceGroup": {
+      "session_affinity_attribute": "",
+      "session_affinity_policy": "",
+      "services": [
+        {
+          "name": "$GLOBAL_APP_NAME",
+          "namespace": "$K8S_NAMESPACE",
+          "port": 80,
+          "weight": 100
+        }
+      ]
+    }
+  }
+}
+

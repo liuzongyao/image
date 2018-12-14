@@ -15,4 +15,4 @@ class TestResourceSuite(object):
         get_resource_type = resource_client.get_resource_type_list(all_type_content.json())
         resource_list = set(json.loads(resource_client.generate_data('./test_data/resource_list/all_resources.json')))
         result = resource_client.update_result(result, resource_list.issubset(get_resource_type), "管理视图资源列表不匹配")
-        assert result
+        assert result["flag"], result
