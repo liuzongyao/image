@@ -334,6 +334,12 @@ class Common(AlaudaRequest):
             logger.error("access service failed: {}".format(e))
         return False
 
+    @staticmethod
+    def log_info(func: object) -> object:
+        def wrapper(*args, **kwargs):
+            logger.info(func.__name__.center(50, '*'))
+            return func(*args, **kwargs)
+        return wrapper
     # def is_weblab_open(self, weblab_name):
     #     weblabs = self.global_info.get("$weblabs")
     #     if isinstance(weblabs, dict) and weblab_name in weblabs.keys() and weblabs[weblab_name]:

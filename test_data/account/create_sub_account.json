@@ -1,0 +1,8 @@
+{
+    "ignoreProject": true,
+    "password": "$sub_account_password",
+    "roles": [],
+    "usernames": [
+        "$sub_account_user_name"
+    ]
+}

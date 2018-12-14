@@ -1,0 +1,25 @@
+{
+    "config": {
+        "client_key": "",
+        "domain": "",
+        "host": "$ldap_host",
+        "port": "$ldap_port",
+        "search_base": "$search_base",
+        "server_cert": "",
+        "service_account": "$ldap_account",
+        "service_password": "$ldap_password",
+        "tls": false
+    },
+    "schema": {
+        "users": {
+            "class_type": "$class_type",
+            "login_field": "$login_field",
+            "search": ""
+        }
+    },
+    "test": {
+        "password": "$test_user_password",
+        "username": "$test_user_name"
+    },
+    "type": "OpenLDAP"
+}
