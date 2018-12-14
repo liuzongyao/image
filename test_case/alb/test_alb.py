@@ -14,9 +14,9 @@ class TestAlbSuite(object):
         list_result = self.alb.list_alb()
         assert list_result.status_code == 200, "获取负载均衡列表失败 {}".format(list_result.text)
         if len(list_result.json()) == 0:
-            return True, "集群负载均衡列表为空，请先部署alb2"
-        self.alb_name = list_result.json()[-1]['kubernetes']['metadata']['name']
-        self.alb_namespace = list_result.json()[-1]['kubernetes']['metadata']['namespace']
+            return False, "集群负载均衡列表为空，请先部署alb2"
+        self.alb_name = self.alb.get_value(list_result.json(), "-1.kubernetes.metadata.name")
+        self.alb_namespace = self.alb.get_value(list_result.json(), "-1.kubernetes.metadata.namespace")
         self.tcpportname = "{}-999".format(self.alb_name)
         self.httpportname = "{}-777-http".format(self.alb_name)
         self.rulename = "rule-{}".format(self.httpportname)
@@ -29,17 +29,15 @@ class TestAlbSuite(object):
         self.alb.delete_frontend(self.alb_namespace, self.httpportname)
         self.alb.delete_alb(self.k8s_namespace, self.alb2_name)
 
-    @pytest.mark.BAT
-    def test_alb(self):
+    def test_tcp(self):
         '''
-        创建tcp端口-获取tcp端口详情-设置默认内部路由-获取应用访问地址-获取端口列表-删除tcp端口-
-        创建http端口-创建规则-获取应用访问地址-获取规则详情-更新规则-获取规则列表-删除规则-删除http端口
+        创建tcp端口-获取tcp端口详情-设置默认内部路由-获取应用访问地址-获取端口列表-删除tcp端口
         :return:
         '''
         crd_result = self.alb.get_alb_crd()
         assert crd_result.status_code == 200, "获取alb2的crd 失败:{}".format(crd_result.text)
         if len(crd_result.json()) == 0:
-            return True, "集群不支持alb2,请先部署alb2"
+            return False, "集群不支持alb2,请先部署alb2"
         result = {"flag": True}
 
         # create tcp frontend
@@ -51,7 +49,7 @@ class TestAlbSuite(object):
         # get frontend detail
         frontend_result = self.alb.get_detail_frontend(self.alb_namespace, self.tcpportname)
         result = self.alb.update_result(result, frontend_result.status_code == 200, frontend_result.text)
-        version = frontend_result.json()['kubernetes']['metadata']['resourceVersion']
+        version = self.alb.get_value(frontend_result.json(), 'kubernetes.metadata.resourceVersion')
 
         # update tcp frontend
         update_frontend_result = self.alb.update_frontend(self.alb_namespace, self.tcpportname,
@@ -59,12 +57,12 @@ class TestAlbSuite(object):
                                                           {"$alb_name": self.alb_name,
                                                            "$alb-namespace": self.alb_namespace,
                                                            "$resourceVersion": version})
-        assert update_frontend_result.status_code == 204, "更新tcp默认内部路由失败:{}".format(update_frontend_result.text)
+        assert update_frontend_result.status_code == 204, "设置tcp默认内部路由失败:{}".format(update_frontend_result.text)
 
         # get app address
         address_result = self.newapp.get_newapp_address(self.k8s_namespace, self.newapp.global_info['$GLOBAL_APP_NAME'])
         result = self.alb.update_result(result, self.tcpportname in address_result.text,
-                                        "更新tcp默认内部路由,获取应用地址失败 {}".format(address_result.text))
+                                        "设置tcp默认内部路由,获取应用地址失败 {}".format(address_result.text))
 
         # list frontend
         frontend_result = self.alb.list_frontend(self.alb_namespace, self.alb_name)
@@ -76,6 +74,16 @@ class TestAlbSuite(object):
         assert delete_result.status_code == 204, "删除tcp端口失败：{}".format(delete_result.text)
         assert self.alb.check_exists(self.alb.common_frontend_url(self.alb_namespace, self.tcpportname), 404, params={})
 
+    def test_http(self):
+        '''
+        创建http端口-创建规则-获取应用访问地址-获取规则详情-更新规则-获取规则列表-删除规则-删除http端口
+        :return:
+        '''
+        crd_result = self.alb.get_alb_crd()
+        assert crd_result.status_code == 200, "获取alb2的crd 失败:{}".format(crd_result.text)
+        if len(crd_result.json()) == 0:
+            return False, "集群不支持alb2,请先部署alb2"
+        result = {"flag": True}
         # create http frontend
         http_result = self.alb.create_frontend("./test_data/alb2/frontend-http.json",
                                                {"$alb_name": self.alb_name, "$alb-namespace": self.alb_namespace
@@ -97,7 +105,7 @@ class TestAlbSuite(object):
         # detail rule
         detail_rule_result = self.alb.detail_rule(self.alb_namespace, self.rulename)
         assert detail_rule_result.status_code == 200, "获取规则详情失败 {}".format(detail_rule_result.text)
-        version = detail_rule_result.json()['kubernetes']['metadata']['resourceVersion']
+        version = self.alb.get_value(detail_rule_result.json(), 'kubernetes.metadata.resourceVersion')
 
         # update rule
         update_rule_result = self.alb.update_rule(self.alb_namespace, self.rulename,
@@ -131,7 +139,7 @@ class TestAlbSuite(object):
         crd_result = self.alb.get_alb_crd()
         assert crd_result.status_code == 200, "获取alb2的crd 失败:{}".format(crd_result.text)
         if len(crd_result.json()) == 0:
-            return True, "集群不支持alb2,请先部署alb2"
+            return False, "集群不支持alb2,请先部署alb2"
         result = {"flag": True}
         # create alb
         masterip = self.alb.global_info['$MASTERIPS'].split(",")[0]
@@ -147,7 +155,7 @@ class TestAlbSuite(object):
         # detail alb
         detail_result = self.alb.get_alb_detail(self.k8s_namespace, self.alb2_name)
         result = self.alb.update_result(result, detail_result.status_code == 200, detail_result.text)
-        version = detail_result.json()['kubernetes']['metadata']['resourceVersion']
+        version = self.alb.get_value(detail_result.json(), 'kubernetes.metadata.resourceVersion')
 
         # update alb
         update_result = self.alb.update_alb(self.k8s_namespace, self.alb2_name, "./test_data/alb2/update-alb2.json",
