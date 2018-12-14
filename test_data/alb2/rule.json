@@ -1,0 +1,31 @@
+{
+  "apiVersion": "crd.alauda.io/v1",
+  "kind": "Rule",
+  "metadata": {
+    "name": "$rule_name",
+    "namespace": "$alb-namespace",
+    "labels": {
+      "alb2.alauda.io/name": "$alb_name",
+      "alb2.alauda.io/frontend": "$alb_name-777-http"
+    }
+  },
+  "spec": {
+    "priority": 10000,
+    "domain": "",
+    "url": "",
+    "dsl": "(AND (IN HOST test.e2e.cn))",
+    "description": "$rule_name",
+    "serviceGroup": {
+      "session_affinity_policy": "sip-hash",
+      "session_affinity_attribute": "",
+      "services": [
+        {
+          "name": "$GLOBAL_APP_NAME",
+          "namespace": "$K8S_NAMESPACE",
+          "port": 80,
+          "weight": 100
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,17 @@
+[
+  {
+    "apiVersion": "crd.alauda.io/v1",
+    "kind": "ALB2",
+    "metadata": {
+      "name": "$alb_name",
+      "namespace": "$K8S_NAMESPACE"
+    },
+    "spec": {
+      "address": "$address",
+      "type": "nginx",
+      "domains": [
+        "*.e2e.myalauda.cn"
+      ]
+    }
+  }
+]

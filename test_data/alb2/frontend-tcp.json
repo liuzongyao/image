@@ -1,0 +1,15 @@
+{
+  "apiVersion": "crd.alauda.io/v1",
+  "kind": "Frontend",
+  "metadata": {
+    "name": "$alb_name-999",
+    "namespace": "$alb-namespace",
+    "labels": {
+      "alb2.alauda.io/name": "$alb_name"
+    }
+  },
+  "spec": {
+    "port": 999,
+    "protocol": "tcp"
+  }
+}
