@@ -1,4 +1,3 @@
-import pytest
 from test_case.image.image import Image
 
 
