@@ -1,11 +1,11 @@
 import pytest
-
 from common.log import logger
 from test_case.service.service import Service
 
 
-@pytest.mark.service
 @pytest.mark.ace
+@pytest.mark.BAT
+@pytest.mark.flaky(reruns=2, reruns_delay=3)
 class TestServiceSuite(object):
     def setup_class(self):
         self.service = Service()
@@ -16,7 +16,6 @@ class TestServiceSuite(object):
     def teardown_class(self):
         self.service.delete_service(self.k8s_namespace, self.service_name)
 
-    @pytest.mark.BAT
     def test_service(self):
         '''
         创建内部路由-内部路由列表-获取详情-更新内部路由-搜索内部路由-删除内部路由
@@ -55,5 +54,6 @@ class TestServiceSuite(object):
         # delete service
         delete_result = self.service.delete_service(self.k8s_namespace, self.service_name)
         assert delete_result.status_code == 204, "删除内部路由失败：{}".format(delete_result.text)
-        assert self.service.check_exists(self.service.get_common_service_url(self.k8s_namespace, self.service_name), 404)
+        assert self.service.check_exists(self.service.get_common_service_url(self.k8s_namespace, self.service_name),
+                                         404)
         assert result['flag'], result

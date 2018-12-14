@@ -1,14 +1,12 @@
 import pytest
 import time
-
 from test_case.configmap.configmap import Configmap
 from test_case.newapp.newapp import Newapplication
 from test_case.persistentvolumeclaims.pvc import Pvc
 from test_case.storageclasses.scs import Scs
 
 
-@pytest.mark.newapp
-@pytest.mark.ace
+@pytest.mark.flaky(reruns=2, reruns_delay=3)
 class TestNewApplicationSuite(object):
     def setup_class(self):
         self.newapp = Newapplication()
@@ -36,6 +34,7 @@ class TestNewApplicationSuite(object):
         self.scs.delete_scs(self.scs_name)
 
     @pytest.mark.BAT
+    @pytest.mark.ace
     def test_newapp(self):
         # if not self.newapp.is_weblab_open("USER_VIEW_ENABLED"):
         #     return True, "用户视角未打开，不需要测试"

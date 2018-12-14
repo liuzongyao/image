@@ -3,6 +3,9 @@ from test_case.notification.notification import Notification
 import pytest
 
 
+@pytest.mark.BAT
+@pytest.mark.ace
+@pytest.mark.flaky(reruns=2, reruns_delay=3)
 class TestNotiSuite(object):
     def setup_class(self):
         self.noti = Notification()
@@ -15,7 +18,6 @@ class TestNotiSuite(object):
         noti_id = self.noti.get_noti_id_from_list(self.noti_name)
         self.noti.delete_noti(noti_id)
 
-    @pytest.mark.BAT
     def test_noti(self):
         final_result = {"flag": True}
 

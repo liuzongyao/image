@@ -6,6 +6,7 @@ from test_case.storageclasses.scs import Scs
 
 @pytest.mark.pvc
 @pytest.mark.ace
+@pytest.mark.flaky(reruns=2, reruns_delay=3)
 class TestPvcSuite(object):
     def setup_class(self):
 
