@@ -7,6 +7,7 @@ class Account(Common):
     api:
     1、register
     """
+
     def register_account_url(self):
         return "v1/auth/register"
 
@@ -16,6 +17,7 @@ class Account(Common):
     1、get account profile
     2、update account password
     """
+
     def account_profile_url(self):
         return "v1/auth/profile"
 
@@ -24,16 +26,18 @@ class Account(Common):
     1、get account info
     2、update company name
     """
+
     def account_detail_url(self, account):
         return "v1/orgs/{0}".format(account)
 
     """
-    api: 
+    api:
     1、set ldap config
-    2、get ldap config info 
-    3、update ldap config 
+    2、get ldap config info
+    3、update ldap config
     4、delete ldap config (abolish ?)
     """
+
     def ldap_url(self):
         return "v1/orgs/{0}/config/ldap".format(self.account)
 
@@ -43,6 +47,7 @@ class Account(Common):
     2、sync sub account status
     3、delete invalid sub account
     """
+
     def ldap_sync_url(self):
         return "v1/orgs/{0}/config/ldap/sync".format(self.account)
 
@@ -50,6 +55,7 @@ class Account(Common):
     api:
     1、get invalid sub account num
     """
+
     def ldap_info_url(self):
         return "v1/orgs/{0}/config/ldap/info".format(self.account)
 
@@ -58,6 +64,7 @@ class Account(Common):
     1、get sub account list
     2、create sub account
     """
+
     def sub_account_url(self):
         return "v1/orgs/{0}/accounts".format(self.account)
 
@@ -67,6 +74,7 @@ class Account(Common):
     2、update sub account password
     3、delete sub account
     """
+
     def sub_account_operate_url(self, username):
         return "v1/orgs/{0}/accounts/{1}".format(self.account, username)
 
@@ -74,6 +82,7 @@ class Account(Common):
     api:
     1、update sub account detail except password
     """
+
     def sub_account_detail_operate_url(self, username):
         return "/v1/orgs/{0}/accounts/{1}/details".format(self.account, username)
 
@@ -83,14 +92,16 @@ class Account(Common):
     2、assign role to a sub account
     3、revoke role of a sub account
     """
+
     def sub_account_role_url(self, username):
         return "v1/orgs/{0}/accounts/{1}/roles".format(self.account, username)
 
     """
     api:
     1、get user token
-    2、update user token 
+    2、update user token
     """
+
     def get_token(self):
         return "v1/generate-api-token"
 
