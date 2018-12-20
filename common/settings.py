@@ -14,8 +14,6 @@ PASSWORD = os.getenv("PASSWORD", "Alauda2018!@#")
 REGION_NAME = os.getenv("REGION_NAME", "high-region-available")
 REGISTRY_NAME = os.getenv("REGISTRY_NAME", "high")
 IMAGE = os.getenv("IMAGE", "index.alauda.cn/alaudaorg/qaimages:helloworld")
-COMMAND_IP = os.getenv("COMMAND_IP", "62.234.102.38")
-K8S_IP = os.getenv("K8S_IP", "62.234.114.88")
 # not necessary
 REGISTRY_CREDENTIAL = os.getenv("REGISTRY_CREDENTIAL", "alauda-registry-credential")
 
