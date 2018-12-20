@@ -173,7 +173,7 @@ class Image(Common):
 
     def get_registry_running(self):
         path = self.get_feature_url(self.region_name)
-        for i in range(1, 100):
+        for i in range(1, 7):
             result = self.send(method="get", path=path, params={})
             status = result.json()['registry']['application_info']['status']
             if status == 'Running':
