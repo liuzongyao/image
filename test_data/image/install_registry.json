@@ -1,0 +1,6 @@
+{
+  "config": {
+    "type": "official"
+  },
+  "values_yaml_content": "$values_yaml_content"
+}

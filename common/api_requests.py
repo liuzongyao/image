@@ -19,6 +19,11 @@ class AlaudaRequest(object):
         self.registry_name = settings.REGISTRY_NAME
         self.global_info_path = settings.GLOBAL_INFO_FILE
         self.project_name = settings.PROJECT_NAME
+        self.env = settings.ENV
+        self.image = settings.IMAGE
+        self.command_ip = settings.COMMAND_IP
+        self.k8s_ip = settings.K8S_IP
+        self.k8s_namespace = settings.K8S_NAMESPACE
         if self.sub_account:
             self.auth = ("{}/{}".format(self.account, self.sub_account), self.password)
         else:

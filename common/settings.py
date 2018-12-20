@@ -12,8 +12,11 @@ ACCOUNT = os.getenv("ACCOUNT", "alauda")
 SUB_ACCOUNT = os.getenv("SUB_ACCOUNT", "")
 PASSWORD = os.getenv("PASSWORD", "Alauda2018!@#")
 REGION_NAME = os.getenv("REGION_NAME", "high-region-available")
-REGISTRY_NAME = os.getenv("REGISTRY_NAME", "high")
+REGION_NAME = os.getenv("REGION_NAME", "liuzongyao")
+REGISTRY_NAME = os.getenv("REGISTRY_NAME", "liuzongyao")
 IMAGE = os.getenv("IMAGE", "index.alauda.cn/alaudaorg/qaimages:helloworld")
+COMMAND_IP = os.getenv("COMMAND_IP", "62.234.102.38")
+K8S_IP = os.getenv("K8S_IP", "62.234.114.88")
 # not necessary
 REGISTRY_CREDENTIAL = os.getenv("REGISTRY_CREDENTIAL", "alauda-registry-credential")
 
@@ -40,16 +43,16 @@ SVN_USERNAME = os.getenv("SVN_USERNAME", "User_Name-01")
 SVN_PASSWORD = os.getenv("SVN_PASSWORD", "alauda_Test-!@#")
 
 GIT_REPO = os.getenv("GIT_REPO",
-                     "http://192.144.148.212/li/alauda")
-GIT_CREDENTIAL = os.getenv("GIT_CREDENTIAL", "alauda-git-credential")
-GIT_USERNAME = os.getenv("GIT_USERNAME", "rzli@alauda.io")
-GIT_PASSWORD = os.getenv("GIT_PASSWORD", "Luhan0420.")
+                     "http://192.144.148.212:10008/root/test123")
+GIT_CREDENTIAL = os.getenv("GIT_CREDENTIAL", "root")
+GIT_USERNAME = os.getenv("GIT_USERNAME", "root")
+GIT_PASSWORD = os.getenv("GIT_PASSWORD", "07Apples")
 GIT_PATH = os.getenv("GIT_PATH", "/")
 GIT_BRANCH = os.getenv("GIT_BRANCH", "master")
 
 TESTCASES = os.getenv("TESTCASES", "")
-CASE_TYPE = os.getenv("CASE_TYPE", "BAT")
-PROJECT_NAME = os.getenv("PROJECT_NAME", "e2etest")
+CASE_TYPE = os.getenv("CASE_TYPE", "demo1")
+PROJECT_NAME = os.getenv("PROJECT_NAME", "e2edemo")
 ENV = os.getenv("ENV", "Staging")
 RECIPIENTS = get_list_from_str(os.getenv("RECIPIENTS", "testing@alauda.io"))
 K8S_NAMESPACE = os.getenv("K8S_NAMESPACE", "{}-alauda-default2-{}".format(PROJECT_NAME, REGION_NAME).replace("_", "-"))
@@ -73,6 +76,6 @@ SMTP = {
 
 LOG_LEVEL = "INFO"
 LOG_PATH = "./report"
-REPO_NAME = "hello-world"
+REPO_NAME = "liuzongyao"
 TARGET_REPO_NAME = "sys-repo"
 GLOBAL_INFO_FILE = "./temp_data/global_info.json"
