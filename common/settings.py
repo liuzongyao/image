@@ -46,8 +46,11 @@ GIT_REPO = os.getenv("GIT_REPO",
 GIT_CREDENTIAL = os.getenv("GIT_CREDENTIAL", "alauda-git-credential")
 GIT_USERNAME = os.getenv("GIT_USERNAME", "root")
 GIT_PASSWORD = os.getenv("GIT_PASSWORD", "07Apples")
+# 应用目录添加git类型用的git参数
+GIT_URL = os.getenv("GIT_URL", "https://bitbucket.org/mathildetech/devops-charts.git")
 GIT_PATH = os.getenv("GIT_PATH", "/")
 GIT_BRANCH = os.getenv("GIT_BRANCH", "master")
+GIT_USER = os.getenv("GIT_USER", "rzli@alauda.io")
 
 TESTCASES = os.getenv("TESTCASES", "")
 CASE_TYPE = os.getenv("CASE_TYPE", "BAT")
