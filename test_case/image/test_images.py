@@ -95,7 +95,10 @@ class TestImageSuite(object):
         self.repo_name = self.image_tool.region_name
 
     def teardown_class(self):
-        self.image_tool.uninstall_registry(self.image_tool.region_name)
+        pass
+        # self.image_tool.uninstall_registry(self.image_tool.region_name)
+        # jenkins还需要镜像仓库 不应该在此次删除 应该在系统teardown里删除
+
 
     def test_multiple_project(self):
         # create registry project
