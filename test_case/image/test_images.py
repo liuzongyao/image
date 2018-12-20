@@ -13,13 +13,11 @@ class TestImageSuite(object):
         secret_name = 'pull-image-secret6'
         self.add_daemon = 'test_case/image/add_daemon.py'
         self.tag = 'helloworld'
+        # wait for houchao to add in the system setup
         if self.image_tool.env != 'private':
-            ret_registry = self.image_tool.install_registry(self.image_tool.region_name, self.image_tool.registry_name,
-                                                            "test_data/image/install_registry.json")
-            assert ret_registry.status_code == 200, "安装registry失败：{}".format(ret_registry.text)
-
+            self.image_tool.install_registry(self.image_tool.region_name, self.image_tool.registry_name,
+                                             "test_data/image/install_registry.json")
             self.image_tool.get_registry_running()
-
         self.registry_address = self.image_tool.get_registry_endpoint()
         cmd = 'scp -i ' + self.tencent + ' -P 52022 ' + self.add_daemon + ' liuzongyao@118.24.213.153:/home/liuzongyao'
         logger.info('copy file to tencent jump host ' + cmd)
@@ -98,7 +96,6 @@ class TestImageSuite(object):
         pass
         # self.image_tool.uninstall_registry(self.image_tool.region_name)
         # jenkins还需要镜像仓库 不应该在此次删除 应该在系统teardown里删除
-
 
     def test_multiple_project(self):
         # create registry project
@@ -247,7 +244,7 @@ class TestImageSuite(object):
 
         get_repo_detail = self.image_tool.get_repo_detail(self.repo_name, self.reg_project_name)
 
-        assert get_repo_detail.json()['upload'] == 1
+        assert get_repo_detail.json()['upload'] >= 1
 
         delete_repo_ret = self.image_tool.delete_repo(self.repo_name, self.reg_project_name)
         assert delete_repo_ret.status_code == 204, "删除镜像仓库操作失败"
@@ -280,7 +277,7 @@ class TestImageSuite(object):
 
         get_repo_detail = self.image_tool.get_repo_detail(self.repo_name)
 
-        assert get_repo_detail.json()['upload'] == 1
+        assert get_repo_detail.json()['upload'] >= 1
 
         delete_repo_ret = self.image_tool.delete_repo(self.repo_name)
 
