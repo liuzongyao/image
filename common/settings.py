@@ -43,7 +43,7 @@ SVN_PASSWORD = os.getenv("SVN_PASSWORD", "alauda_Test-!@#")
 
 GIT_REPO = os.getenv("GIT_REPO",
                      "http://192.144.148.212:10008/root/test123")
-GIT_CREDENTIAL = os.getenv("GIT_CREDENTIAL", "root")
+GIT_CREDENTIAL = os.getenv("GIT_CREDENTIAL", "alauda-git-credential")
 GIT_USERNAME = os.getenv("GIT_USERNAME", "root")
 GIT_PASSWORD = os.getenv("GIT_PASSWORD", "07Apples")
 GIT_PATH = os.getenv("GIT_PATH", "/")
@@ -75,6 +75,6 @@ SMTP = {
 
 LOG_LEVEL = "INFO"
 LOG_PATH = "./report"
-REPO_NAME = "liuzongyao"
+REPO_NAME = "hello-world"
 TARGET_REPO_NAME = "sys-repo"
 GLOBAL_INFO_FILE = "./temp_data/global_info.json"
